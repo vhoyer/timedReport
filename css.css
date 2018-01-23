@@ -1,0 +1,26 @@
+.add-card {
+	min-height: 250px;
+	border-style: dashed;
+	border-width: 2px;
+	transition: all .5s ease-out;
+	user-select: none;
+}
+.add-card:hover{
+	cursor: pointer;
+	box-shadow: 0 3px 12px #ddd;
+}
+
+.selected {
+	box-shadow: 0 0 0 10px rgba(80,220,100,0.35),
+				0 0 0 5px rgba(80,220,100,0.35);
+}
+
+.plus-btn {
+	--size: 60px;
+
+	display: inline-block;
+	margin-bottom: -1rem;
+	background-color: rgba(0,0,0,.07);
+	font-size: calc( var(--size) * .67);
+	width: var(--size); /* match .h1 */
+}
