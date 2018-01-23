@@ -1,5 +1,4 @@
 .add-card {
-	min-height: 250px;
 	border-style: dashed;
 	border-width: 2px;
 	transition: all .5s ease-out;
@@ -10,9 +9,30 @@
 	box-shadow: 0 3px 12px #ddd;
 }
 
+.card{
+	transition: box-shadow .3s ease-out;
+	min-height: 250px;
+}
 .selected {
-	box-shadow: 0 0 0 10px rgba(80,220,100,0.35),
-				0 0 0 5px rgba(80,220,100,0.35);
+	box-shadow: 0 0 0 7px rgba(80,220,100,0.4),
+				0 0 0 2px rgba(80,220,100,0.5);
+}
+
+.close-wrapper{
+	position: relative;
+}
+.close-card{
+	outline: none !important;
+	position: absolute;
+	top: 4px;
+	right: 0;
+}
+.close-card > span{
+	--size: 32px;
+
+	display: inline-block;
+	font-size: calc( var(--size) * .67);
+	width: var(--size); /* match .h1 */
 }
 
 .plus-btn {
