@@ -25,23 +25,21 @@ let vm = new Vue({
 				return;
 			}
 
-			let selection = document.querySelector(".selected");
-			if (selection != null) {
-				stopTimerOn(cardId);
-			}
-
 			startTimerOn(cardId);
 		},
 		editField: function(field, cardId){
 			editField(field, /*then*/ () => {
-				let key = field.dataset.boundProperty
+				let property = field.dataset.boundProperty
+				if (property === undefined){
+					return
+				}
 
-				this.getCardFromId(cardId)[key] = field.innerHTML.trim()
+				this.getCardFromId(cardId)[property] = field.innerHTML.trim()
 			})
 		},
 		addCard: function () {
 			this.cards.push({
-				id: this.idOrigin++,
+				id: `card-${this.idOrigin++}`,
 				title: "Task description",
 				project: "Project name",
 				description: "Full description",
@@ -70,6 +68,12 @@ function stopTimerOn(cardId){
 	clearInterval(vm.timer.current)
 }
 function startTimerOn(cardId){
+	let selection = document.querySelector(".selected");
+	if (selection != null) {
+		//stop any running timer
+		stopTimerOn(selection.id);
+	}
+
 	vm.getCardFromId(cardId).isSelected = true
 
 	vm.timer.current = setInterval(function(){
@@ -81,31 +85,36 @@ function ifEditingTime(field){
 	let card = field.parentNode
 
 	if(card.classList.contains("selected")){ 
-		stopTimerOn(card)
+		stopTimerOn(card.id)
 	}
 
 	return {
 		wasTimer: field.classList.contains("timer"),
-		wasRunning: !card.classList.contains("selected")
+		wasRunning: card.classList.contains("selected")
 	}
 }
 
 function editField(field, callback){
-	let card = field.parentNode
 	let timer = ifEditingTime(field)
 
 	let outOfFocusBehaviour = function(){
-		isEditing = false;
+		vm.isEditing = false;
 		field.setAttribute("contenteditable","false")
 
 		callback()
 
+		let cardId;
+		let timeString;
+		if (timer.wasTimer){
+			cardId = field.parentNode.id
+			timeString = field.innerHTML.match(/\d\d:\d\d:\d\d/)
+		}
 		//if it was editingand has a valid time string
-		if (timer.wasTimer && field.innerHTML.match(/\d\d:\d\d:\d\d/) != null){
-			field.dataset.time = new Date(`1970-01-01T${field.innerHTML}`).getTime()-timeOffset()
+		if (timer.wasTimer && timeString != null){
+			vm.getCardFromId(cardId).time = new Date(`1970-01-01T${timeString}`).getTime()-timeOffset()
 		}
 		if (timer.wasTimer && timer.wasRunning){
-			startTimerOn(card)
+			startTimerOn(cardId)
 			//was triggering outOfFocusBehaviour multiple times, thisis a workaround
 			timer.wasTimer = false
 		}

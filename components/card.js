@@ -35,7 +35,6 @@ let cardTemplate = `
             </div>
             <div
                 class="card-footer timer"
-                data-bound-property="time"
                 v-bind:data-time="time"
                 v-on:click="cardClickedOr('edit-time', 'timer')" >
                 {{ timeString }}
@@ -59,7 +58,7 @@ Vue.component('card',{
     },
     data() {
         return {
-            HTMLCardId: `card-${this.$vnode.key}`,
+            HTMLCardId: this.$vnode.key,
             delay: 200,
             clicks: 0,
             timer: null
