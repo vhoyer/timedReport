@@ -10,6 +10,11 @@ let vm = new Vue({
 		cards: [],
 	},
 	methods:{
+		getCardFromId: function(cardId){
+			return this.cards.find(function(card){
+				return card.id == cardId
+			})
+		},
 		cardClicked: function (cardId){
 			onTaskClick($(`#card-${cardId}`)[0])
 		},
@@ -39,42 +44,35 @@ let vm = new Vue({
 });
 
 function onTaskClick(card){
+	console.log("TODO: change method of getting id")
 	if (vm.isEditing){
 		return;
 	}
 
 
 	if (card.classList.contains("selected")){
-		stopTimerOn(card);
+		stopTimerOn(card.id.replace("card-",""));
 		return;
 	}
 
 	let selection = document.querySelector(".selected");
 	if (selection != null){
-		stopTimerOn(selection);
+		stopTimerOn(selection.id.replace("card-",""));
 	}
 
-	startTimerOn(card);
+	startTimerOn(card.id.replace("card-",""));
 }
-function stopTimerOn(card){
-	card.classList.remove("selected");
+function stopTimerOn(cardId){
+	vm.getCardFromId(cardId).isSelected = false
+
 	clearInterval(vm.timer.current);
 }
-function timeOffset(){
-	return new Date(0).getTimezoneOffset() * 60000;
-}
-function startTimerOn(card){
-	card.classList.add("selected");
-
-	let thisTimer = card.querySelector(".timer");
-	let starterTime = Number(thisTimer.dataset.time);
+function startTimerOn(cardId){
+	vm.getCardFromId(cardId).isSelected = true
 
 	vm.timer.current = setInterval(function(){
-		starterTime += vm.timer.delay;
-		thisTimer.dataset.time = starterTime;
-
-		thisTimer.innerHTML = new Date(starterTime + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/);
-	},vm.timer.delay);
+		vm.getCardFromId(cardId).time += vm.timer.delay
+	},vm.timer.delay)
 }
 
 function ifEditingTime(field){

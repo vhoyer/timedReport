@@ -77,3 +77,7 @@ Vue.component('card',{
       }      
     },
 })
+
+function timeOffset(){
+	return new Date(0).getTimezoneOffset() * 60000;
+}
