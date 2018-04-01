@@ -17,6 +17,16 @@
 				<nav class="navbar navbar-light bg-light">
 					<div class='container'>
 						<h1 class="navbar-brand mb-0">Timed Report!</h1>
+
+						<form class="form-inline">
+							<button
+								type="button"
+								:disabled="cards.length < 1"
+								@click="clearCookies()"
+								class="btn btn-outline-danger my-2 my-sm-0">
+								Clear Cookies
+							</button>
+						</form>
 					</div>
 				</nav>
 			</header>

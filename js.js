@@ -1,3 +1,4 @@
+
 let vm = new Vue({
 	el:"#app",
 	data:{
@@ -8,6 +9,12 @@ let vm = new Vue({
 			delay: 200,
 		},
 		cards: [],
+	},
+	mounted: function(){
+		this.loadCookies()
+		setInterval(
+			() => this.saveCookies()
+		,this.timer.delay)
 	},
 	methods:{
 		getCardFromId: function(cardId){
@@ -53,10 +60,17 @@ let vm = new Vue({
 			})
 		},
 		saveCookies: function () {
-			console.log("TODO: save into cookies")
+			Cookies.set("vm-data", this.$data)
+		},
+		loadCookies: function(){
+			let load = JSON.parse(Cookies.get("vm-data"))
+
+			this.idOrigin = load.idOrigin
+			this.cards = load.cards
 		},
 		clearCookies: function () {
 			Cookies.remove("vm-data")
+			this.idOrigin = 0
 			this.cards = []
 		},
 	},
