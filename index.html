@@ -46,10 +46,10 @@
 						:is-selected="card.isSelected"
 						@card-closed="removeCard(card.id)"
 						@card-clicked="cardClicked(card.id)"
-						@edit-title="card.title = 'ola, que tal?'"
-						@edit-project="card.project = 'my-project'"
-						@edit-description="card.description += '\nputa merda meu'"
-						@edit-time="card.time = 0"
+						@edit-title="editField($event, card.id)"
+						@edit-project="editField($event, card.id)"
+						@edit-description="editField($event, card.id)"
+						@edit-time="editField($event, card.id)"
 						/>
 				</div>
 			</main>

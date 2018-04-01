@@ -32,6 +32,13 @@ let vm = new Vue({
 
 			startTimerOn(cardId);
 		},
+		editField: function(field, cardId){
+			editField(field, /*then*/ () => {
+				let key = field.dataset.boundProperty
+
+				this.getCardFromId(cardId)[key] = field.innerHTML.trim()
+			})
+		},
 		addCard: function () {
 			this.cards.push({
 				id: this.idOrigin++,
@@ -60,7 +67,7 @@ let vm = new Vue({
 function stopTimerOn(cardId){
 	vm.getCardFromId(cardId).isSelected = false
 
-	clearInterval(vm.timer.current);
+	clearInterval(vm.timer.current)
 }
 function startTimerOn(cardId){
 	vm.getCardFromId(cardId).isSelected = true
@@ -71,50 +78,52 @@ function startTimerOn(cardId){
 }
 
 function ifEditingTime(field){
-	let card = field.parentNode;
+	let card = field.parentNode
 
 	if(card.classList.contains("selected")){ 
-		stopTimerOn(card);
+		stopTimerOn(card)
 	}
 
 	return {
 		wasTimer: field.classList.contains("timer"),
 		wasRunning: !card.classList.contains("selected")
-	};
+	}
 }
 
-function editField(field){
-	let card = field.parentNode;
-	let timer = ifEditingTime(field);
+function editField(field, callback){
+	let card = field.parentNode
+	let timer = ifEditingTime(field)
 
 	let outOfFocusBehaviour = function(){
 		isEditing = false;
-		field.setAttribute("contenteditable","false");
+		field.setAttribute("contenteditable","false")
+
+		callback()
 
 		//if it was editingand has a valid time string
 		if (timer.wasTimer && field.innerHTML.match(/\d\d:\d\d:\d\d/) != null){
-			field.dataset.time = new Date(`1970-01-01T${field.innerHTML}`).getTime()-timeOffset();
+			field.dataset.time = new Date(`1970-01-01T${field.innerHTML}`).getTime()-timeOffset()
 		}
 		if (timer.wasTimer && timer.wasRunning){
-			startTimerOn(card);
+			startTimerOn(card)
 			//was triggering outOfFocusBehaviour multiple times, thisis a workaround
-			timer.wasTimer = false;
+			timer.wasTimer = false
 		}
 	}
 
-	vm.isEditing = true;
-	field.setAttribute("contenteditable","true");
-	field.focus();
-	document.execCommand('selectAll',false,null);
+	vm.isEditing = true
+	field.setAttribute("contenteditable","true")
+	field.focus()
+	document.execCommand('selectAll',false,null)
 
 	$(field).on('blur',function(){
-		outOfFocusBehaviour();
-	});
+		outOfFocusBehaviour()
+	})
 	$(field).on('keydown',function(e){
 		if (e.key != "Enter"){
-			return;
+			return
 		}
-		outOfFocusBehaviour();
-		e.preventDefault();
-	});
+		outOfFocusBehaviour()
+		e.preventDefault()
+	})
 }

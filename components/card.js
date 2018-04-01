@@ -2,7 +2,7 @@ let cardTemplate = `
     <div class="mb-2 col-12 col-sm-4 col-lg-3">
         <div
             class="card text-center h-100"
-            v-bind:id=" 'card-' + this.$vnode.key "
+            v-bind:id=" HTMLCardId "
             v-bind:class="{ selected: isSelected }">
             <div class="close-wrapper">
                 <button
@@ -16,24 +16,28 @@ let cardTemplate = `
             <div class="card-body" v-on:click.self="$emit('card-clicked')">
                 <div
                     class="card-title h5"
-                    v-on:click="cardClickedOr('edit-title')" >
+                    data-bound-property="title"
+                    v-on:click="cardClickedOr('edit-title', 'card-title')" >
                     {{ title }}
                 </div>
                 <div
                     class="card-subtitle mb-2 text-muted"
-                    v-on:click="cardClickedOr('edit-project')" >
+                    data-bound-property="project"
+                    v-on:click="cardClickedOr('edit-project', 'card-subtitle')" >
                     {{ project }}
                 </div>
                 <p
                     class="card-text"
-                    v-on:click="cardClickedOr('edit-description')" >
+                    data-bound-property="description"
+                    v-on:click="cardClickedOr('edit-description', 'card-text')" >
                     {{ description }}
                 </p>
             </div>
             <div
                 class="card-footer timer"
+                data-bound-property="time"
                 v-bind:data-time="time"
-                v-on:click="cardClickedOr('edit-time')" >
+                v-on:click="cardClickedOr('edit-time', 'timer')" >
                 {{ timeString }}
             </div>
         </div>
@@ -55,24 +59,30 @@ Vue.component('card',{
     },
     data() {
         return {
+            HTMLCardId: `card-${this.$vnode.key}`,
             delay: 200,
             clicks: 0,
             timer: null
         } 
     },
     methods: {
-        cardClickedOr: function (eventName) {
+        cardClickedOr: function (eventName, field) {
             this.clicks++
+
             if (this.clicks === 1) {
-                var self = this
+                let self = this
+
                 this.timer = setTimeout(function () {
                     self.$emit('card-clicked')
                     self.clicks = 0
-                }, this.delay);
+                }, this.delay)
             } else {
-                clearTimeout(this.timer);
-                this.$emit(eventName);
-                this.clicks = 0;
+                clearTimeout(this.timer)
+
+                let elementToEdit = $(`#${this.HTMLCardId} .${field}`)[0]
+
+                this.$emit(eventName, elementToEdit)
+                this.clicks = 0
             }        	
       }      
     },
