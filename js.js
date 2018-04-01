@@ -15,8 +15,22 @@ let vm = new Vue({
 				return card.id == cardId
 			})
 		},
-		cardClicked: function (cardId){
-			onTaskClick($(`#card-${cardId}`)[0])
+		cardClicked: function (cardId) {
+			if (vm.isEditing) {
+				return;
+			}
+
+			if (vm.getCardFromId(cardId).isSelected) {
+				stopTimerOn(cardId);
+				return;
+			}
+
+			let selection = document.querySelector(".selected");
+			if (selection != null) {
+				stopTimerOn(cardId);
+			}
+
+			startTimerOn(cardId);
 		},
 		addCard: function () {
 			this.cards.push({
@@ -43,25 +57,6 @@ let vm = new Vue({
 	},
 });
 
-function onTaskClick(card){
-	console.log("TODO: change method of getting id")
-	if (vm.isEditing){
-		return;
-	}
-
-
-	if (card.classList.contains("selected")){
-		stopTimerOn(card.id.replace("card-",""));
-		return;
-	}
-
-	let selection = document.querySelector(".selected");
-	if (selection != null){
-		stopTimerOn(selection.id.replace("card-",""));
-	}
-
-	startTimerOn(card.id.replace("card-",""));
-}
 function stopTimerOn(cardId){
 	vm.getCardFromId(cardId).isSelected = false
 
