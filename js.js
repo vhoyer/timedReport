@@ -74,7 +74,12 @@ let vm = new Vue({
 			Cookies.set("vm-data", this.cookies)
 		},
 		loadCookies: function(){
-			let load = JSON.parse(Cookies.get("vm-data"))
+			let raw = Cookies.get("vm-data")
+			if (raw === undefined){
+				return
+			}
+
+			let load = JSON.parse(raw)
 
 			this.displayCookieAlert = load.displayCookieAlert
 			this.idOrigin = load.idOrigin
