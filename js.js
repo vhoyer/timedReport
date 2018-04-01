@@ -89,6 +89,14 @@ let vm = new Vue({
 	},
 });
 
+$(document).ready(function(){
+	let selection = document.querySelector(".selected");
+	if (selection != null) {
+		//restart any selected card's timer
+		startTimerOn(selection.id);
+	}
+})
+
 function stopTimerOn(cardId){
 	vm.getCardFromId(cardId).isSelected = false
 
