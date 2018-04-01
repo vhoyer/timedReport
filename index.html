@@ -12,33 +12,76 @@
 		<title>Timed Reports!</title>
 	</head>
 	<body>
-		<header class="mb-3">
-			<nav class="navbar navbar-light bg-light">
-				<div class='container'>
-					<h1 class="navbar-brand mb-0">Timed Report!</h1>
-				</div>
-			</nav>
-		</header>
+		<div id="app">
+			<header class="mb-3">
+				<nav class="navbar navbar-light bg-light">
+					<div class='container'>
+						<h1 class="navbar-brand mb-0">Timed Report!</h1>
 
-		<main class="container">
-			<div id="container" class="row">
-				<div class="mb-2 col-12 col-sm-4 col-lg-3 order-last">
-					<div id="add-new" class="card h-100 add-card">
-						<div class="card-body text-center d-flex flex-column justify-content-center">
-							<div class="plus-wrapper">
-								<span class="plus-btn rounded-circle">+</span>
+						<form class="form-inline">
+							<button
+								type="button"
+								:disabled="!(cards.length > 0 || !displayCookieAlert)"
+								@click="clearCookies()"
+								class="btn btn-outline-danger my-2 my-sm-0">
+								Clear Cookies
+							</button>
+						</form>
+					</div>
+				</nav>
+			</header>
+
+			<main class="container">
+				<div id="container" class="row">
+					<div class="mb-2 col-12 col-sm-4 col-lg-3 order-last">
+						<div
+							id="add-new"
+							class="card h-100 add-card"
+						    v-on:click="addCard()">
+							<div class="card-body text-center d-flex flex-column justify-content-center">
+								<div class="plus-wrapper">
+									<span class="plus-btn rounded-circle">+</span>
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-			</div>
-		</main>
 
+					<card
+						v-for="card in cards"
+						:key="card.id"
+						:title="card.title"
+						:project="card.project"
+						:description="card.description"
+						:time="card.time"
+						:is-selected="card.isSelected"
+						@card-closed="removeCard(card.id)"
+						@card-clicked="cardClicked(card.id)"
+						@edit-title="editField($event, card.id)"
+						@edit-project="editField($event, card.id)"
+						@edit-description="editField($event, card.id)"
+						@edit-time="editField($event, card.id)"
+						/>
+				</div>
+			</main>
+
+			<aside class="container fixed-bottom" v-if="displayCookieAlert">
+				<div class="alert alert-warning alert-dismissible fade show" role="alert">
+					<strong>Holy guacamole!</strong> This site uses your cookies. Deal with it!
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close" v-on:click="displayCookieAlert = false">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+			</aside>
+		</div>
+			
 		<!-- Optional JavaScript -->
 		<!-- jQuery first, then Popper.js, then Bootstrap JS -->
 		<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+		<script src="components/card.js"></script>
 		<script src="js.js"></script>
 	</body>
 </html>

@@ -1,117 +1,173 @@
-let report;
-let currentTimer;
-let isEditing = false;
 
-$(document).ready(function(){
-	$("#add-new").on("click",function(){
-		$("#container").append(`
-			<div class="mb-2 col-12 col-sm-4 col-lg-3">
-				<div class="card text-center h-100" onclick="onTaskClick(this)">
-					<div class="close-wrapper">
-						<button type="button" class="close close-card" aria-label="Close" onclick="closeCard(this)">
-							<span aria-hidden="true">&times;</span>
-						</button>
-					</div>
-					<div class="card-body">
-						<div class="card-title h5" ondblclick="editField(this)">Task description</div>
-						<div class="card-subtitle mb-2 text-muted" ondblclick="editField(this)">Project name</div>
-						<p class="card-text" ondblclick="editField(this)">Full description</p>
-					</div>
-					<div class="card-footer timer" data-time="0" ondblclick="editField(this)">00:00:00</div>
-				</div>
-			</div>
-		`);
-	});
+let vm = new Vue({
+	el:"#app",
+	data:{
+		displayCookieAlert: true,
+
+		idOrigin: 0,
+		isEditing: false,
+		timer: {
+			current: null,
+			delay: 200,
+		},
+		cards: [],
+	},
+	computed:{
+		cookies: function(){
+			return {
+				displayCookieAlert: this.displayCookieAlert,
+				idOrigin: this.idOrigin,
+				cards: this.cards,
+			}
+		}
+	},
+	mounted: function(){
+		this.loadCookies()
+		setInterval(
+			() => this.saveCookies()
+		,this.timer.delay)
+	},
+	methods:{
+		getCardFromId: function(cardId){
+			return this.cards.find(function(card){
+				return card.id == cardId
+			})
+		},
+		cardClicked: function (cardId) {
+			if (vm.isEditing) {
+				return;
+			}
+
+			if (vm.getCardFromId(cardId).isSelected) {
+				stopTimerOn(cardId);
+				return;
+			}
+
+			startTimerOn(cardId);
+		},
+		editField: function(field, cardId){
+			editField(field, /*then*/ () => {
+				let property = field.dataset.boundProperty
+				if (property === undefined){
+					return
+				}
+
+				this.getCardFromId(cardId)[property] = field.innerHTML.trim()
+			})
+		},
+		addCard: function () {
+			this.cards.push({
+				id: `card-${this.idOrigin++}`,
+				title: "Task description",
+				project: "Project name",
+				description: "Full description",
+				time: 0,
+				isSelected: false,
+			})
+		},
+		removeCard: function(cardId){
+			this.cards = this.cards.filter(function(element){
+				return element.id !== cardId
+			})
+		},
+		saveCookies: function () {
+			Cookies.set("vm-data", this.cookies)
+		},
+		loadCookies: function(){
+			let load = JSON.parse(Cookies.get("vm-data"))
+
+			this.displayCookieAlert = load.displayCookieAlert
+			this.idOrigin = load.idOrigin
+			this.cards = load.cards
+		},
+		clearCookies: function () {
+			Cookies.remove("vm-data")
+			this.displayCookieAlert = true
+			this.idOrigin = 0
+			this.cards = []
+		},
+	},
 });
 
-function onTaskClick(card){
-	if (isEditing){
-		return;
-	}
-
-
-	if (card.classList.contains("selected")){
-		stopTimerOn(card);
-		return;
-	}
-
+$(document).ready(function(){
 	let selection = document.querySelector(".selected");
-	if (selection != null){
-		stopTimerOn(selection);
+	if (selection != null) {
+		//restart any selected card's timer
+		startTimerOn(selection.id);
+	}
+})
+
+function stopTimerOn(cardId){
+	vm.getCardFromId(cardId).isSelected = false
+
+	clearInterval(vm.timer.current)
+}
+function startTimerOn(cardId){
+	let selection = document.querySelector(".selected");
+	if (selection != null) {
+		//stop any running timer
+		stopTimerOn(selection.id);
 	}
 
-	startTimerOn(card);
-}
-function stopTimerOn(card){
-	card.classList.remove("selected");
-	clearInterval(currentTimer);
-}
-function timeOffset(){
-	return new Date(0).getTimezoneOffset() * 60000;
-}
-function startTimerOn(card){
-	card.classList.add("selected");
+	vm.getCardFromId(cardId).isSelected = true
 
-	let thisTimer = card.querySelector(".timer");
-	let starterTime = Number(thisTimer.dataset.time);
-
-	currentTimer = setInterval(function(){
-		starterTime += 1000;
-		thisTimer.dataset.time = starterTime;
-
-		thisTimer.innerHTML = new Date(starterTime + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/);
-	},1000);
+	vm.timer.current = setInterval(function(){
+		vm.getCardFromId(cardId).time += vm.timer.delay
+	},vm.timer.delay)
 }
 
 function ifEditingTime(field){
-	let card = field.parentNode;
+	let card = field.parentNode
 
 	if(card.classList.contains("selected")){ 
-		stopTimerOn(card);
+		stopTimerOn(card.id)
 	}
 
 	return {
 		wasTimer: field.classList.contains("timer"),
-		wasRunning: !card.classList.contains("selected")
-	};
+		wasRunning: card.classList.contains("selected")
+	}
 }
 
-function editField(field){
-	let card = field.parentNode;
-	let timer = ifEditingTime(field);
+function editField(field, callback){
+	let timer = ifEditingTime(field)
 
 	let outOfFocusBehaviour = function(){
-		isEditing = false;
-		field.setAttribute("contenteditable","false");
+		vm.isEditing = false;
+		field.setAttribute("contenteditable","false")
 
+		callback()
+
+		let cardId;
+		let timeString;
+		if (timer.wasTimer){
+			cardId = field.parentNode.id
+			timeString = field.innerHTML.match(/\d\d:\d\d:\d\d/)
+		}
 		//if it was editingand has a valid time string
-		if (timer.wasTimer && field.innerHTML.match(/\d\d:\d\d:\d\d/) != null){
-			field.dataset.time = new Date(`1970-01-01T${field.innerHTML}`).getTime()-timeOffset();
+		if (timer.wasTimer && timeString != null){
+			vm.getCardFromId(cardId).time = new Date(`1970-01-01T${timeString}`).getTime()-timeOffset()
 		}
 		if (timer.wasTimer && timer.wasRunning){
-			startTimerOn(card);
+			startTimerOn(cardId)
 			//was triggering outOfFocusBehaviour multiple times, thisis a workaround
-			timer.wasTimer = false;
+			timer.wasTimer = false
 		}
 	}
 
-	isEditing = true;
-	field.setAttribute("contenteditable","true");
-	field.focus();
-	document.execCommand('selectAll',false,null);
+	vm.isEditing = true
+	field.setAttribute("contenteditable","true")
+	field.focus()
+	document.execCommand('selectAll',false,null)
 
 	$(field).on('blur',function(){
-		outOfFocusBehaviour();
-	});
+		outOfFocusBehaviour()
+	})
 	$(field).on('keydown',function(e){
 		if (e.key != "Enter"){
-			return;
+			return
 		}
-		outOfFocusBehaviour();
-		e.preventDefault();
-	});
-}
-
-function closeCard(btnClose){
-	btnClose.parentNode.parentNode.parentNode.remove();
+		outOfFocusBehaviour()
+		e.preventDefault()
+	})
 }

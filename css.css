@@ -8,39 +8,38 @@
 	cursor: pointer;
 	box-shadow: 0 3px 12px #ddd;
 }
-
-.card{
-	transition: box-shadow .3s ease-out;
-	min-height: 250px;
-}
-.selected {
-	box-shadow: 0 0 0 8px rgba(80,220,100,0.4),
-				0 0 0 3px rgba(80,220,100,0.5);
-}
-
-.close-wrapper{
-	position: relative;
-}
-.close-card{
-	outline: none !important;
-	position: absolute;
-	top: 4px;
-	right: 0;
-}
-.close-card > span{
-	--size: 32px;
-
-	display: inline-block;
-	font-size: calc( var(--size) * .67);
-	width: var(--size); /* match .h1 */
-}
-
-.plus-btn {
+.add-card .plus-btn {
 	--size: 60px;
 
 	display: inline-block;
 	margin-bottom: -1rem;
 	background-color: rgba(0,0,0,.07);
+	font-size: calc( var(--size) * .67);
+	width: var(--size); /* match .h1 */
+}
+
+.card{
+	transition: box-shadow .3s ease-out;
+	min-height: 250px;
+}
+.card.selected {
+	box-shadow: 0 0 0 8px rgba(80,220,100,0.4),
+				0 0 0 3px rgba(80,220,100,0.5);
+}
+
+.card .close-wrapper{
+	position: relative;
+}
+.card .close-card{
+	outline: none !important;
+	position: absolute;
+	top: 4px;
+	right: 0;
+}
+.card .close-card > span{
+	--size: 32px;
+
+	display: inline-block;
 	font-size: calc( var(--size) * .67);
 	width: var(--size); /* match .h1 */
 }
