@@ -12,27 +12,48 @@
 		<title>Timed Reports!</title>
 	</head>
 	<body>
-		<header class="mb-3">
-			<nav class="navbar navbar-light bg-light">
-				<div class='container'>
-					<h1 class="navbar-brand mb-0">Timed Report!</h1>
-				</div>
-			</nav>
-		</header>
+		<div id="app">
+			<header class="mb-3">
+				<nav class="navbar navbar-light bg-light">
+					<div class='container'>
+						<h1 class="navbar-brand mb-0">Timed Report!</h1>
+					</div>
+				</nav>
+			</header>
 
-		<main class="container">
-			<div id="container" class="row">
-				<div class="mb-2 col-12 col-sm-4 col-lg-3 order-last">
-					<div id="add-new" class="card h-100 add-card">
-						<div class="card-body text-center d-flex flex-column justify-content-center">
-							<div class="plus-wrapper">
-								<span class="plus-btn rounded-circle">+</span>
+			<main class="container">
+				<div id="container" class="row">
+					<div class="mb-2 col-12 col-sm-4 col-lg-3 order-last">
+						<div
+							id="add-new"
+							class="card h-100 add-card"
+						    v-on:click="addCard()">
+							<div class="card-body text-center d-flex flex-column justify-content-center">
+								<div class="plus-wrapper">
+									<span class="plus-btn rounded-circle">+</span>
+								</div>
 							</div>
 						</div>
 					</div>
+
+					<card
+						v-for="(card,index) in cards"
+						:key="index"
+						:title="card.title"
+						:project="card.project"
+						:description="card.description"
+						:time="card.time"
+						:is-selected="card.isSelected"
+						@card-closed="cards.splice(index,1)"
+						@card-clicked="card.time += 1000"
+						@edit-title="card.title = 'ola, que tal?'"
+						@edit-project="card.project = 'my-project'"
+						@edit-description="card.description += '\nputa merda meu'"
+						@edit-time="card.time = 0"
+						/>
 				</div>
-			</div>
-		</main>
+			</main>
+		</div>
 
 		<!-- Optional JavaScript -->
 		<!-- jQuery first, then Popper.js, then Bootstrap JS -->

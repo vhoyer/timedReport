@@ -1,31 +1,43 @@
-let report;
-let currentTimer;
-let isEditing = false;
-
-$(document).ready(function(){
-	$("#add-new").on("click",function(){
-		$("#container").append(`
-			<div class="mb-2 col-12 col-sm-4 col-lg-3">
-				<div class="card text-center h-100" onclick="onTaskClick(this)">
-					<div class="close-wrapper">
-						<button type="button" class="close close-card" aria-label="Close" onclick="closeCard(this)">
-							<span aria-hidden="true">&times;</span>
-						</button>
-					</div>
-					<div class="card-body">
-						<div class="card-title h5" ondblclick="editField(this)">Task description</div>
-						<div class="card-subtitle mb-2 text-muted" ondblclick="editField(this)">Project name</div>
-						<p class="card-text" ondblclick="editField(this)">Full description</p>
-					</div>
-					<div class="card-footer timer" data-time="0" ondblclick="editField(this)">00:00:00</div>
-				</div>
-			</div>
-		`);
-	});
+let vm = new Vue({
+	el:"#app",
+	data:{
+		isEditing: false,
+		timer: {
+			current: null,
+			delay: 200,
+		},
+		cards: [
+			{
+				title: "Task description",
+				project: "Project name",
+				description: "Full description",
+				time: 10000,
+				isSelected: false,
+			},
+		],
+	},
+	methods:{
+		addCard: function () {
+			this.cards.push({
+				title: "Task description",
+				project: "Project name",
+				description: "Full description",
+				time: 0,
+				isSelected: false,
+			})
+		},
+		saveCookies: function () {
+			console.log("TODO: save into cookies")
+		},
+		clearCookies: function () {
+			Cookies.remove("vm-data")
+			this.cards = []
+		},
+	},
 });
 
 function onTaskClick(card){
-	if (isEditing){
+	if (vm.isEditing){
 		return;
 	}
 
@@ -44,7 +56,7 @@ function onTaskClick(card){
 }
 function stopTimerOn(card){
 	card.classList.remove("selected");
-	clearInterval(currentTimer);
+	clearInterval(vm.timer.current);
 }
 function timeOffset(){
 	return new Date(0).getTimezoneOffset() * 60000;
@@ -55,12 +67,12 @@ function startTimerOn(card){
 	let thisTimer = card.querySelector(".timer");
 	let starterTime = Number(thisTimer.dataset.time);
 
-	currentTimer = setInterval(function(){
-		starterTime += 1000;
+	vm.timer.current = setInterval(function(){
+		starterTime += vm.timer.delay;
 		thisTimer.dataset.time = starterTime;
 
 		thisTimer.innerHTML = new Date(starterTime + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/);
-	},1000);
+	},vm.timer.delay);
 }
 
 function ifEditingTime(field){
@@ -95,7 +107,7 @@ function editField(field){
 		}
 	}
 
-	isEditing = true;
+	vm.isEditing = true;
 	field.setAttribute("contenteditable","true");
 	field.focus();
 	document.execCommand('selectAll',false,null);
