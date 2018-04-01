@@ -1,29 +1,31 @@
 let vm = new Vue({
 	el:"#app",
 	data:{
+		idOrigin: 0,
 		isEditing: false,
 		timer: {
 			current: null,
 			delay: 200,
 		},
-		cards: [
-			{
-				title: "Task description",
-				project: "Project name",
-				description: "Full description",
-				time: 10000,
-				isSelected: false,
-			},
-		],
+		cards: [],
 	},
 	methods:{
+		cardClicked: function (cardId){
+			onTaskClick($(`#card-${cardId}`)[0])
+		},
 		addCard: function () {
 			this.cards.push({
+				id: this.idOrigin++,
 				title: "Task description",
 				project: "Project name",
 				description: "Full description",
 				time: 0,
 				isSelected: false,
+			})
+		},
+		removeCard: function(cardId){
+			this.cards = this.cards.filter(function(element){
+				return element.id !== cardId
 			})
 		},
 		saveCookies: function () {
@@ -122,8 +124,4 @@ function editField(field){
 		outOfFocusBehaviour();
 		e.preventDefault();
 	});
-}
-
-function closeCard(btnClose){
-	btnClose.parentNode.parentNode.parentNode.remove();
 }

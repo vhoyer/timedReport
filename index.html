@@ -37,15 +37,15 @@
 					</div>
 
 					<card
-						v-for="(card,index) in cards"
-						:key="index"
+						v-for="card in cards"
+						:key="card.id"
 						:title="card.title"
 						:project="card.project"
 						:description="card.description"
 						:time="card.time"
 						:is-selected="card.isSelected"
-						@card-closed="cards.splice(index,1)"
-						@card-clicked="card.time += 1000"
+						@card-closed="removeCard(card.id)"
+						@card-clicked="cardClicked(card.id)"
 						@edit-title="card.title = 'ola, que tal?'"
 						@edit-project="card.project = 'my-project'"
 						@edit-description="card.description += '\nputa merda meu'"

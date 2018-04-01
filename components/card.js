@@ -2,6 +2,7 @@ let cardTemplate = `
     <div class="mb-2 col-12 col-sm-4 col-lg-3">
         <div
             class="card text-center h-100"
+            v-bind:id=" 'card-' + this.$vnode.key "
             v-bind:class="{ selected: isSelected }">
             <div class="close-wrapper">
                 <button
