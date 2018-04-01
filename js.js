@@ -2,6 +2,8 @@
 let vm = new Vue({
 	el:"#app",
 	data:{
+		displayCookieAlert: true,
+
 		idOrigin: 0,
 		isEditing: false,
 		timer: {
@@ -9,6 +11,15 @@ let vm = new Vue({
 			delay: 200,
 		},
 		cards: [],
+	},
+	computed:{
+		cookies: function(){
+			return {
+				displayCookieAlert: this.displayCookieAlert,
+				idOrigin: this.idOrigin,
+				cards: this.cards,
+			}
+		}
 	},
 	mounted: function(){
 		this.loadCookies()
@@ -60,16 +71,18 @@ let vm = new Vue({
 			})
 		},
 		saveCookies: function () {
-			Cookies.set("vm-data", this.$data)
+			Cookies.set("vm-data", this.cookies)
 		},
 		loadCookies: function(){
 			let load = JSON.parse(Cookies.get("vm-data"))
 
+			this.displayCookieAlert = load.displayCookieAlert
 			this.idOrigin = load.idOrigin
 			this.cards = load.cards
 		},
 		clearCookies: function () {
 			Cookies.remove("vm-data")
+			this.displayCookieAlert = true
 			this.idOrigin = 0
 			this.cards = []
 		},

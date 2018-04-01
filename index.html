@@ -21,7 +21,7 @@
 						<form class="form-inline">
 							<button
 								type="button"
-								:disabled="cards.length < 1"
+								:disabled="!(cards.length > 0 || !displayCookieAlert)"
 								@click="clearCookies()"
 								class="btn btn-outline-danger my-2 my-sm-0">
 								Clear Cookies
@@ -63,8 +63,17 @@
 						/>
 				</div>
 			</main>
-		</div>
 
+			<aside class="container fixed-bottom" v-if="displayCookieAlert">
+				<div class="alert alert-warning alert-dismissible fade show" role="alert">
+					<strong>Holy guacamole!</strong> This site uses your cookies. Deal with it!
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close" v-on:click="displayCookieAlert = false">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+			</aside>
+		</div>
+			
 		<!-- Optional JavaScript -->
 		<!-- jQuery first, then Popper.js, then Bootstrap JS -->
 		<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
