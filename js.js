@@ -1,4 +1,3 @@
-
 let vm = new Vue({
 	el:"#app",
 	data:{
@@ -7,6 +6,7 @@ let vm = new Vue({
 		idOrigin: 0,
 		isEditing: false,
 		timer: {
+			startCounting: 0,
 			current: null,
 			delay: 200,
 		},
@@ -86,8 +86,11 @@ let vm = new Vue({
 			this.cards = load.cards
 		},
 		clearCookies: function () {
+			clearInterval(this.timer.current)
 			Cookies.remove("vm-data")
+
 			this.displayCookieAlert = true
+			this.timer.current = null
 			this.idOrigin = 0
 			this.cards = []
 		},
@@ -116,8 +119,12 @@ function startTimerOn(cardId){
 
 	vm.getCardFromId(cardId).isSelected = true
 
+	vm.timer.startCounting = Date.now()
 	vm.timer.current = setInterval(function(){
-		vm.getCardFromId(cardId).time += vm.timer.delay
+		let now = Date.now()
+		vm.getCardFromId(cardId).time += (now - vm.timer.startCounting)
+
+		vm.timer.startCounting = now
 	},vm.timer.delay)
 }
 
