@@ -2,6 +2,7 @@ let vm = new Vue({
 	el:"#app",
 	data:{
 		displayCookieAlert: true,
+		beta: false,
 
 		idOrigin: 0,
 		isEditing: false,
@@ -18,6 +19,7 @@ let vm = new Vue({
 				displayCookieAlert: this.displayCookieAlert,
 				idOrigin: this.idOrigin,
 				cards: this.cards,
+				beta: this.beta,
 			}
 		}
 	},
@@ -84,6 +86,7 @@ let vm = new Vue({
 			this.displayCookieAlert = load.displayCookieAlert
 			this.idOrigin = load.idOrigin
 			this.cards = load.cards
+			this.beta = load.beta
 		},
 		clearCookies: function () {
 			clearInterval(this.timer.current)
@@ -92,7 +95,17 @@ let vm = new Vue({
 			this.displayCookieAlert = true
 			this.timer.current = null
 			this.idOrigin = 0
+			this.beta = false
 			this.cards = []
+		},
+		exportToExcel: function(){
+			let excel = ""
+			let time = time => new Date(time + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0]
+			this.cards.forEach(card => {
+				excel += `${card.project}\t${card.title}\t${card.description}\t\t\t\t${time(card.time)}\n`
+			});
+
+			copy(excel)
 		},
 	},
 });
@@ -182,4 +195,32 @@ function editField(field, callback){
 		outOfFocusBehaviour()
 		e.preventDefault()
 	})
+}
+
+function setupClipboard(text){
+	$("body").append(`<div id="clipboard-container" style="
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	width: 0px;
+	height: 0px;
+	z-index: 100;
+	opacity: 0;"><textarea id="clipboard" style="
+	width: 1px;
+	height: 1px;       
+	padding: 0px;">${text}</textarea></div>`)
+}
+function setoffClipboard(){
+	$('#clipboard-container').remove()
+}
+function copy(text) {
+	setupClipboard(text)
+
+	//Get Input Element
+	document.getElementById("clipboard").select()
+
+	//Copy Content
+	document.execCommand("copy")
+
+	setoffClipboard()
 }
