@@ -36,8 +36,8 @@ let cardTemplate = `
             <div
                 class="card-footer timer"
                 v-bind:data-time="time"
+                v-html="timeString"
                 v-on:click="cardClickedOr('edit-time', 'timer')" >
-                {{ timeString }}
             </div>
         </div>
     </div>
