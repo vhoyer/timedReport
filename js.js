@@ -99,7 +99,9 @@ let vm = new Vue({
 			clearInterval(this.timer.current)
 			clearInterval(autoSaver)
 
+			this.displayCookieAlert = true
 			this.timer.current = null
+			this.beta = false
 			this.clearCards()
 
 			Cookies.remove("vm-data")
