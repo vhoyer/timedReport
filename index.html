@@ -71,6 +71,7 @@
 						:description="card.description"
 						:time="card.time"
 						:is-selected="card.isSelected"
+						:is-editing="isEditing"
 						@card-closed="removeCard(card.id)"
 						@card-clicked="cardClicked(card.id)"
 						@edit-title="editField($event, card.id)"

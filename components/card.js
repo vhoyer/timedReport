@@ -50,6 +50,7 @@ Vue.component('card',{
         description: String,
         time: Number,
         isSelected: Boolean,
+        isEditing: Boolean,
     },
     computed: {
         timeString: function() {
@@ -83,7 +84,7 @@ Vue.component('card',{
                 this.$emit(eventName, elementToEdit)
                 this.clicks = 0
             }        	
-      }      
+        }      
     },
 })
 
