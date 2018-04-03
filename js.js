@@ -1,3 +1,5 @@
+let autoSaver;
+
 let vm = new Vue({
 	el:"#app",
 	data:{
@@ -25,7 +27,7 @@ let vm = new Vue({
 	},
 	mounted: function(){
 		this.loadCookies()
-		setInterval(
+		autoSaver = setInterval(
 			() => this.saveCookies()
 		,this.timer.delay)
 	},
@@ -88,15 +90,19 @@ let vm = new Vue({
 			this.cards = load.cards
 			this.beta = load.beta
 		},
+		clearCards: function (){
+			clearInterval(this.timer.current)
+			this.idOrigin = 0
+			this.cards = []
+		},
 		clearCookies: function () {
 			clearInterval(this.timer.current)
-			Cookies.remove("vm-data")
+			clearInterval(autoSaver)
 
-			this.displayCookieAlert = true
 			this.timer.current = null
-			this.idOrigin = 0
-			this.beta = false
-			this.cards = []
+			this.clearCards()
+
+			Cookies.remove("vm-data")
 		},
 		exportToExcel: function(){
 			let excel = ""
