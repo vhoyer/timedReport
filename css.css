@@ -43,3 +43,11 @@
 	font-size: calc( var(--size) * .67);
 	width: var(--size); /* match .h1 */
 }
+.card .card-text {
+	margin-left: -20px;
+	margin-right: -20px;
+	margin-bottom: -20px;
+	max-height: 117px; /* card - (title + subtitle) */
+	overflow-x: hidden;
+	overflow-y: auto;
+}
