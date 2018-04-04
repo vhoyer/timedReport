@@ -66,6 +66,7 @@ let vm = new Vue({
 				project: "Project name",
 				description: "Full description",
 				time: 0,
+				taskState: 0,
 				isSelected: false,
 			})
 		},
@@ -75,7 +76,7 @@ let vm = new Vue({
 			})
 		},
 		saveCookies: function () {
-			Cookies.set("vm-data", this.cookies)
+			Cookies.set("vm-data", this.cookies, { expires: 365 /*days*/ })
 		},
 		loadCookies: function(){
 			let raw = Cookies.get("vm-data")
