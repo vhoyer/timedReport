@@ -14,6 +14,12 @@ let vm = new Vue({
 			delay: 200,
 		},
 		cards: [],
+		taskStates: [
+			"todo",
+			"doing",
+			"paused",
+			"done",
+		]
 	},
 	computed:{
 		cookies: function(){
@@ -111,7 +117,9 @@ let vm = new Vue({
 			let excel = ""
 			let time = time => new Date(time + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0]
 			this.cards.forEach(card => {
-				excel += `${card.project}\t${card.title}\t${card.description}\t\t\t\t\t${time(card.time)}\n`
+				let stateString = this.taskStates[card.taskState]
+
+				excel += `${card.project}\t${card.title}\t${card.description}\t${stateString}\t\t\t\t${time(card.time)}\n`
 			});
 
 			copy(excel)
