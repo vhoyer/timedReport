@@ -25,6 +25,7 @@ let vm = new Vue({
 		cookies: function(){
 			return {
 				displayCookieAlert: this.displayCookieAlert,
+				taskStates: this.taskStates,
 				idOrigin: this.idOrigin,
 				cards: this.cards,
 				beta: this.beta,
@@ -43,6 +44,9 @@ let vm = new Vue({
 				return card.id == cardId
 			})
 		},
+
+
+
 		cardClicked: function (cardId) {
 			if (vm.isEditing) {
 				return;
@@ -65,6 +69,9 @@ let vm = new Vue({
 				this.getCardFromId(cardId)[property] = field.innerHTML.trim()
 			})
 		},
+
+
+
 		addCard: function () {
 			this.cards.push({
 				id: `card-${this.idOrigin++}`,
@@ -81,6 +88,14 @@ let vm = new Vue({
 				return element.id !== cardId
 			})
 		},
+		clearCards: function (){
+			clearInterval(this.timer.current)
+			this.idOrigin = 0
+			this.cards = []
+		},
+
+
+
 		saveCookies: function () {
 			Cookies.set("vm-data", this.cookies, { expires: 365 /*days*/ })
 		},
@@ -93,14 +108,10 @@ let vm = new Vue({
 			let load = JSON.parse(raw)
 
 			this.displayCookieAlert = load.displayCookieAlert
+			this.taskStates = load.taskStates
 			this.idOrigin = load.idOrigin
 			this.cards = load.cards
 			this.beta = load.beta
-		},
-		clearCards: function (){
-			clearInterval(this.timer.current)
-			this.idOrigin = 0
-			this.cards = []
 		},
 		clearCookies: function () {
 			clearInterval(this.timer.current)
