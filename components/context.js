@@ -1,8 +1,9 @@
 let templateString = `
 <div
     class="context-menu dropdown-menu"
-    v-bind:class="{ show: isActive }"
-    v-bind:style="{ transform: 'translate(' + x + 'px,' + y + 'px)' }"
+    @click="$emit('close-self')"
+    :class="{ show: isActive }"
+    :style="{ transform: 'translate(' + x + 'px,' + y + 'px)' }"
     >
     <slot></slot>
 </div>

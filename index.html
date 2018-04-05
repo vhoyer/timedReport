@@ -85,7 +85,9 @@
 				<context-menu
 					:is-active="context.isActive"
 					:x="context.x"
-					:y="context.y">
+					:y="context.y"
+					@close-self="context.isActive = false"
+					>
 
 					<a 
 						href="#"
