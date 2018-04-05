@@ -163,6 +163,12 @@ let vm = new Vue({
 			let card = this.getCardFromId(this.context.cardId)
 			card.taskState = statesIndex
 		},
+		checkTaskState: function(taskIndex){
+			let card = this.getCardFromId(this.context.cardId)
+			if (card === undefined) { return }
+
+			return card.taskState === taskIndex
+		},
 
 
 
