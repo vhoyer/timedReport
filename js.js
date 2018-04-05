@@ -169,7 +169,7 @@ let vm = new Vue({
 			card.taskState = statesIndex
 
 			if (statesIndex == this.completeStateIndex){
-				card.percentage = 1
+				card.percentage = 100
 			}
 		},
 		checkTaskState: function(taskIndex){
@@ -188,11 +188,14 @@ let vm = new Vue({
 		},
 		changePercentage: function(){
 			let card = this.getCardFromId(this.context.cardId)
-			let newValue = prompt("", card.percentage * 100)
+			let newValue = prompt("Change task percentage:", card.percentage)
 
-			if (typeof newValue !== 'number') { return }
+			//convert to Number
+			newValue = Number( newValue )
 
-			card.percentage = (newValue / 100)
+			if (newValue === NaN) { return }
+
+			card.percentage = newValue
 		},
 
 
@@ -201,7 +204,7 @@ let vm = new Vue({
 			let time = time => new Date(time + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0]
 			let stateString = this.taskStates[card.taskState]
 
-			return `${card.project}\t${card.title}\t${card.description}\t${stateString}\t\t${card.percentage}\t\t${time(card.time)}\n`
+			return `${card.project}\t${card.title}\t${card.description}\t${stateString}\t\t${card.percentage}%\t\t${time(card.time)}\n`
 		},
 		toExcel: function(){
 			let card = this.getCardFromId(this.context.cardId)
