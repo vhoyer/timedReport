@@ -20,11 +20,19 @@ let vm = new Vue({
 			"paused",
 			"done",
 		],
+
+		context: {
+			isActive: false,
+			cardId: "",
+			x: 0,
+			y: 0,
+		},
 	},
 	computed:{
 		cookies: function(){
 			return {
 				displayCookieAlert: this.displayCookieAlert,
+				taskStates: this.taskStates,
 				idOrigin: this.idOrigin,
 				cards: this.cards,
 				beta: this.beta,
@@ -43,6 +51,9 @@ let vm = new Vue({
 				return card.id == cardId
 			})
 		},
+
+
+
 		cardClicked: function (cardId) {
 			if (vm.isEditing) {
 				return;
@@ -65,6 +76,9 @@ let vm = new Vue({
 				this.getCardFromId(cardId)[property] = field.innerHTML.trim()
 			})
 		},
+
+
+
 		addCard: function () {
 			this.cards.push({
 				id: `card-${this.idOrigin++}`,
@@ -81,26 +95,40 @@ let vm = new Vue({
 				return element.id !== cardId
 			})
 		},
+		clearCards: function (){
+			clearInterval(this.timer.current)
+			this.idOrigin = 0
+			this.cards = []
+		},
+
+
+
 		saveCookies: function () {
 			Cookies.set("vm-data", this.cookies, { expires: 365 /*days*/ })
 		},
-		loadCookies: function(){
+		loadCookies: function () {
 			let raw = Cookies.get("vm-data")
-			if (raw === undefined){
+			if (raw === undefined) {
 				return
 			}
 
 			let load = JSON.parse(raw)
 
-			this.displayCookieAlert = load.displayCookieAlert
-			this.idOrigin = load.idOrigin
-			this.cards = load.cards
-			this.beta = load.beta
-		},
-		clearCards: function (){
-			clearInterval(this.timer.current)
-			this.idOrigin = 0
-			this.cards = []
+			if (load.displayCookieAlert !== undefined) {
+				this.displayCookieAlert = load.displayCookieAlert
+			}
+			if (load.taskStates !== undefined) {
+				this.taskStates = load.taskStates
+			}
+			if (load.idOrigin !== undefined) {
+				this.idOrigin = load.idOrigin
+			}
+			if (load.cards !== undefined) {
+				this.cards = load.cards
+			}
+			if (load.beta !== undefined) {
+				this.beta = load.beta
+			}
 		},
 		clearCookies: function () {
 			clearInterval(this.timer.current)
@@ -113,15 +141,44 @@ let vm = new Vue({
 
 			Cookies.remove("vm-data")
 		},
+
+
+
+		contextmenu: function(event, cardId){
+			if (this.isEditing){
+				return
+			}
+
+			event.preventDefault()
+
+			this.context.x = event.x
+			this.context.y = event.y
+			this.context.isActive = true
+			this.context.cardId = cardId
+		},
+		switchCardState: function(statesIndex){
+			let card = this.getCardFromId(this.context.cardId)
+			card.taskState = statesIndex
+		},
+
+
+
+		excelBase: function(card){
+			let time = time => new Date(time + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0]
+			let stateString = this.taskStates[card.taskState]
+
+			return `${card.project}\t${card.title}\t${card.description}\t${stateString}\t\t\t\t${time(card.time)}\n`
+		},
+		toExcel: function(){
+			let card = this.getCardFromId(this.context.cardId)
+			let excel = this.excelBase(card)
+			copy(excel)
+		},
 		exportToExcel: function(){
 			let excel = ""
-			let time = time => new Date(time + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0]
 			this.cards.forEach(card => {
-				let stateString = this.taskStates[card.taskState]
-
-				excel += `${card.project}\t${card.title}\t${card.description}\t${stateString}\t\t\t\t${time(card.time)}\n`
-			});
-
+				excel += this.excelBase(card)
+			})
 			copy(excel)
 		},
 	},
