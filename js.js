@@ -106,19 +106,29 @@ let vm = new Vue({
 		saveCookies: function () {
 			Cookies.set("vm-data", this.cookies, { expires: 365 /*days*/ })
 		},
-		loadCookies: function(){
+		loadCookies: function () {
 			let raw = Cookies.get("vm-data")
-			if (raw === undefined){
+			if (raw === undefined) {
 				return
 			}
 
 			let load = JSON.parse(raw)
 
-			this.displayCookieAlert = load.displayCookieAlert
-			this.taskStates = load.taskStates
-			this.idOrigin = load.idOrigin
-			this.cards = load.cards
-			this.beta = load.beta
+			if (load.displayCookieAlert !== undefined) {
+				this.displayCookieAlert = load.displayCookieAlert
+			}
+			if (load.taskStates !== undefined) {
+				this.taskStates = load.taskStates
+			}
+			if (load.idOrigin !== undefined) {
+				this.idOrigin = load.idOrigin
+			}
+			if (load.cards !== undefined) {
+				this.cards = load.cards
+			}
+			if (load.beta !== undefined) {
+				this.beta = load.beta
+			}
 		},
 		clearCookies: function () {
 			clearInterval(this.timer.current)
