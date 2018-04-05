@@ -17,7 +17,9 @@ let vm = new Vue({
 		idOrigin: 0,
 		cards: [],
 
-		completeStateIndex: 3,
+		taskStatePercentages:[
+			{ index: 3, percentage: 100 },
+		],
 		taskStates: [
 			"todo",
 			"doing",
@@ -36,6 +38,7 @@ let vm = new Vue({
 		cookies: function(){
 			return {
 				displayCookieAlert: this.displayCookieAlert,
+				taskStatePercentages: this.taskStatePercentages,
 				taskStates: this.taskStates,
 				idOrigin: this.idOrigin,
 				cards: this.cards,
@@ -122,6 +125,9 @@ let vm = new Vue({
 			if (load.displayCookieAlert !== undefined) {
 				this.displayCookieAlert = load.displayCookieAlert
 			}
+			if (load.taskStatePercentages !== undefined){
+				this.taskStatePercentages = load.taskStatePercentages
+			}
 			if (load.taskStates !== undefined) {
 				this.taskStates = load.taskStates
 			}
@@ -168,9 +174,11 @@ let vm = new Vue({
 			let card = this.getCardFromId(this.context.cardId)
 			card.taskState = statesIndex
 
-			if (statesIndex == this.completeStateIndex){
-				card.percentage = 100
-			}
+			let matchingTaskState = element => element.index === statesIndex
+			let taskStatePercentage = this.taskStatePercentages.find(matchingTaskState)
+			if (taskStatePercentage === undefined){ return }
+
+			card.percentage = taskStatePercentage.percentage
 		},
 		checkTaskState: function(taskIndex){
 			let card = this.getCardFromId(this.context.cardId)
@@ -182,9 +190,10 @@ let vm = new Vue({
 			let card = this.getCardFromId(this.context.cardId)
 			if (card === undefined) { return }
 
-			let taskIsNotCompleted = (card.taskState !== this.completeStateIndex)
+			let matchingTaskState = element => element.index === card.taskState
+			let hasMatchingPercentage = this.taskStatePercentages.find(matchingTaskState) !== undefined
 
-			return taskIsNotCompleted
+			return !hasMatchingPercentage
 		},
 		changePercentage: function(){
 			let card = this.getCardFromId(this.context.cardId)
