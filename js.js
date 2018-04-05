@@ -19,7 +19,7 @@ let vm = new Vue({
 			"doing",
 			"paused",
 			"done",
-		]
+		],
 	},
 	computed:{
 		cookies: function(){
