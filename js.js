@@ -156,6 +156,10 @@ let vm = new Vue({
 			this.context.isActive = true
 			this.context.cardId = cardId
 		},
+		switchCardState: function(statesIndex){
+			let card = this.getCardFromId(this.context.cardId)
+			card.taskState = statesIndex
+		},
 
 
 
