@@ -95,6 +95,8 @@
 				:is-active="context.isActive"
 				:x="context.x"
 				:y="context.y"
+				@outside-x="context.x += $event"
+				@outside-y="context.y += $event"
 				>
 
 				<a 
