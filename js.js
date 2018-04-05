@@ -19,7 +19,14 @@ let vm = new Vue({
 			"doing",
 			"paused",
 			"done",
-		]
+		],
+
+		context: {
+			isActive: false,
+			cardId: "",
+			x: 0,
+			y: 0,
+		},
 	},
 	computed:{
 		cookies: function(){
@@ -124,15 +131,40 @@ let vm = new Vue({
 
 			Cookies.remove("vm-data")
 		},
+
+
+
+		contextmenu: function(event, cardId){
+			if (this.isEditing){
+				return
+			}
+
+			event.preventDefault()
+
+			this.context.x = event.x
+			this.context.y = event.y
+			this.context.isActive = true
+			this.context.cardId = cardId
+		},
+
+
+
+		excelBase: function(card){
+			let time = time => new Date(time + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0]
+			let stateString = this.taskStates[card.taskState]
+
+			return `${card.project}\t${card.title}\t${card.description}\t${stateString}\t\t\t\t${time(card.time)}\n`
+		},
+		toExcel: function(){
+			let card = this.getCardFromId(this.context.cardId)
+			let excel = this.excelBase(card)
+			copy(excel)
+		},
 		exportToExcel: function(){
 			let excel = ""
-			let time = time => new Date(time + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0]
 			this.cards.forEach(card => {
-				let stateString = this.taskStates[card.taskState]
-
-				excel += `${card.project}\t${card.title}\t${card.description}\t${stateString}\t\t\t\t${time(card.time)}\n`
-			});
-
+				excel += this.excelBase(card)
+			})
 			copy(excel)
 		},
 	},
