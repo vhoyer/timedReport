@@ -6,14 +6,18 @@ let vm = new Vue({
 		displayCookieAlert: true,
 		beta: false,
 
-		idOrigin: 0,
 		isEditing: false,
+
 		timer: {
 			startCounting: 0,
 			current: null,
 			delay: 200,
 		},
+
+		idOrigin: 0,
 		cards: [],
+
+		completeStateIndex: 3,
 		taskStates: [
 			"todo",
 			"doing",
@@ -87,6 +91,7 @@ let vm = new Vue({
 				description: "Full description",
 				time: 0,
 				taskState: 0,
+				percentage: 0,
 				isSelected: false,
 			})
 		},
@@ -162,12 +167,32 @@ let vm = new Vue({
 		switchCardState: function(statesIndex){
 			let card = this.getCardFromId(this.context.cardId)
 			card.taskState = statesIndex
+
+			if (statesIndex == this.completeStateIndex){
+				card.percentage = 1
+			}
 		},
 		checkTaskState: function(taskIndex){
 			let card = this.getCardFromId(this.context.cardId)
 			if (card === undefined) { return }
 
 			return card.taskState === taskIndex
+		},
+		showPercentageOption: function(){
+			let card = this.getCardFromId(this.context.cardId)
+			if (card === undefined) { return }
+
+			let taskIsNotCompleted = (card.taskState !== this.completeStateIndex)
+
+			return taskIsNotCompleted
+		},
+		changePercentage: function(){
+			let card = this.getCardFromId(this.context.cardId)
+			let newValue = prompt("", card.percentage * 100)
+
+			if (typeof newValue !== 'number') { return }
+
+			card.percentage = (newValue / 100)
 		},
 
 
@@ -176,7 +201,7 @@ let vm = new Vue({
 			let time = time => new Date(time + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0]
 			let stateString = this.taskStates[card.taskState]
 
-			return `${card.project}\t${card.title}\t${card.description}\t${stateString}\t\t\t\t${time(card.time)}\n`
+			return `${card.project}\t${card.title}\t${card.description}\t${stateString}\t\t${card.percentage}\t\t${time(card.time)}\n`
 		},
 		toExcel: function(){
 			let card = this.getCardFromId(this.context.cardId)

@@ -102,6 +102,13 @@
 					class="dropdown-item"
 					@click="toExcel()">to excel</a>
 
+				<a 
+					href="#"
+					class="dropdown-item"
+					v-if="showPercentageOption()"
+					@click="changePercentage()">change percentage (%)</a>
+
+
 				<div class="dropdown-divider"></div>
 
 				<a 
