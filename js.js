@@ -156,6 +156,9 @@ let vm = new Vue({
 			this.context.isActive = true
 			this.context.cardId = cardId
 		},
+		closeContextMenu: function(){
+			vm.context.isActive = false
+		},
 		switchCardState: function(statesIndex){
 			let card = this.getCardFromId(this.context.cardId)
 			card.taskState = statesIndex
@@ -190,6 +193,12 @@ $(document).ready(function(){
 		//restart any selected card's timer
 		startTimerOn(selection.id);
 	}
+
+	window.addEventListener("keydown", function onPress(event) {
+		if (event.key !== "Escape") { return }
+
+		vm.closeContextMenu()
+	});
 })
 
 function stopTimerOn(cardId){

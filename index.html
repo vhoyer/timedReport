@@ -23,7 +23,8 @@
 		<title>Timed Reports!</title>
 	</head>
 	<body>
-		<div id="app">
+		<div id="app"
+			@click="closeContextMenu()" >
 			<header class="mb-3">
 				<nav class="navbar navbar-light bg-light">
 					<div class='container'>
@@ -88,29 +89,30 @@
 						@contextmenu="contextmenu($event, card.id)"
 						/>
 				</div>
-				<context-menu
-					:is-active="context.isActive"
-					:x="context.x"
-					:y="context.y"
-					@close-self="context.isActive = false"
-					>
-
-					<a 
-						href="#"
-						class="dropdown-item"
-						@click="toExcel()">to excel</a>
-
-					<div class="dropdown-divider"></div>
-
-					<a 
-						href="#"
-						class="dropdown-item"
-						@click="switchCardState(index)"
-						v-for="(state,index) in taskStates">
-						<span v-if=""></span>
-						{{ state }}</a>
-				</context-menu>
 			</main>
+
+			<context-menu
+				:is-active="context.isActive"
+				:x="context.x"
+				:y="context.y"
+				>
+
+				<a 
+					href="#"
+					class="dropdown-item"
+					@click="toExcel()">to excel</a>
+
+				<div class="dropdown-divider"></div>
+
+				<a 
+					href="#"
+					class="dropdown-item"
+					@click="switchCardState(index)"
+					v-for="(state,index) in taskStates">
+					{{ state }}
+					<span v-if="checkTaskState(index)" class="float-right ml-3">&#x2713;</span>
+				</a>
+			</context-menu>
 
 			<aside class="container fixed-bottom" v-if="displayCookieAlert">
 				<div class="alert alert-warning alert-dismissible fade show mx-3" role="alert">
