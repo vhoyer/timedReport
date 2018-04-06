@@ -86,6 +86,14 @@ let vm = new Vue({
 
 
 
+		getRandomPercentage:function(){
+			return Math.floor(
+				Math.random() * 100
+			)
+		},
+
+
+
 		addCard: function () {
 			this.cards.push({
 				id: `card-${this.idOrigin++}`,
@@ -175,10 +183,11 @@ let vm = new Vue({
 			card.taskState = statesIndex
 
 			let matchingTaskState = element => element.index === statesIndex
-			let taskStatePercentage = this.taskStatePercentages.find(matchingTaskState)
-			if (taskStatePercentage === undefined){ return }
+			let _new = this.taskStatePercentages.find(matchingTaskState)
+			if (_new === undefined){ return }
 
-			card.percentage = taskStatePercentage.percentage
+			let callIt = typeof _new.percentage === "function"
+			card.percentage = callIt ? _new.percentage() : _new.percentage
 		},
 		checkTaskState: function(taskIndex){
 			let card = this.getCardFromId(this.context.cardId)
