@@ -12,8 +12,8 @@ let templateString = `
 Vue.component('context-menu',{
     template: templateString,
     data(){return{
-        width: 200,
-        height: 200,
+        width: 0,
+        height: 0,
     }},
     props:{
         isActive: Boolean,
@@ -38,8 +38,12 @@ Vue.component('context-menu',{
         let menu = document.querySelector('#context-menu')
 
         let observer = new MutationObserver(mutations => {
-            this.width = menu.offsetWidth
-            this.height = menu.offsetHeight
+            if (menu.offsetWidth > this.width){
+                this.width = menu.offsetWidth
+            }
+            if (menu.offsetHeight > this.height) {
+                this.height = menu.offsetHeight
+            }
         })
 
         observer.observe(menu, {
