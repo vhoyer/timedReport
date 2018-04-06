@@ -100,28 +100,25 @@
 				@outside-y="context.y += $event"
 				>
 
-				<a 
-					href="#"
+				<div 
 					class="dropdown-item"
-					@click="toExcel()">to excel</a>
+					@click="toExcel()">to excel</div>
 
-				<a 
-					href="#"
+				<div 
 					class="dropdown-item"
 					v-if="showPercentageOption()"
-					@click="changePercentage()">{{ getCardFromId(context.cardId).percentage }}% - change it</a>
+					@click="changePercentage()">{{ getCardFromId(context.cardId).percentage }}% - change it</div>
 
 
 				<div class="dropdown-divider"></div>
 
-				<a 
-					href="#"
+				<div 
 					class="dropdown-item"
 					@click="switchCardState(index)"
 					v-for="(state,index) in taskStates">
 					{{ state }}
 					<span v-if="checkTaskState(index)" class="float-right ml-3">&#x2713;</span>
-				</a>
+				</div>
 			</context-menu>
 
 			<aside class="container fixed-bottom" v-if="displayCookieAlert">
