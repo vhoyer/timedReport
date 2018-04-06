@@ -58,6 +58,9 @@ let vm = new Vue({
 				return card.id == cardId
 			})
 		},
+		getStateString: function(card){
+			return this.taskStates[card.taskState];
+		},
 
 
 

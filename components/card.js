@@ -14,7 +14,7 @@ let cardTemplate = `
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="card-body" v-on:click.self="$emit('card-clicked')">
+            <div class="card-body d-flex flex-column" v-on:click.self="$emit('card-clicked')">
                 <div
                     class="card-title h5"
                     data-bound-property="title"
@@ -29,10 +29,15 @@ let cardTemplate = `
                 </div>
                 <p
                     class="card-text"
+                    style="flex-grow:inherit"
                     data-bound-property="description"
                     v-on:click="cardClickedOr('edit-description', 'card-text')" >
                     {{ description }}
                 </p>
+                <hr class="my-2 mx-0"/>
+                <div class="card-status">
+                    {{ taskStateString }}
+                </div>
             </div>
             <div
                 class="card-footer timer"
@@ -47,6 +52,7 @@ Vue.component('card',{
     props:{
         title: String,
         project: String,
+        taskStateString: String,
         description: String,
         time: Number,
         isSelected: Boolean,
