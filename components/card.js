@@ -65,6 +65,19 @@ Vue.component('card',{
             timer: null
         } 
     },
+    mounted:function(){
+        let card = document.querySelector(`#${this.HTMLCardId}`)
+
+        let elements =
+        [ card.querySelector(".card-title")
+        , card.querySelector(".card-subtitle")
+        , card.querySelector(".card-text")
+        ]
+        
+        elements.forEach(element => {
+            element.addEventListener("paste", this.pastePureText)
+        });
+    },
     methods: {
         cardClickedOr: function (eventName, field) {
             this.clicks++
@@ -84,7 +97,14 @@ Vue.component('card',{
                 this.$emit(eventName, elementToEdit)
                 this.clicks = 0
             }        	
-        }      
+        },      
+        pastePureText: function (e) {
+            e.preventDefault();
+            var text = e.clipboardData.getData("text/plain");
+            var temp = document.createElement("div");
+            temp.innerHTML = text;
+            document.execCommand("insertHTML", false, temp.textContent);
+        },
     },
 })
 
