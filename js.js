@@ -222,6 +222,11 @@ let vm = new Vue({
 			let time = time => new Date(time + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0]
 			let stateString = this.taskStates[card.taskState]
 
+			//removing line breaks
+			card.title       = card.title      .replace(/\n/g," ")
+			card.project     = card.project    .replace(/\n/g," ")
+			card.description = card.description.replace(/\n/g," ")
+
 			return `${card.project}\t${card.title}\t${card.description}\t${stateString}\t\t${card.percentage}%\t\t${time(card.time)}\n`
 		},
 		toExcel: function(){
