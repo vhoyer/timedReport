@@ -47,7 +47,7 @@
 	margin-left: -20px;
 	margin-right: -20px;
 	margin-bottom: -20px;
-	max-height: 117px; /* card - (title + subtitle) */
+	max-height: 199px; /* card's height */
 	overflow-x: hidden;
 	overflow-y: auto;
 }
