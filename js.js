@@ -214,8 +214,8 @@ let vm = new Vue({
 			let _new = this.taskStateCustom.find(matchingTaskState)
 			if (_new === undefined){ return }
 
-			let callIt = typeof _new.percentage === "function"
-			card.percentage = callIt ? _new.percentage(card) : _new.percentage
+			let callIt = typeof _new.percentage === "string"
+			card.percentage = callIt ? eval(_new.percentage)(card) : _new.percentage
 		},
 		checkTaskState: function(taskIndex){
 			let card = this.getCardFromId(this.context.cardId)
