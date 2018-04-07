@@ -100,6 +100,7 @@
 				:y="context.y"
 				@outside-x="context.x += $event"
 				@outside-y="context.y += $event"
+				@close-context="context.isActive = false"
 				>
 
 				<div 

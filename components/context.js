@@ -1,7 +1,7 @@
 let templateString = `
 <div
     id="context-menu"
-    class="context-menu dropdown-menu"
+    class="context-menu dropdown-menu position-fixed"
     :class="{ show: isActive }"
     :style="{ transform: 'translate(' + x + 'px,' + y + 'px)' }"
     >
@@ -35,19 +35,30 @@ Vue.component('context-menu',{
         },
     },
     mounted:function(){
-        let menu = document.querySelector('#context-menu')
+        this.onSizeChange()
+        this.onScroll()
+    },
+    methods: {
+        onSizeChange: function () {
+            let menu = document.querySelector('#context-menu')
 
-        let observer = new MutationObserver(mutations => {
-            if (menu.offsetWidth > this.width){
-                this.width = menu.offsetWidth
-            }
-            if (menu.offsetHeight > this.height) {
-                this.height = menu.offsetHeight
-            }
-        })
+            let observer = new MutationObserver(mutations => {
+                if (menu.offsetWidth > this.width) {
+                    this.width = menu.offsetWidth
+                }
+                if (menu.offsetHeight > this.height) {
+                    this.height = menu.offsetHeight
+                }
+            })
 
-        observer.observe(menu, {
-            attributes: true
-        })
+            observer.observe(menu, {
+                attributes: true
+            })
+        },
+        onScroll:function(){
+            window.addEventListener('scroll', () => {
+                this.$emit('close-context')
+            })
+        },
     },
 })
