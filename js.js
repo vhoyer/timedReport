@@ -17,8 +17,8 @@ let vm = new Vue({
 		idOrigin: 0,
 		cards: [],
 
-		taskStatePercentages:[
-			{ index: 3, percentage: 100 },
+		taskStateCustom:[
+			{ index: 3, percentage: 100, color:"var(--success)", },
 		],
 		taskStates: [
 			"todo",
@@ -38,7 +38,7 @@ let vm = new Vue({
 		cookies: function(){
 			return {
 				displayCookieAlert: this.displayCookieAlert,
-				taskStatePercentages: this.taskStatePercentages,
+				taskStateCustom: this.taskStateCustom,
 				taskStates: this.taskStates,
 				idOrigin: this.idOrigin,
 				cards: this.cards,
@@ -57,6 +57,18 @@ let vm = new Vue({
 			return this.cards.find(function(card){
 				return card.id == cardId
 			})
+		},
+
+
+
+		getProgressColor: function(card){
+			let color = this.taskStateCustom
+
+			let matchingTaskState = element => element.index === card.taskState
+			let _new = this.taskStateCustom.find(matchingTaskState)
+			if (_new === undefined){ return "" }
+
+			return _new.color;
 		},
 		getStateString: function(card){
 			return this.taskStates[card.taskState];
@@ -136,8 +148,8 @@ let vm = new Vue({
 			if (load.displayCookieAlert !== undefined) {
 				this.displayCookieAlert = load.displayCookieAlert
 			}
-			if (load.taskStatePercentages !== undefined){
-				this.taskStatePercentages = load.taskStatePercentages
+			if (load.taskStateCustom !== undefined){
+				this.taskStateCustom = load.taskStateCustom
 			}
 			if (load.taskStates !== undefined) {
 				this.taskStates = load.taskStates
@@ -150,6 +162,11 @@ let vm = new Vue({
 			}
 			if (load.beta !== undefined) {
 				this.beta = load.beta
+			}
+			//backward support
+			if (load.taskStatePercentage !== undefined){
+				this.taskStateCustom = load.taskStatePercentage
+				Cookies.remove("vm-data")
 			}
 		},
 		clearCookies: function () {
@@ -186,7 +203,7 @@ let vm = new Vue({
 			card.taskState = statesIndex
 
 			let matchingTaskState = element => element.index === statesIndex
-			let _new = this.taskStatePercentages.find(matchingTaskState)
+			let _new = this.taskStateCustom.find(matchingTaskState)
 			if (_new === undefined){ return }
 
 			let callIt = typeof _new.percentage === "function"
@@ -203,7 +220,7 @@ let vm = new Vue({
 			if (card === undefined) { return }
 
 			let matchingTaskState = element => element.index === card.taskState
-			let hasMatchingPercentage = this.taskStatePercentages.find(matchingTaskState) !== undefined
+			let hasMatchingPercentage = this.taskStateCustom.find(matchingTaskState) !== undefined
 
 			return !hasMatchingPercentage
 		},

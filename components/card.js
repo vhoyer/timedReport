@@ -36,9 +36,9 @@ let cardTemplate = `
                 </p>
                 <div class="progress my-2" style="height: 2px;">
                     <div
-                        class="progress-bar"
+                        class="progress-bar bg-secondary"
                         role="progressbar"
-                        :style="{ width: progress+'%' }"
+                        :style="{ width: progress+'%', 'background-color': progressColorCss }"
                         :aria-valuenow="progress"
                         aria-valuemin="0"
                         aria-valuemax="100">
@@ -61,17 +61,26 @@ Vue.component('card',{
     props:{
         title: String,
         project: String,
-        taskStateString: String,
         description: String,
+
+        progressColor: String,
         progress: Number,
+        taskStateString: String,
+        
         time: Number,
+
         isSelected: Boolean,
         isEditing: Boolean,
     },
     computed: {
         timeString: function() {
             return new Date(this.time + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0]
-        }
+        },
+        progressColorCss: function(){
+            if (this.progressColor == undefined){ return }
+
+            return this.progressColor + '!important'
+        },
     },
     data() {
         return {
