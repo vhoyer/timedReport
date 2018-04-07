@@ -33,12 +33,15 @@ let vm = new Vue({
 			x: 0,
 			y: 0,
 		},
+
+		customActions: [],
 	},
 	computed:{
 		cookies: function(){
 			return {
 				displayCookieAlert: this.displayCookieAlert,
 				taskStateCustom: this.taskStateCustom,
+				customActions: this.customActions,
 				taskStates: this.taskStates,
 				idOrigin: this.idOrigin,
 				cards: this.cards,
@@ -152,12 +155,16 @@ let vm = new Vue({
 			}
 
 			let load = JSON.parse(raw)
+			console.log(raw,load)
 
 			if (load.displayCookieAlert !== undefined) {
 				this.displayCookieAlert = load.displayCookieAlert
 			}
 			if (load.taskStateCustom !== undefined){
 				this.taskStateCustom = load.taskStateCustom
+			}
+			if (load.customActions !== undefined){
+				this.customActions = load.customActions
 			}
 			if (load.taskStates !== undefined) {
 				this.taskStates = load.taskStates
@@ -242,6 +249,12 @@ let vm = new Vue({
 			if (newValue === NaN) { return }
 
 			card.percentage = newValue
+		},
+
+
+
+		convertToFunction:function(string){
+			return eval(string)
 		},
 
 
