@@ -41,6 +41,12 @@
 						<form class="form-inline">
 							<button
 								type="button"
+								@click="showConfigModal()"
+								class="btn my-2 mr-2 my-sm-0">
+								Load configs
+							</button>
+							<button
+								type="button"
 								v-if="beta"
 								@click="exportToExcel()"
 								class="btn my-2 mr-2 my-sm-0">
@@ -48,7 +54,7 @@
 							</button>
 							<button
 								type="button"
-								:disabled="!(cards.length > 0 || !displayCookieAlert)"
+								:disabled="!(cards.length > 0)"
 								@click="clearCards()"
 								class="btn btn-outline-danger my-2 my-sm-0">
 								Clear Cards
@@ -138,6 +144,35 @@
 				</div>
 			</context-menu>
 
+			<div id="config-modal" class="modal" tabindex="-1" role="dialog">
+				<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title">Your custom configuragions</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<p>Insert valid JavaScript here, or else, face the consequences.</p>
+							<textarea id="config-entry" class="form-control" v-model="configEntry"></textarea>
+						</div>
+						<div class="modal-footer">
+							<div class="input-group mr-auto w-25">
+								<div class="custom-file">
+									<input type="file" class="custom-file-input" id="inputGroupFile04">
+									<label class="custom-file-label" for="inputGroupFile04">Load a file</label>
+								</div>
+							</div>
+
+							<button type="button" class="btn btn-primary" @click="runConfig()" data-dismiss="modal">Run code</button>
+							<button type="button" class="btn btn-secondary" @click="saveConfigFile()">Download file</button>
+							<button type="button" class="btn" data-dismiss="modal">Close</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
 			<aside class="container fixed-bottom" v-if="displayCookieAlert">
 				<div class="alert alert-warning alert-dismissible fade show mx-3" role="alert">
 					<strong>Holy guacamole!</strong> This site uses your cookies. Deal with it!
@@ -153,6 +188,7 @@
 		<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/gh/jackmoore/autosize/dist/autosize.min.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
 		<script src="components/context.js"></script>

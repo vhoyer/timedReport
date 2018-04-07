@@ -54,3 +54,7 @@
 .card .card-status {
 	margin-bottom: -12px;
 }
+
+#config-entry{
+	max-height: 58vh;
+}

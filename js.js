@@ -5,6 +5,7 @@ let vm = new Vue({
 	data:{
 		displayCookieAlert: true,
 		beta: false,
+		configEntry: "",
 
 		isEditing: false,
 
@@ -42,6 +43,7 @@ let vm = new Vue({
 				displayCookieAlert: this.displayCookieAlert,
 				taskStateCustom: this.taskStateCustom,
 				customActions: this.customActions,
+				configEntry: this.configEntry,
 				taskStates: this.taskStates,
 				idOrigin: this.idOrigin,
 				cards: this.cards,
@@ -177,6 +179,9 @@ let vm = new Vue({
 			if (load.beta !== undefined) {
 				this.beta = load.beta
 			}
+			if (load.configEntry !== undefined){
+				this.configEntry = load.configEntry
+			}
 			//backward support
 			if (load.taskStatePercentage !== undefined){
 				this.taskStateCustom = load.taskStatePercentage
@@ -254,6 +259,38 @@ let vm = new Vue({
 
 		convertToFunction:function(string){
 			return eval(string)
+		},
+
+
+
+		showConfigModal:function(){
+			let modal = $('#config-modal')
+			modal.on('shown.bs.modal', function () {
+				let textarea = $('#config-entry')
+				textarea.trigger('focus')
+
+				autosize(textarea)
+				textarea.on('autosize:resized', function () {
+					modal.modal('handleUpdate')					
+				})
+			})
+			modal.modal('show')
+		},
+		saveConfigFile:function(){
+			let sourceText = vm.configEntry, fileIdentity = "MyTimedReport.config.js";
+			let workElement = document.createElement("a")
+			if ('download' in workElement) {
+				workElement.href = "data:" + 'text/plain' + "charset=utf-8," + escape(sourceText)
+				workElement.setAttribute("download", fileIdentity)
+				document.body.appendChild(workElement)
+				let eventMouse = document.createEvent("MouseEvents")
+				eventMouse.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
+				workElement.dispatchEvent(eventMouse)
+				document.body.removeChild(workElement)
+			} else throw 'File saving not supported for this browser'
+		},
+		runConfig:function(){
+			eval(this.configEntry)
 		},
 
 
