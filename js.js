@@ -107,9 +107,12 @@ let vm = new Vue({
 			)
 		},
 		incrementWithRandom:function(card){
-			return Math.floor(
-				Math.random() * 10
-			) + card.percentage
+			let increment = Math.floor( Math.random() * 10 )
+			let newValue = increment + card.percentage
+			if (newValue > 100){
+				newValue = 100
+			}
+			return newValue
 		},
 
 
