@@ -34,7 +34,16 @@ let cardTemplate = `
                     v-on:click="cardClickedOr('edit-description', 'card-text')" >
                     {{ description }}
                 </p>
-                <hr class="my-2 mx-0"/>
+                <div class="progress my-2" style="height: 2px;">
+                    <div
+                        class="progress-bar"
+                        role="progressbar"
+                        :style="{ width: progress+'%' }"
+                        :aria-valuenow="progress"
+                        aria-valuemin="0"
+                        aria-valuemax="100">
+                    </div>
+                </div>
                 <div class="card-status">
                     {{ taskStateString }}
                 </div>
@@ -54,6 +63,7 @@ Vue.component('card',{
         project: String,
         taskStateString: String,
         description: String,
+        progress: Number,
         time: Number,
         isSelected: Boolean,
         isEditing: Boolean,
