@@ -155,7 +155,6 @@ let vm = new Vue({
 			}
 
 			let load = JSON.parse(raw)
-			console.log(raw,load)
 
 			if (load.displayCookieAlert !== undefined) {
 				this.displayCookieAlert = load.displayCookieAlert
