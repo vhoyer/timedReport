@@ -35,7 +35,12 @@ let vm = new Vue({
 			y: 0,
 		},
 
-		customActions: [],
+		customActions: [
+			{
+				name: "Now with custom actions",
+				action: "(function(){vm.showConfigModal();vm.configEntry=\"vm.customActions[0]=({\\n    name: 'Increment It!',\\n    action: '( function(){\\\\\\n    let card=vm.getCardFromId(vm.context.cardId);\\\\\\n    if( card.percentage == 0 ) { card.taskState = 1; }\\\\\\n    if( card.percentage == 100 ) { return; }\\\\\\n    let n = vm.incrementWithRandom(card);\\\\\\n    if( n == 100 ) { card.taskState = 3; }\\\\\\n    card.percentage=n;\\\\\\n})'});\"})"
+			},
+		],
 	},
 	computed:{
 		cookies: function(){
