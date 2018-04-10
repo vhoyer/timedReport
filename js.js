@@ -3,7 +3,7 @@ let autoSaver;
 let vm = new Vue({
 	el:"#app",
 	data:{
-		displayCookieAlert: true,
+		displayNotCookieAlert: true,
 		beta: false,
 		configEntry: "",
 
@@ -43,9 +43,9 @@ let vm = new Vue({
 		],
 	},
 	computed:{
-		cookies: function(){
+		storage: function(){
 			return {
-				displayCookieAlert: this.displayCookieAlert,
+				displayNotCookieAlert: this.displayNotCookieAlert,
 				taskStateCustom: this.taskStateCustom,
 				customActions: this.customActions,
 				configEntry: this.configEntry,
@@ -57,9 +57,9 @@ let vm = new Vue({
 		}
 	},
 	mounted: function(){
-		this.loadCookies()
+		this.loadStorage()
 		autoSaver = setInterval(
-			() => this.saveCookies()
+			() => this.saveStorage()
 		,this.timer.delay)
 	},
 	methods:{
@@ -152,19 +152,21 @@ let vm = new Vue({
 
 
 
-		saveCookies: function () {
-			Cookies.set("vm-data", this.cookies, { expires: 365 /*days*/ })
+		saveStorage: function () {
+			window.localStorage.setItem("vm-data",
+				JSON.stringify(this.storage))
 		},
-		loadCookies: function () {
-			let raw = Cookies.get("vm-data")
-			if (raw === undefined) {
+		loadStorage: function () {
+			let raw = window.localStorage.getItem("vm-data")
+			if (raw === null || raw === "undefined") {
 				return
 			}
 
+			console.log(raw)
 			let load = JSON.parse(raw)
 
-			if (load.displayCookieAlert !== undefined) {
-				this.displayCookieAlert = load.displayCookieAlert
+			if (load.displayNotCookieAlert !== undefined) {
+				this.displayNotCookieAlert = load.displayNotCookieAlert
 			}
 			if (load.taskStateCustom !== undefined){
 				this.taskStateCustom = load.taskStateCustom
@@ -190,10 +192,9 @@ let vm = new Vue({
 			//backward support
 			if (load.taskStatePercentage !== undefined){
 				this.taskStateCustom = load.taskStatePercentage
-				Cookies.remove("vm-data")
 			}
 		},
-		clearCookies: function () {
+		clearStorage: function () {
 			clearInterval(this.timer.current)
 			clearInterval(autoSaver)
 
@@ -202,7 +203,7 @@ let vm = new Vue({
 			this.beta = false
 			this.clearCards()
 
-			Cookies.remove("vm-data")
+			window.localStorage.clear()
 		},
 
 
@@ -338,6 +339,11 @@ $(document).ready(function(){
 
 		vm.closeContextMenu()
 	});
+
+	//Check if browser have support for window.localStorage
+	if (!storageAvailable('localStorage')){
+		alert("Please Update yout browser for a better experience")
+	}
 })
 
 function stopTimerOn(cardId){
@@ -445,4 +451,30 @@ function copy(text) {
 	document.execCommand("copy")
 
 	setoffClipboard()
+}
+
+
+
+function storageAvailable(type) {
+    try {
+        var storage = window[type],
+            x = '__storage_test__';
+        storage.setItem(x, x);
+        storage.removeItem(x);
+        return true;
+    }
+    catch(e) {
+        return e instanceof DOMException && (
+            // everything except Firefox
+            e.code === 22 ||
+            // Firefox
+            e.code === 1014 ||
+            // test name field too, because code might not be present
+            // everything except Firefox
+            e.name === 'QuotaExceededError' ||
+            // Firefox
+            e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+            // acknowledge QuotaExceededError only if there's something already stored
+            storage.length !== 0;
+    }
 }

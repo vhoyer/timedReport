@@ -172,10 +172,10 @@
 				</div>
 			</div>
 
-			<aside class="container fixed-bottom" v-if="displayCookieAlert">
+			<aside class="container fixed-bottom" v-if="displayNotCookieAlert">
 				<div class="alert alert-warning alert-dismissible fade show mx-3" role="alert">
-					<strong>Holy guacamole!</strong> This site uses your cookies. Deal with it!
-					<button type="button" class="close" data-dismiss="alert" aria-label="Close" v-on:click="displayCookieAlert = false">
+					<strong>Holy guacamole!</strong> This site uses your <s>cookies</s> <code>window.localStorage</code>. Deal with it! <small>— The cool kids now use <code>window.localStorage</code></small>
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close" v-on:click="displayNotCookieAlert = false">
 						<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
@@ -188,7 +188,6 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 		<script src="https://cdn.jsdelivr.net/gh/jackmoore/autosize/dist/autosize.min.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
 		<script src="components/context.js"></script>
 		<script src="components/card.js"></script>
