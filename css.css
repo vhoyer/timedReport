@@ -1,8 +1,16 @@
+body{
+	background-image: url(resources/body-bg.svg);
+	background-attachment: fixed;
+	background-position: bottom right;
+	background-size: 100vw 100vh;
+}
+
 .add-card {
 	border-style: dashed;
 	border-width: 2px;
 	transition: all .5s ease-out;
 	user-select: none;
+	background-color: transparent;
 }
 .add-card:hover{
 	cursor: pointer;
