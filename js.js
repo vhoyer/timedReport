@@ -457,10 +457,10 @@ function copy(text) {
 function storageAvailable(type) {
     try {
         var storage = window[type],
-            x = '__storage_test__';
-        storage.setItem(x, x);
-        storage.removeItem(x);
-        return true;
+            x = '__storage_test__'
+        storage.setItem(x, x)
+        storage.removeItem(x)
+        return true
     }
     catch(e) {
         return e instanceof DOMException && (
@@ -474,6 +474,22 @@ function storageAvailable(type) {
             // Firefox
             e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
             // acknowledge QuotaExceededError only if there's something already stored
-            storage.length !== 0;
+            storage.length !== 0
     }
+}
+
+function loadFileToConfig(files){
+	let file = files[0]
+	if (file == null) {
+		return
+	}
+	
+	var reader = new FileReader()
+	reader.readAsText(file, "UTF-8")
+	reader.onload = function (evt) {
+		vm.configEntry = evt.target.result
+	}
+	reader.onerror = function (evt) {
+		alert("Couldn't load file's content")
+	}
 }
