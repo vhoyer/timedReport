@@ -296,6 +296,8 @@ let vm = new Vue({
 		},
 		runConfig:function(){
 			eval(this.configEntry)
+
+			document.querySelector("#config-modal button.btn.d-none.d-sm-block").click()
 		},
 
 
