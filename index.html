@@ -25,6 +25,7 @@
 	<body>
 		<div
 			id="app"
+			class="d-flex flex-column"
 			style="min-height:100vh"
 			@click="closeContextMenu()" >
 			<header class="mb-3">
@@ -63,7 +64,7 @@
 				</nav>
 			</header>
 
-			<main class="container">
+			<main class="container" style="flex-grow:1">
 				<div id="container" class="row">
 					<div class="mb-4 col-12 col-sm-6 col-md-4 col-lg-3 order-last">
 						<div
@@ -186,6 +187,8 @@
 					</button>
 				</div>
 			</aside>
+
+			<my-footer></my-footer>
 		</div>
 			
 		<!-- Optional JavaScript -->
@@ -196,6 +199,7 @@
 		<script defer src="https://use.fontawesome.com/releases/v5.0.9/js/all.js" integrity="sha384-8iPTk2s/jMVj81dnzb/iFR2sdA7u06vHJyyLlAd4snFpCl/SnyUjRrbdJsw1pGIl" crossorigin="anonymous"></script>
 		<script src="https://cdn.jsdelivr.net/gh/jackmoore/autosize/dist/autosize.min.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+		<script src="components/my-footer.js"></script>
 		<script src="components/context.js"></script>
 		<script src="components/card.js"></script>
 		<script src="js.js"></script>
