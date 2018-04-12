@@ -1,4 +1,4 @@
-body{
+.bg-svg{
 	background-image: url(resources/body-bg.svg);
 	background-attachment: fixed;
 	background-position: bottom right;
