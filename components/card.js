@@ -10,28 +10,28 @@ let cardTemplate = `
                     type="button"
                     class="close close-card"
                     aria-label="Close"
-                    v-on:click="$emit('card-closed')" >
+                    @click="$emit('card-closed')" >
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="card-body d-flex flex-column" v-on:click.self="$emit('card-clicked')">
+            <div class="card-body d-flex flex-column" @click.self="$emit('card-clicked')">
                 <div
                     class="card-title h5"
                     data-bound-property="title"
-                    v-on:click="cardClickedOr('edit-title', 'card-title')" >
+                    @click="cardClickedOr('edit-title', 'card-title')" >
                     {{ title }}
                 </div>
                 <div
                     class="card-subtitle mb-2 text-muted"
                     data-bound-property="project"
-                    v-on:click="cardClickedOr('edit-project', 'card-subtitle')" >
+                    @click="cardClickedOr('edit-project', 'card-subtitle')" >
                     {{ project }}
                 </div>
                 <p
                     class="card-text"
                     style="flex-grow:inherit"
                     data-bound-property="description"
-                    v-on:click="cardClickedOr('edit-description', 'card-text')" >
+                    @click="cardClickedOr('edit-description', 'card-text')" >
                     {{ description }}
                 </p>
                 <div class="progress my-2" style="height: 2px;">
@@ -44,14 +44,17 @@ let cardTemplate = `
                         aria-valuemax="100">
                     </div>
                 </div>
-                <div class="card-status">
+                <div
+                    class="card-status"
+                    @click="$emit('card-clicked')"
+                    >
                     {{ taskStateString }}
                 </div>
             </div>
             <div
                 class="card-footer timer"
                 v-html="timeString"
-                v-on:click="cardClickedOr('edit-time', 'timer')" >
+                @click="cardClickedOr('edit-time', 'timer')" >
             </div>
         </div>
     </div>
