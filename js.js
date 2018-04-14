@@ -41,6 +41,16 @@ let vm = new Vue({
 				action: "(function(){vm.showConfigModal();vm.configEntry=\"vm.customActions[0]=({\\n    name: 'Increment It!',\\n    action: '( function(){\\\\\\n    let card=vm.getCardFromId(vm.context.cardId);\\\\\\n    if( card.percentage == 0 ) { card.taskState = 1; }\\\\\\n    if( card.percentage == 100 ) { return; }\\\\\\n    let n = vm.incrementWithRandom(card);\\\\\\n    if( n == 100 ) { card.taskState = 3; }\\\\\\n    card.percentage=n;\\\\\\n})'});\";setTimeout(()=>{autosize.update(document.querySelector('#config-entry'))},0)})"
 			},
 		],
+
+		//event args
+		ev: {
+			previousActiveCard: null,
+			senderCard: null,
+		},
+		on: {
+			cardCliking: "()=>{}",
+			cardClicked: "()=>{}",
+		},
 	},
 	computed:{
 		storage: function(){
@@ -54,7 +64,7 @@ let vm = new Vue({
 				cards: this.cards,
 				beta: this.beta,
 			}
-		}
+		},
 	},
 	mounted: function(){
 		this.loadStorage()
@@ -87,16 +97,22 @@ let vm = new Vue({
 
 
 		cardClicked: function (cardId) {
-			if (vm.isEditing) {
-				return;
+			this.ev.senderCard = vm.getCardFromId(cardId)
+
+			call(this.on.cardCliking, this.ev)
+
+			if (this.isEditing) {
+				return
 			}
 
-			if (vm.getCardFromId(cardId).isSelected) {
-				stopTimerOn(cardId);
-				return;
+			if (this.ev.senderCard.isSelected) {
+				stopTimerOn(cardId)
+				return
 			}
 
-			startTimerOn(cardId);
+			startTimerOn(cardId)
+
+			call(this.on.cardClicked, this.ev)
 		},
 		editField: function(field, cardId){
 			editField(field, /*then*/ () => {
@@ -137,6 +153,7 @@ let vm = new Vue({
 				taskState: 0,
 				percentage: 0,
 				isSelected: false,
+				isHidden: false,
 			})
 		},
 		removeCard: function(cardId){
@@ -356,7 +373,9 @@ function startTimerOn(cardId){
 	let selection = document.querySelector(".selected");
 	if (selection != null) {
 		//stop any running timer
-		stopTimerOn(selection.id);
+		stopTimerOn(selection.id)
+		//set the events properties
+		vm.ev.previousActiveCard = vm.getCardFromId(selection.id)
 	}
 
 	vm.getCardFromId(cardId).isSelected = true
@@ -494,4 +513,10 @@ function loadFileToConfig(files){
 	reader.onerror = function (evt) {
 		alert("Couldn't load file's content")
 	}
+}
+
+
+
+function call(func, handler){
+	eval(`(${func})`)(handler)
 }
