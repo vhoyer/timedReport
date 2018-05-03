@@ -99,7 +99,7 @@ let vm = new Vue({
 		cardClicked: function (cardId) {
 			this.ev.senderCard = vm.getCardFromId(cardId)
 
-			call(this.on.cardCliking, this.ev)
+			this.call(this.on.cardCliking, this.ev)
 
 			if (this.isEditing) {
 				return
@@ -112,7 +112,7 @@ let vm = new Vue({
 
 			startTimerOn(cardId)
 
-			call(this.on.cardClicked, this.ev)
+			this.call(this.on.cardClicked, this.ev)
 		},
 		editField: function(field, cardId){
 			editField(field, /*then*/ () => {
@@ -208,7 +208,7 @@ let vm = new Vue({
 
 			//Run config when start
 			Vue.nextTick()
-				j.then(() => eval(this.configEntry))
+				.then(() => eval(this.configEntry))
 		},
 		clearStorage: function () {
 			clearInterval(this.timer.current)
@@ -279,8 +279,8 @@ let vm = new Vue({
 
 
 
-		convertToFunction:function(string){
-			return eval(string)
+		call:function(code, handler){
+			eval(`(${code})`)(handler)
 		},
 
 
@@ -513,10 +513,4 @@ function loadFileToConfig(files){
 	reader.onerror = function (evt) {
 		alert("Couldn't load file's content")
 	}
-}
-
-
-
-function call(func, handler){
-	eval(`(${func})`)(handler)
 }

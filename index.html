@@ -126,7 +126,7 @@
 					<div
 						class="dropdown-item"
 						v-for="custom in customActions"
-						@click="convertToFunction(custom.action)()"
+						@click="call(custom.action)"
 						>
 						{{ custom.name }}
 					</div>
