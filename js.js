@@ -61,6 +61,7 @@ let vm = new Vue({
 				configEntry: this.configEntry,
 				taskStates: this.taskStates,
 				idOrigin: this.idOrigin,
+				timer: this.timer,
 				cards: this.cards,
 				beta: this.beta,
 			}
@@ -195,6 +196,9 @@ let vm = new Vue({
 			}
 			if (load.idOrigin !== undefined) {
 				this.idOrigin = load.idOrigin
+			}
+			if (load.timer !== undefined) {
+				this.timer = load.timer
 			}
 			if (load.cards !== undefined) {
 				this.cards = load.cards
@@ -349,7 +353,7 @@ $(document).ready(function(){
 	let selection = document.querySelector(".selected");
 	if (selection != null) {
 		//restart any selected card's timer
-		startTimerOn(selection.id);
+		startTimerOn(selection.id, false);
 	}
 
 	window.addEventListener("keydown", function onPress(event) {
@@ -369,7 +373,7 @@ function stopTimerOn(cardId){
 
 	clearInterval(vm.timer.current)
 }
-function startTimerOn(cardId){
+function startTimerOn(cardId, updateNowValue = true){
 	let selection = document.querySelector(".selected");
 	if (selection != null) {
 		//stop any running timer
@@ -380,7 +384,10 @@ function startTimerOn(cardId){
 
 	vm.getCardFromId(cardId).isSelected = true
 
-	vm.timer.startCounting = Date.now()
+	if (updateNowValue) {
+		vm.timer.startCounting = Date.now()
+	}
+
 	vm.timer.current = setInterval(function(){
 		let now = Date.now()
 		vm.getCardFromId(cardId).time += (now - vm.timer.startCounting)
