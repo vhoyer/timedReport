@@ -205,10 +205,10 @@ let vm = new Vue({
 			if (load.configEntry !== undefined){
 				this.configEntry = load.configEntry
 			}
-			//backward support
-			if (load.taskStatePercentage !== undefined){
-				this.taskStateCustom = load.taskStatePercentage
-			}
+
+			//Run config when start
+			Vue.nextTick()
+				j.then(() => eval(this.configEntry))
 		},
 		clearStorage: function () {
 			clearInterval(this.timer.current)
