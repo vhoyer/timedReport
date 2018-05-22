@@ -48,7 +48,7 @@
 	--size: 32px;
 
 	display: inline-block;
-	font-size: calc( var(--size) * .67);
+	font-size: calc( var(--size) * .60);
 	width: var(--size); /* match .h1 */
 }
 .card .card-text {
