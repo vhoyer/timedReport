@@ -151,6 +151,7 @@ let vm = new Vue({
 				project: "Project name",
 				description: "Full description",
 				time: 0,
+				estimatedTime: 0,
 				taskState: 0,
 				percentage: 0,
 				isSelected: false,
@@ -201,6 +202,12 @@ let vm = new Vue({
 				this.timer = load.timer
 			}
 			if (load.cards !== undefined) {
+				//backward compatibility
+				load.cards.forEach(e =>{
+					if (e.estimatedTime == undefined){
+						e.estimatedTime = 0
+					}
+				})
 				this.cards = load.cards
 			}
 			if (load.beta !== undefined) {

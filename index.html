@@ -89,6 +89,7 @@
 						:progress="card.percentage"
 						:task-state-string="getStateString(card)"
 						:time="card.time"
+						:estimated-time="card.estimatedTime"
 						:is-selected="card.isSelected"
 						:is-editing="isEditing"
 						@card-closed="removeCard(card.id)"
