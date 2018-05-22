@@ -69,6 +69,10 @@ let vm = new Vue({
 	},
 	mounted: function(){
 		this.loadStorage()
+		//Run config when start
+		Vue.nextTick()
+			.then(() => eval(this.configEntry))
+		//Start auto save timer
 		autoSaver = setInterval(
 			() => this.saveStorage()
 		,this.timer.delay)
@@ -216,10 +220,6 @@ let vm = new Vue({
 			if (load.configEntry !== undefined){
 				this.configEntry = load.configEntry
 			}
-
-			//Run config when start
-			Vue.nextTick()
-				.then(() => eval(this.configEntry))
 		},
 		clearStorage: function () {
 			clearInterval(this.timer.current)
