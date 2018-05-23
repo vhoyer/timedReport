@@ -156,7 +156,7 @@ let vm = new Vue({
 				description: "Full description",
 				time: 0,
 				//estimated time of completion
-				etc: 0,
+				eta: 0,
 				taskState: 0,
 				percentage: 0,
 				isSelected: false,
@@ -209,12 +209,12 @@ let vm = new Vue({
 			if (load.cards !== undefined) {
 				//backward compatibility
 				load.cards.forEach(e =>{
-					if (e.eac !== undefined && e.etc == undefined){
-						e.etc = e.eac
+					if (e.eac !== undefined && e.eta == undefined){
+						e.eta = e.eac
 						delete e.eac
 					}
-					else if (e.etc == undefined){
-						e.etc = 0
+					else if (e.eta == undefined){
+						e.eta = 0
 					}
 				})
 				this.cards = load.cards
