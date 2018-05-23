@@ -15,9 +15,9 @@ let cardTemplate = `
                 </button>
             </div>
             <div
-                class="card-header timer"
-                v-html="estimatedTimeString"
-                @click="cardClickedOr('edit-time', 'timer')" >
+                class="card-header eac"
+                v-html="eacString"
+                @click="cardClickedOr('edit-eac', 'eac')" >
             </div>
             <div class="card-body d-flex flex-column" @click.self="$emit('card-clicked')">
                 <div
@@ -76,7 +76,7 @@ Vue.component('card',{
         taskStateString: String,
         
         time: Number,
-        estimatedTime: Number,
+        eac: Number,
 
         isSelected: Boolean,
         isEditing: Boolean,
@@ -85,9 +85,8 @@ Vue.component('card',{
         timeString: function() {
             return new Date(this.time + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0]
         },
-        estimatedTimeString: function() {
-            console.log(this)
-            return new Date(this.estimatedTime + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0]
+        eacString: function() {
+            return new Date(this.eac + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0]
         },
         progressColorCss: function(){
             if (this.progressColor == undefined){ return }
