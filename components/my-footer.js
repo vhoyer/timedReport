@@ -16,7 +16,7 @@ let template = `
 Vue.component('my-footer',{
     template: template,
     data(){return{
-        tagName: "2018.5",
+        tagName: "2018.5.1",
     }},
     mounted:function(){
         request({
