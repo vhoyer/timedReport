@@ -336,7 +336,7 @@ let vm = new Vue({
 
 
 		excelBase: function(card){
-			let time = time => new Date(time + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0]
+			let time = time => (time > 0 ? "" : "-") + new Date( (time > 0 ? 1 : -1) * time + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0]
 			let stateString = this.taskStates[card.taskState]
 
 			//removing line breaks
