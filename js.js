@@ -448,7 +448,7 @@ function editField(field, callback){
 		}
 		if (timer.wasTimer && timer.wasRunning){
 			startTimerOn(cardId)
-			//was triggering outOfFocusBehaviour multiple times, thisis a workaround
+			//was triggering outOfFocusBehaviour multiple times, this is a workaround
 			timer.wasTimer = false
 		}
 	}
