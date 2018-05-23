@@ -89,7 +89,7 @@
 						:progress="card.percentage"
 						:task-state-string="getStateString(card)"
 						:time="card.time"
-						:eac="card.eac"
+						:etc="card.etc"
 						:is-selected="card.isSelected"
 						:is-editing="isEditing"
 						@card-closed="removeCard(card.id)"
@@ -98,7 +98,7 @@
 						@edit-project="editField($event, card.id)"
 						@edit-description="editField($event, card.id)"
 						@edit-time="editField($event, card.id)"
-						@edit-eac="editField($event, card.id)"
+						@edit-etc="editField($event, card.id)"
 						@contextmenu="contextmenu($event, card.id)"
 						/>
 				</div>

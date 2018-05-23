@@ -156,7 +156,7 @@ let vm = new Vue({
 				description: "Full description",
 				time: 0,
 				//estimated time of completion
-				eac: 0,
+				etc: 0,
 				taskState: 0,
 				percentage: 0,
 				isSelected: false,
@@ -209,8 +209,12 @@ let vm = new Vue({
 			if (load.cards !== undefined) {
 				//backward compatibility
 				load.cards.forEach(e =>{
-					if (e.eac == undefined){
-						e.eac = 0
+					if (e.eac !== undefined && e.etc == undefined){
+						e.etc = e.eac
+						delete e.eac
+					}
+					else if (e.etc == undefined){
+						e.etc = 0
 					}
 				})
 				this.cards = load.cards
@@ -340,7 +344,7 @@ let vm = new Vue({
 			card.project     = card.project    .replace(/\n/g," ")
 			card.description = card.description.replace(/\n/g," ")
 
-			return `${card.project}\t${card.title}\t${card.description}\t${stateString}\t\t${card.percentage}%\t\t${time(card.time)}\t${time(card.eac)}\n`
+			return `${card.project}\t${card.title}\t${card.description}\t${stateString}\t\t${card.percentage}%\t\t${time(card.time)}\t${time(card.etc - card.time)}\n`
 		},
 		toExcel: function(){
 			let card = this.getCardFromId(this.context.cardId)
@@ -406,15 +410,15 @@ function startTimerOn(cardId, updateNowValue = true){
 
 function ifEditingTime(field){
 	let card = field.parentNode
-	let isEac = field.classList.contains("eac")
+	let isEtc = field.classList.contains("etc")
 
-	if(card.classList.contains("selected") && !isEac){ 
+	if(card.classList.contains("selected") && !isEtc){ 
 		//because if editing title..description the parentNode == card-body
 		stopTimerOn(card.id)
 	}
 
 	return {
-		wasEac: isEac,
+		wasEtc: isEtc,
 		wasTimer: field.classList.contains("timer"),
 		wasRunning: card.classList.contains("selected")
 	}
@@ -431,7 +435,7 @@ function editField(field, callback){
 
 		let cardId;
 		let timeString;
-		if (timer.wasTimer || timer.wasEac){
+		if (timer.wasTimer || timer.wasEtc){
 			cardId = field.parentNode.id
 			timeString = field.innerHTML.match(/\d\d:\d\d:\d\d/)
 		}
@@ -439,8 +443,8 @@ function editField(field, callback){
 		if (timer.wasTimer && timeString != null){
 			vm.getCardFromId(cardId).time = new Date(`1970-01-01T${timeString}`).getTime()-timeOffset()
 		}
-		if (timer.wasEac && timeString != null){
-			vm.getCardFromId(cardId).eac = new Date(`1970-01-01T${timeString}`).getTime()-timeOffset()
+		if (timer.wasEtc && timeString != null){
+			vm.getCardFromId(cardId).etc = new Date(`1970-01-01T${timeString}`).getTime()-timeOffset()
 		}
 		if (timer.wasTimer && timer.wasRunning){
 			startTimerOn(cardId)
