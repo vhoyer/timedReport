@@ -372,7 +372,7 @@ $(document).ready(function(){
 
 	//Check if browser have support for window.localStorage
 	if (!storageAvailable('localStorage')){
-		alert("Please Update yout browser for a better experience")
+		alert("Please Update yout browser for a better experience, I haven't tested with an outdated browser, so you may have no expirience at all xD\n\nHey, I'm doing you a favor")
 	}
 })
 
