@@ -62,6 +62,14 @@
 .card .card-status {
 	margin-bottom: -12px;
 }
+.card .eta:hover::before {
+	content: 'ETA';
+	position: absolute;
+	left: 1em;
+	line-height: 2em;
+	font-size: .75em;
+	color: var(--secondary);
+}
 
 #config-entry{
 	max-height: 58vh;
