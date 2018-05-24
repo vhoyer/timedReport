@@ -344,7 +344,7 @@ let vm = new Vue({
 			card.project     = card.project    .replace(/\n/g," ")
 			card.description = card.description.replace(/\n/g," ")
 
-			return `${card.project}\t${card.title}\t${card.description}\t${stateString}\t\t${card.percentage}%\t\t${time(card.time)}\t${time(card.etc - card.time)}\n`
+			return `${card.project}\t${card.title}\t${card.description}\t${stateString}\t\t${card.percentage}%\t\t${time(card.time)}\t${time(card.eta - card.time)}\n`
 		},
 		toExcel: function(){
 			let card = this.getCardFromId(this.context.cardId)
@@ -410,15 +410,15 @@ function startTimerOn(cardId, updateNowValue = true){
 
 function ifEditingTime(field){
 	let card = field.parentNode
-	let isEtc = field.classList.contains("etc")
+	let isEta = field.classList.contains("eta")
 
-	if(card.classList.contains("selected") && !isEtc){ 
+	if(card.classList.contains("selected") && !isEta){ 
 		//because if editing title..description the parentNode == card-body
 		stopTimerOn(card.id)
 	}
 
 	return {
-		wasEtc: isEtc,
+		wasEta: isEta,
 		wasTimer: field.classList.contains("timer"),
 		wasRunning: card.classList.contains("selected")
 	}
@@ -435,7 +435,7 @@ function editField(field, callback){
 
 		let cardId;
 		let timeString;
-		if (timer.wasTimer || timer.wasEtc){
+		if (timer.wasTimer || timer.wasEta){
 			cardId = field.parentNode.id
 			timeString = field.innerHTML.match(/\d\d:\d\d:\d\d/)
 		}
@@ -443,8 +443,8 @@ function editField(field, callback){
 		if (timer.wasTimer && timeString != null){
 			vm.getCardFromId(cardId).time = new Date(`1970-01-01T${timeString}`).getTime()-timeOffset()
 		}
-		if (timer.wasEtc && timeString != null){
-			vm.getCardFromId(cardId).etc = new Date(`1970-01-01T${timeString}`).getTime()-timeOffset()
+		if (timer.wasEta && timeString != null){
+			vm.getCardFromId(cardId).eta = new Date(`1970-01-01T${timeString}`).getTime()-timeOffset()
 		}
 		if (timer.wasTimer && timer.wasRunning){
 			startTimerOn(cardId)
