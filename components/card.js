@@ -74,7 +74,7 @@ Vue.component('card',{
         progressColor: String,
         progress: Number,
         taskStateString: String,
-        
+
         time: Number,
         eta: Number,
 
@@ -100,7 +100,7 @@ Vue.component('card',{
             delay: 200,
             clicks: 0,
             timer: null
-        } 
+        }
     },
     mounted:function(){
         let card = document.querySelector(`#${this.HTMLCardId}`)
@@ -110,7 +110,7 @@ Vue.component('card',{
         , card.querySelector(".card-subtitle")
         , card.querySelector(".card-text")
         ]
-        
+
         elements.forEach(element => {
             element.addEventListener("paste", this.pastePureText)
         });
@@ -133,8 +133,8 @@ Vue.component('card',{
 
                 this.$emit(eventName, elementToEdit)
                 this.clicks = 0
-            }        	
-        },      
+            }
+        },
         pastePureText: function (e) {
             e.preventDefault();
             var text = e.clipboardData.getData("text/plain");
