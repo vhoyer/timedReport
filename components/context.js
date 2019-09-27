@@ -43,7 +43,7 @@ Vue.component('context-menu',{
         onSizeChange: function () {
             let menu = document.querySelector('#context-menu')
 
-            let observer = new MutationObserver(mutations => {
+            let observer = new MutationObserver(_mutations => {
                 if (menu.offsetWidth > this.width) {
                     this.width = menu.offsetWidth
                 }
