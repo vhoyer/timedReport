@@ -33,7 +33,7 @@
 					<div class='container'>
 						<h1 class="navbar-brand mb-0">Timed Report!</h1>
 
-						<ul class="navbar-nav mr-auto"> 
+						<ul class="navbar-nav mr-auto">
 							<li class="nav-item"></li>
 								<a class="nav-link" target="_blank" href="https://github.com/vhoyer/timedReport/issues/new">Feature request?</a>
 							</li>
@@ -113,11 +113,11 @@
 				@close-context="context.isActive = false"
 				>
 
-				<div 
+				<div
 					class="dropdown-item"
 					@click="toExcel()">to excel</div>
 
-				<div 
+				<div
 					class="dropdown-item"
 					v-if="showPercentageOption()"
 					@click="changePercentage()">{{ getCardFromId(context.cardId).percentage }}% - change it</div>
@@ -137,7 +137,7 @@
 
 				<div class="dropdown-divider"></div>
 
-				<div 
+				<div
 					class="dropdown-item"
 					@click="switchCardState(index)"
 					v-for="(state,index) in taskStates">
@@ -166,7 +166,7 @@
 										<label class="custom-file-label" for="inputGroupFile04">Load a file</label>
 									</div>
 								</div>
-						
+
 								<button type="button" class="btn btn-primary" @click="runConfig()" data-dismiss="modal">
 									<i class="fas fa-play d-inline d-sm-none d-lg-inline"></i>
 									<span class="d-none d-sm-inline">Run code</span>
@@ -192,7 +192,7 @@
 
 			<my-footer></my-footer>
 		</div>
-			
+
 		<!-- Optional JavaScript -->
 		<!-- jQuery first, then Popper.js, then Bootstrap JS -->
 		<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
