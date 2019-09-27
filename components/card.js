@@ -1,5 +1,5 @@
 let cardTemplate = `
-    <div class="mb-4 col-12 col-sm-6 col-md-4 col-lg-3">
+    <div class="mb-4 col-12 col-sm-6 col-md-4 col-lg-3" data-hj-whitelist>
         <div
             class="card text-center h-100"
             @contextmenu="$emit('contextmenu', $event)"

@@ -2,6 +2,7 @@ let templateString = `
 <div
     id="context-menu"
     class="context-menu dropdown-menu position-fixed"
+    data-hj-whitelist
     :class="{ show: isActive }"
     :style="{ transform: 'translate(' + x + 'px,' + y + 'px)' }"
     >
