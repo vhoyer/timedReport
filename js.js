@@ -189,43 +189,13 @@ let vm = new Vue({
 
       let load = JSON.parse(raw)
 
-      if (load.displayNotCookieAlert !== undefined) {
-        this.displayNotCookieAlert = load.displayNotCookieAlert
-      }
-      if (load.taskStateCustom !== undefined){
-        this.taskStateCustom = load.taskStateCustom
-      }
-      if (load.customActions !== undefined){
-        this.customActions = load.customActions
-      }
-      if (load.taskStates !== undefined) {
-        this.taskStates = load.taskStates
-      }
-      if (load.idOrigin !== undefined) {
-        this.idOrigin = load.idOrigin
-      }
-      if (load.timer !== undefined) {
-        this.timer = load.timer
-      }
-      if (load.cards !== undefined) {
-        //backward compatibility
-        load.cards.forEach(e =>{
-          if (e.eac !== undefined && e.eta == undefined){
-            e.eta = e.eac
-            delete e.eac
-          }
-          else if (e.eta == undefined){
-            e.eta = 0
-          }
-        })
-        this.cards = load.cards
-      }
-      if (load.beta !== undefined) {
-        this.beta = load.beta
-      }
-      if (load.configEntry !== undefined){
-        this.configEntry = load.configEntry
-      }
+      Object.keys(load).forEach((loadedProperty) => {
+        const loaded = load[loadedProperty]
+
+        if (loaded !== undefined) {
+          this[loadedProperty] = loaded
+        }
+      })
     },
     clearStorage() {
       clearInterval(this.timer.current)
