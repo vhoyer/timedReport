@@ -53,7 +53,7 @@ let vm = new Vue({
 		},
 	},
 	computed:{
-		storage: function(){
+		storage() {
 			return {
 				displayNotCookieAlert: this.displayNotCookieAlert,
 				taskStateCustom: this.taskStateCustom,
@@ -67,7 +67,7 @@ let vm = new Vue({
 			}
 		},
 	},
-	mounted: function(){
+	mounted() {
 		this.loadStorage()
 		//Run config when start
 		Vue.nextTick()
@@ -77,8 +77,8 @@ let vm = new Vue({
 			() => this.saveStorage()
 		,this.timer.delay)
 	},
-	methods:{
-		getCardFromId: function(cardId){
+	methods: {
+		getCardFromId(cardId) {
 			return this.cards.find(function(card){
 				return card.id == cardId
 			})
@@ -86,22 +86,20 @@ let vm = new Vue({
 
 
 
-		getProgressColor: function(card){
-			let color = this.taskStateCustom
-
+		getProgressColor(card) {
 			let matchingTaskState = element => element.index === card.taskState
 			let _new = this.taskStateCustom.find(matchingTaskState)
 			if (_new === undefined){ return "" }
 
 			return _new.color;
 		},
-		getStateString: function(card){
+		getStateString(card) {
 			return this.taskStates[card.taskState];
 		},
 
 
 
-		cardClicked: function (cardId) {
+		cardClicked(cardId) {
 			this.ev.senderCard = vm.getCardFromId(cardId)
 
 			this.call(this.on.cardCliking, this.ev)
@@ -119,7 +117,7 @@ let vm = new Vue({
 
 			this.call(this.on.cardClicked, this.ev)
 		},
-		editField: function(field, cardId){
+		editField(field, cardId) {
 			editField(field, /*then*/ () => {
 				let property = field.dataset.boundProperty
 				if (property === undefined){
@@ -132,12 +130,12 @@ let vm = new Vue({
 
 
 
-		getRandomPercentage:function(){
+		getRandomPercentage() {
 			return Math.floor(
 				Math.random() * 100
 			)
 		},
-		incrementWithRandom:function(card){
+		incrementWithRandom(card) {
 			let increment = Math.floor( Math.random() * 10 )
 			let newValue = increment + card.percentage
 			if (newValue > 100){
@@ -163,12 +161,12 @@ let vm = new Vue({
 				isHidden: false,
 			})
 		},
-		removeCard: function(cardId){
+		removeCard(cardId) {
 			this.cards = this.cards.filter(function(element){
 				return element.id !== cardId
 			})
 		},
-		clearCards: function (){
+		clearCards() {
 			clearInterval(this.timer.current)
 			this.idOrigin = 0
 			this.cards = []
@@ -176,11 +174,11 @@ let vm = new Vue({
 
 
 
-		saveStorage: function () {
+		saveStorage() {
 			window.localStorage.setItem("vm-data",
 				JSON.stringify(this.storage))
 		},
-		loadStorage: function () {
+		loadStorage() {
 			let raw = window.localStorage.getItem("vm-data")
 			if (raw === null || raw === "undefined") {
 				return
@@ -226,7 +224,7 @@ let vm = new Vue({
 				this.configEntry = load.configEntry
 			}
 		},
-		clearStorage: function () {
+		clearStorage() {
 			clearInterval(this.timer.current)
 			clearInterval(autoSaver)
 
@@ -240,7 +238,7 @@ let vm = new Vue({
 
 
 
-		contextmenu: function(event, cardId){
+		contextmenu(event, cardId) {
 			if (this.isEditing){
 				return
 			}
@@ -252,10 +250,10 @@ let vm = new Vue({
 			this.context.isActive = true
 			this.context.cardId = cardId
 		},
-		closeContextMenu: function(){
+		closeContextMenu() {
 			vm.context.isActive = false
 		},
-		switchCardState: function(statesIndex){
+		switchCardState(statesIndex) {
 			let card = this.getCardFromId(this.context.cardId)
 			card.taskState = statesIndex
 
@@ -266,13 +264,13 @@ let vm = new Vue({
 			let callIt = typeof _new.percentage === "string"
 			card.percentage = callIt ? eval(_new.percentage)(card) : _new.percentage
 		},
-		checkTaskState: function(taskIndex){
+		checkTaskState(taskIndex) {
 			let card = this.getCardFromId(this.context.cardId)
 			if (card === undefined) { return }
 
 			return card.taskState === taskIndex
 		},
-		showPercentageOption: function(){
+		showPercentageOption() {
 			let card = this.getCardFromId(this.context.cardId)
 			if (card === undefined) { return }
 
@@ -281,7 +279,7 @@ let vm = new Vue({
 
 			return !hasMatchingPercentage
 		},
-		changePercentage: function(){
+		changePercentage() {
 			let card = this.getCardFromId(this.context.cardId)
 			let newValue = prompt("Change task percentage:", card.percentage)
 
@@ -295,13 +293,13 @@ let vm = new Vue({
 
 
 
-		call:function(code, handler){
+		call(code, handler) {
 			eval(`(${code})`)(handler)
 		},
 
 
 
-		showConfigModal:function(){
+		showConfigModal() {
 			let modal = $('#config-modal')
 			modal.on('shown.bs.modal', function () {
 				let textarea = $('#config-entry')
@@ -309,12 +307,12 @@ let vm = new Vue({
 
 				autosize(textarea)
 				textarea.on('autosize:resized', function () {
-					modal.modal('handleUpdate')					
+					modal.modal('handleUpdate')
 				})
 			})
 			modal.modal('show')
 		},
-		saveConfigFile:function(){
+		saveConfigFile() {
 			let sourceText = vm.configEntry, fileIdentity = "MyTimedReport.config.js";
 			let workElement = document.createElement("a")
 			if ('download' in workElement) {
@@ -327,7 +325,7 @@ let vm = new Vue({
 				document.body.removeChild(workElement)
 			} else throw 'File saving not supported for this browser'
 		},
-		runConfig:function(){
+		runConfig() {
 			eval(this.configEntry)
 
 			document.querySelector("#config-modal button.btn.d-none.d-sm-block").click()
@@ -335,7 +333,7 @@ let vm = new Vue({
 
 
 
-		excelBase: function(card){
+		excelBase(card) {
 			let time = time => (time > 0 ? "" : "-") + new Date( (time > 0 ? 1 : -1) * time + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0]
 			let stateString = this.taskStates[card.taskState]
 
@@ -346,12 +344,12 @@ let vm = new Vue({
 
 			return `${card.project}\t${card.title}\t${card.description}\t${stateString}\t\t${card.percentage}%\t\t${time(card.time)}\t${time(card.eta - card.time)}\n`
 		},
-		toExcel: function(){
+		toExcel() {
 			let card = this.getCardFromId(this.context.cardId)
 			let excel = this.excelBase(card)
 			copy(excel)
 		},
-		exportToExcel: function(){
+		exportToExcel() {
 			let excel = ""
 			this.cards.forEach(card => {
 				excel += this.excelBase(card)
@@ -412,7 +410,7 @@ function ifEditingTime(field){
 	let card = field.parentNode
 	let isEta = field.classList.contains("eta")
 
-	if(card.classList.contains("selected") && !isEta){ 
+	if(card.classList.contains("selected") && !isEta){
 		//because if editing title..description the parentNode == card-body
 		stopTimerOn(card.id)
 	}
@@ -480,7 +478,7 @@ function setupClipboard(text){
 	z-index: 100;
 	opacity: 0;"><textarea id="clipboard" style="
 	width: 1px;
-	height: 1px;       
+	height: 1px;
 	padding: 0px;">${text}</textarea></div>`)
 }
 function setoffClipboard(){
@@ -529,13 +527,13 @@ function loadFileToConfig(files){
 	if (file == null) {
 		return
 	}
-	
+
 	var reader = new FileReader()
 	reader.readAsText(file, "UTF-8")
 	reader.onload = function (evt) {
 		vm.configEntry = evt.target.result
 	}
-	reader.onerror = function (evt) {
+	reader.onerror = function (_evt) {
 		alert("Couldn't load file's content")
 	}
 }
