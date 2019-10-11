@@ -54,17 +54,20 @@ let vm = new Vue({
   },
   computed:{
     storage() {
-      return {
-        displayNotCookieAlert: this.displayNotCookieAlert,
-        taskStateCustom: this.taskStateCustom,
-        customActions: this.customActions,
-        configEntry: this.configEntry,
-        taskStates: this.taskStates,
-        idOrigin: this.idOrigin,
-        timer: this.timer,
-        cards: this.cards,
-        beta: this.beta,
-      }
+      return [
+        'displayNotCookieAlert',
+        'taskStateCustom',
+        'customActions',
+        'configEntry',
+        'taskStates',
+        'idOrigin',
+        'timer',
+        'cards',
+        'beta',
+      ].reduce((exports, propertyName) => {
+        exports[propertyName] = this[propertyName]
+        return exports
+      }, {})
     },
   },
   mounted() {
