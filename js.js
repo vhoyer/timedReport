@@ -1,11 +1,11 @@
 let autoSaver;
 
 let vm = new Vue({
-  el:"#app",
+  el:'#app',
   data:{
     displayNotCookieAlert: true,
     beta: false,
-    configEntry: "",
+    configEntry: '',
 
     isEditing: false,
 
@@ -19,25 +19,25 @@ let vm = new Vue({
     cards: [],
 
     taskStateCustom:[
-      { index: 3, percentage: 100, color:"var(--success)", },
+      { index: 3, percentage: 100, color:'var(--success)', },
     ],
     taskStates: [
-      "todo",
-      "doing",
-      "paused",
-      "done",
+      'todo',
+      'doing',
+      'paused',
+      'done',
     ],
 
     context: {
       isActive: false,
-      cardId: "",
+      cardId: '',
       x: 0,
       y: 0,
     },
 
     customActions: [
       {
-        name: "Now with custom actions",
+        name: 'Now with custom actions',
         action: "(function(){vm.showConfigModal();vm.configEntry=\"vm.customActions[0]=({\\n    name: 'Increment It!',\\n    action: '( function(){\\\\\\n    let card=vm.getCardFromId(vm.context.cardId);\\\\\\n    if( card.percentage == 0 ) { card.taskState = 1; }\\\\\\n    if( card.percentage == 100 ) { return; }\\\\\\n    let n = vm.incrementWithRandom(card);\\\\\\n    if( n == 100 ) { card.taskState = 3; }\\\\\\n    card.percentage=n;\\\\\\n})'});\";setTimeout(()=>{autosize.update(document.querySelector('#config-entry'))},0)})"
       },
     ],
@@ -48,8 +48,8 @@ let vm = new Vue({
       senderCard: null,
     },
     on: {
-      cardCliking: "()=>{}",
-      cardClicked: "()=>{}",
+      cardCliking: '()=>{}',
+      cardClicked: '()=>{}',
     },
   },
   computed:{
@@ -92,7 +92,7 @@ let vm = new Vue({
     getProgressColor(card) {
       let matchingTaskState = element => element.index === card.taskState
       let _new = this.taskStateCustom.find(matchingTaskState)
-      if (_new === undefined){ return "" }
+      if (_new === undefined){ return '' }
 
       return _new.color;
     },
@@ -152,9 +152,9 @@ let vm = new Vue({
     addCard: function () {
       this.cards.push({
         id: `card-${this.idOrigin++}`,
-        title: "Task description",
-        project: "Project name",
-        description: "Full description",
+        title: 'Task description',
+        project: 'Project name',
+        description: 'Full description',
         time: 0,
         //estimated time of completion
         eta: 0,
@@ -178,12 +178,12 @@ let vm = new Vue({
 
 
     saveStorage() {
-      window.localStorage.setItem("vm-data",
+      window.localStorage.setItem('vm-data',
         JSON.stringify(this.storage))
     },
     loadStorage() {
-      let raw = window.localStorage.getItem("vm-data")
-      if (raw === null || raw === "undefined") {
+      let raw = window.localStorage.getItem('vm-data')
+      if (raw === null || raw === 'undefined') {
         return
       }
 
@@ -264,7 +264,7 @@ let vm = new Vue({
       let _new = this.taskStateCustom.find(matchingTaskState)
       if (_new === undefined){ return }
 
-      let callIt = typeof _new.percentage === "string"
+      let callIt = typeof _new.percentage === 'string'
       card.percentage = callIt ? eval(_new.percentage)(card) : _new.percentage
     },
     checkTaskState(taskIndex) {
@@ -284,7 +284,7 @@ let vm = new Vue({
     },
     changePercentage() {
       let card = this.getCardFromId(this.context.cardId)
-      let newValue = prompt("Change task percentage:", card.percentage)
+      let newValue = prompt('Change task percentage:', card.percentage)
 
       //convert to Number
       newValue = Number( newValue )
@@ -316,14 +316,14 @@ let vm = new Vue({
       modal.modal('show')
     },
     saveConfigFile() {
-      let sourceText = vm.configEntry, fileIdentity = "MyTimedReport.config.js";
-      let workElement = document.createElement("a")
+      let sourceText = vm.configEntry, fileIdentity = 'MyTimedReport.config.js';
+      let workElement = document.createElement('a')
       if ('download' in workElement) {
-        workElement.href = "data:" + 'text/plain' + "charset=utf-8," + escape(sourceText)
-        workElement.setAttribute("download", fileIdentity)
+        workElement.href = 'data:' + 'text/plain' + 'charset=utf-8,' + escape(sourceText)
+        workElement.setAttribute('download', fileIdentity)
         document.body.appendChild(workElement)
-        let eventMouse = document.createEvent("MouseEvents")
-        eventMouse.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
+        let eventMouse = document.createEvent('MouseEvents')
+        eventMouse.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
         workElement.dispatchEvent(eventMouse)
         document.body.removeChild(workElement)
       } else throw 'File saving not supported for this browser'
@@ -331,19 +331,19 @@ let vm = new Vue({
     runConfig() {
       eval(this.configEntry)
 
-      document.querySelector("#config-modal button.btn.d-none.d-sm-block").click()
+      document.querySelector('#config-modal button.btn.d-none.d-sm-block').click()
     },
 
 
 
     excelBase(card) {
-      let time = time => (time > 0 ? "" : "-") + new Date( (time > 0 ? 1 : -1) * time + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0]
+      let time = time => (time > 0 ? '' : '-') + new Date( (time > 0 ? 1 : -1) * time + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0]
       let stateString = this.taskStates[card.taskState]
 
       //removing line breaks
-      card.title       = card.title      .replace(/\n/g," ")
-      card.project     = card.project    .replace(/\n/g," ")
-      card.description = card.description.replace(/\n/g," ")
+      card.title       = card.title      .replace(/\n/g,' ')
+      card.project     = card.project    .replace(/\n/g,' ')
+      card.description = card.description.replace(/\n/g,' ')
 
       return `${card.project}\t${card.title}\t${card.description}\t${stateString}\t\t${card.percentage}%\t\t${time(card.time)}\t${time(card.eta - card.time)}\n`
     },
@@ -353,7 +353,7 @@ let vm = new Vue({
       copy(excel)
     },
     exportToExcel() {
-      let excel = ""
+      let excel = ''
       this.cards.forEach(card => {
         excel += this.excelBase(card)
       })
@@ -363,21 +363,21 @@ let vm = new Vue({
 });
 
 $(document).ready(function(){
-  let selection = document.querySelector(".selected");
+  let selection = document.querySelector('.selected');
   if (selection != null) {
     //restart any selected card's timer
     startTimerOn(selection.id, false);
   }
 
-  window.addEventListener("keydown", function onPress(event) {
-    if (event.key !== "Escape") { return }
+  window.addEventListener('keydown', function onPress(event) {
+    if (event.key !== 'Escape') { return }
 
     vm.closeContextMenu()
   });
 
   //Check if browser have support for window.localStorage
   if (!storageAvailable('localStorage')){
-    alert("Please Update yout browser for a better experience, I haven't tested with an outdated browser, so you may have no expirience at all xD\n\nHey, I'm doing you a favor")
+    alert("Please Update your browser for a better experience, I haven't tested with an outdated browser, so you may have no experience at all xD\n\nHey, I'm doing you a favor")
   }
 })
 
@@ -387,7 +387,7 @@ function stopTimerOn(cardId){
   clearInterval(vm.timer.current)
 }
 function startTimerOn(cardId, updateNowValue = true){
-  let selection = document.querySelector(".selected");
+  let selection = document.querySelector('.selected');
   if (selection != null) {
     //stop any running timer
     stopTimerOn(selection.id)
@@ -411,17 +411,17 @@ function startTimerOn(cardId, updateNowValue = true){
 
 function ifEditingTime(field){
   let card = field.parentNode
-  let isEta = field.classList.contains("eta")
+  let isEta = field.classList.contains('eta')
 
-  if(card.classList.contains("selected") && !isEta){
+  if(card.classList.contains('selected') && !isEta){
     //because if editing title..description the parentNode == card-body
     stopTimerOn(card.id)
   }
 
   return {
     wasEta: isEta,
-    wasTimer: field.classList.contains("timer"),
-    wasRunning: card.classList.contains("selected")
+    wasTimer: field.classList.contains('timer'),
+    wasRunning: card.classList.contains('selected')
   }
 }
 
@@ -430,7 +430,7 @@ function editField(field, callback){
 
   let outOfFocusBehaviour = function(){
     vm.isEditing = false;
-    field.setAttribute("contenteditable","false")
+    field.setAttribute('contenteditable','false')
 
     callback()
 
@@ -455,7 +455,7 @@ function editField(field, callback){
   }
 
   vm.isEditing = true
-  field.setAttribute("contenteditable","true")
+  field.setAttribute('contenteditable','true')
   field.focus()
   document.execCommand('selectAll',false,null)
 
@@ -463,7 +463,7 @@ function editField(field, callback){
     outOfFocusBehaviour()
   })
   $(field).on('keydown',function(e){
-    if (e.key != "Enter"){
+    if (e.key != 'Enter'){
       return
     }
     outOfFocusBehaviour()
@@ -472,7 +472,7 @@ function editField(field, callback){
 }
 
 function setupClipboard(text){
-  $("body").append(`<div id="clipboard-container" style="
+  $('body').append(`<div id="clipboard-container" style="
   position: fixed;
   left: 0px;
   top: 0px;
@@ -491,10 +491,10 @@ function copy(text) {
   setupClipboard(text)
 
   //Get Input Element
-  document.getElementById("clipboard").select()
+  document.getElementById('clipboard').select()
 
   //Copy Content
-  document.execCommand("copy")
+  document.execCommand('copy')
 
   setoffClipboard()
 }
@@ -532,7 +532,7 @@ function loadFileToConfig(files){
   }
 
   var reader = new FileReader()
-  reader.readAsText(file, "UTF-8")
+  reader.readAsText(file, 'UTF-8')
   reader.onload = function (evt) {
     vm.configEntry = evt.target.result
   }
