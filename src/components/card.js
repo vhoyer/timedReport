@@ -1,4 +1,4 @@
-let cardTemplate = `
+const cardTemplate = `
     <div class="mb-4 col-12 col-sm-6 col-md-4 col-lg-3" data-hj-whitelist>
         <div
             class="card text-center h-100"
@@ -63,88 +63,87 @@ let cardTemplate = `
             </div>
         </div>
     </div>
-`
-Vue.component('card',{
-    template: cardTemplate,
-    props:{
-        title: String,
-        project: String,
-        description: String,
+`;
+Vue.component('card', {
+  template: cardTemplate,
+  props: {
+    title: String,
+    project: String,
+    description: String,
 
-        progressColor: String,
-        progress: Number,
-        taskStateString: String,
+    progressColor: String,
+    progress: Number,
+    taskStateString: String,
 
-        time: Number,
-        eta: Number,
+    time: Number,
+    eta: Number,
 
-        isSelected: Boolean,
-        isEditing: Boolean,
+    isSelected: Boolean,
+    isEditing: Boolean,
+  },
+  computed: {
+    timeString() {
+      return new Date(this.time + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0];
     },
-    computed: {
-        timeString: function() {
-            return new Date(this.time + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0]
-        },
-        etaString: function() {
-            return new Date(this.eta + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0]
-        },
-        progressColorCss: function(){
-            if (this.progressColor == undefined){ return }
-
-            return this.progressColor + '!important'
-        },
+    etaString() {
+      return new Date(this.eta + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0];
     },
-    data() {
-        return {
-            HTMLCardId: this.$vnode.key,
-            delay: 200,
-            clicks: 0,
-            timer: null
-        }
+    progressColorCss() {
+      if (this.progressColor == undefined) { return; }
+
+      return `${this.progressColor}!important`;
     },
-    mounted:function(){
-        let card = document.querySelector(`#${this.HTMLCardId}`)
+  },
+  data() {
+    return {
+      HTMLCardId: this.$vnode.key,
+      delay: 200,
+      clicks: 0,
+      timer: null,
+    };
+  },
+  mounted() {
+    const card = document.querySelector(`#${this.HTMLCardId}`);
 
-        let elements =
-        [ card.querySelector(".card-title")
-        , card.querySelector(".card-subtitle")
-        , card.querySelector(".card-text")
-        ]
+    const elements = [card.querySelector('.card-title'),
+      card.querySelector('.card-subtitle'),
+      card.querySelector('.card-text'),
+    ];
 
-        elements.forEach(element => {
-            element.addEventListener("paste", this.pastePureText)
-        });
+    elements.forEach((element) => {
+      element.addEventListener('paste', this.pastePureText);
+    });
+  },
+  methods: {
+    cardClickedOr(eventName, field) {
+      this.clicks++;
+
+      if (this.clicks === 1) {
+        const self = this;
+
+        this.timer = setTimeout(() => {
+          self.$emit('card-clicked');
+          self.clicks = 0;
+        }, this.delay);
+      } else {
+        clearTimeout(this.timer);
+
+        const elementToEdit = $(`#${this.HTMLCardId} .${field}`)[0];
+
+        this.$emit(eventName, elementToEdit);
+        this.clicks = 0;
+      }
     },
-    methods: {
-        cardClickedOr: function (eventName, field) {
-            this.clicks++
-
-            if (this.clicks === 1) {
-                let self = this
-
-                this.timer = setTimeout(function () {
-                    self.$emit('card-clicked')
-                    self.clicks = 0
-                }, this.delay)
-            } else {
-                clearTimeout(this.timer)
-
-                let elementToEdit = $(`#${this.HTMLCardId} .${field}`)[0]
-
-                this.$emit(eventName, elementToEdit)
-                this.clicks = 0
-            }
-        },
-        pastePureText: function (e) {
-            e.preventDefault();
-            var text = e.clipboardData.getData("text/plain");
-            var temp = document.createElement("div");
-            temp.innerHTML = text;
-            document.execCommand("insertHTML", false, temp.textContent);
-        },
+    pastePureText(e) {
+      e.preventDefault();
+      const text = e.clipboardData.getData('text/plain');
+      const temp = document.createElement('div');
+      temp.innerHTML = text;
+      document.execCommand('insertHTML', false, temp.textContent);
     },
-})
+  },
+});
 
-function timeOffset(){
-	return new Date(0).getTimezoneOffset() * 60000;
+function timeOffset() {
+  return new Date(0).getTimezoneOffset() * 60000;
 }
