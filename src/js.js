@@ -90,11 +90,11 @@ const vm = new Vue({
 
 
     getProgressColor(card) {
-      const matchingTaskState = (element) => element.index == card.taskState;
-      const _new = this.taskStateCustom.find(matchingTaskState);
-      if (_new === undefined) { return ''; }
+      const matchingTaskState = (element) => element.index === card.taskState;
+      const newState = this.taskStateCustom.find(matchingTaskState);
+      if (newState === undefined) { return ''; }
 
-      return _new.color;
+      return newState.color;
     },
     getStateString(card) {
       return this.taskStates[card.taskState];
@@ -224,12 +224,12 @@ const vm = new Vue({
       card.taskState = statesIndex;
 
       const matchingTaskState = (element) => element.index === statesIndex;
-      const _new = this.taskStateCustom.find(matchingTaskState);
-      if (_new === undefined) { return; }
+      const newState = this.taskStateCustom.find(matchingTaskState);
+      if (newState === undefined) { return; }
 
-      const callIt = typeof _new.percentage === 'string';
+      const callIt = typeof newState.percentage === 'string';
       // eslint-disable-next-line no-eval
-      card.percentage = callIt ? eval(_new.percentage)(card) : _new.percentage;
+      card.percentage = callIt ? eval(newState.percentage)(card) : newState.percentage;
     },
     checkTaskState(taskIndex) {
       const card = this.getCardFromId(this.context.cardId);
