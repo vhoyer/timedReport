@@ -88,6 +88,33 @@ const vm = new Vue({
       return this.cards.find((card) => card.id === cardId);
     },
 
+    stopTimerOn(cardId) {
+      this.getCardFromId(cardId).isSelected = false;
+
+      clearInterval(this.timer.current);
+    },
+    startTimerOn(cardId, updateNowValue = true) {
+      const selection = document.querySelector('.selected');
+      if (selection != null) {
+        // stop any running timer
+        this.stopTimerOn(selection.id);
+        // set the events properties
+        this.ev.previousActiveCard = this.getCardFromId(selection.id);
+      }
+
+      this.getCardFromId(cardId).isSelected = true;
+
+      if (updateNowValue) {
+        this.timer.startCounting = Date.now();
+      }
+
+      this.timer.current = setInterval(() => {
+        const now = Date.now();
+        this.getCardFromId(cardId).time += (now - this.timer.startCounting);
+
+        this.timer.startCounting = now;
+      }, this.timer.delay);
+    },
 
     getProgressColor(card) {
       const matchingTaskState = (element) => element.index === card.taskState;
@@ -111,11 +138,11 @@ const vm = new Vue({
       }
 
       if (this.ev.senderCard.isSelected) {
-        stopTimerOn(cardId);
+        this.stopTimerOn(cardId);
         return;
       }
 
-      startTimerOn(cardId);
+      this.startTimerOn(cardId);
 
       this.call(this.on.cardClicked, this.ev);
     },
@@ -330,7 +357,7 @@ $(document).ready(() => {
   const selection = document.querySelector('.selected');
   if (selection != null) {
     // restart any selected card's timer
-    startTimerOn(selection.id, false);
+    vm.startTimerOn(selection.id, false);
   }
 
   window.addEventListener('keydown', (event) => {
@@ -345,41 +372,13 @@ $(document).ready(() => {
   }
 });
 
-function stopTimerOn(cardId) {
-  vm.getCardFromId(cardId).isSelected = false;
-
-  clearInterval(vm.timer.current);
-}
-function startTimerOn(cardId, updateNowValue = true) {
-  const selection = document.querySelector('.selected');
-  if (selection != null) {
-    // stop any running timer
-    stopTimerOn(selection.id);
-    // set the events properties
-    vm.ev.previousActiveCard = vm.getCardFromId(selection.id);
-  }
-
-  vm.getCardFromId(cardId).isSelected = true;
-
-  if (updateNowValue) {
-    vm.timer.startCounting = Date.now();
-  }
-
-  vm.timer.current = setInterval(() => {
-    const now = Date.now();
-    vm.getCardFromId(cardId).time += (now - vm.timer.startCounting);
-
-    vm.timer.startCounting = now;
-  }, vm.timer.delay);
-}
-
 function ifEditingTime(field) {
   const card = field.parentNode;
   const isEta = field.classList.contains('eta');
 
   if (card.classList.contains('selected') && !isEta) {
     // because if editing title..description the parentNode == card-body
-    stopTimerOn(card.id);
+    vm.stopTimerOn(card.id);
   }
 
   return {
@@ -412,7 +411,7 @@ function editField(field, callback) {
       vm.getCardFromId(cardId).eta = new Date(`1970-01-01T${timeString}`).getTime() - timeOffset();
     }
     if (timer.wasTimer && timer.wasRunning) {
-      startTimerOn(cardId);
+      vm.startTimerOn(cardId);
       // was triggering outOfFocusBehaviour multiple times, this is a workaround
       timer.wasTimer = false;
     }
