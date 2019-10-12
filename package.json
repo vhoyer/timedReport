@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/vhoyer/timedReport/issues"
   },
-  "homepage": "https://github.com/vhoyer/timedReport#readme"
+  "homepage": "https://github.com/vhoyer/timedReport#readme",
+  "devDependencies": {
+    "gh-pages-deploy": "^0.5.1"
+  }
 }
