@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/vhoyer/timedReport/issues"
   },
-  "homepage": "https://vhoyer.github.io/timedReport/"
+  "homepage": "https://vhoyer.github.io/timedReport/",
+  "devDependencies": {
+    "eslint": "^6.5.1"
+  }
 }
