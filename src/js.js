@@ -147,13 +147,57 @@ const vm = new Vue({
       this.call(this.on.cardClicked, this.ev);
     },
     editField(field, cardId) {
-      editField(field, /* then */ () => {
+      const timer = ifEditingTime(field);
+
+      const callback = () => {
         const property = field.dataset.boundProperty;
         if (property === undefined) {
           return;
         }
 
         this.getCardFromId(cardId)[property] = field.innerHTML.trim();
+      };
+
+      const outOfFocusBehaviour = () => {
+        vm.isEditing = false;
+        field.setAttribute('contenteditable', 'false');
+
+        callback();
+
+        let cardId;
+        let timeString;
+        if (timer.wasTimer || timer.wasEta) {
+          cardId = field.parentNode.id;
+          timeString = field.innerHTML.match(/\d\d:\d\d:\d\d/);
+        }
+        // if it was editing and has a valid time string
+        if (timer.wasTimer && timeString != null) {
+          vm.getCardFromId(cardId).time = new Date(`1970-01-01T${timeString}`).getTime() - timeOffset();
+        }
+        if (timer.wasEta && timeString != null) {
+          vm.getCardFromId(cardId).eta = new Date(`1970-01-01T${timeString}`).getTime() - timeOffset();
+        }
+        if (timer.wasTimer && timer.wasRunning) {
+          vm.startTimerOn(cardId);
+          // was triggering outOfFocusBehaviour multiple times, this is a workaround
+          timer.wasTimer = false;
+        }
+      };
+
+      vm.isEditing = true;
+      field.setAttribute('contenteditable', 'true');
+      field.focus();
+      document.execCommand('selectAll', false, null);
+
+      $(field).on('blur', () => {
+        outOfFocusBehaviour();
+      });
+      $(field).on('keydown', (e) => {
+        if (e.key != 'Enter') {
+          return;
+        }
+        outOfFocusBehaviour();
+        e.preventDefault();
       });
     },
 
@@ -386,52 +430,6 @@ function ifEditingTime(field) {
     wasTimer: field.classList.contains('timer'),
     wasRunning: card.classList.contains('selected'),
   };
-}
-
-function editField(field, callback) {
-  const timer = ifEditingTime(field);
-
-  const outOfFocusBehaviour = () => {
-    vm.isEditing = false;
-    field.setAttribute('contenteditable', 'false');
-
-    callback();
-
-    let cardId;
-    let timeString;
-    if (timer.wasTimer || timer.wasEta) {
-      cardId = field.parentNode.id;
-      timeString = field.innerHTML.match(/\d\d:\d\d:\d\d/);
-    }
-    // if it was editing and has a valid time string
-    if (timer.wasTimer && timeString != null) {
-      vm.getCardFromId(cardId).time = new Date(`1970-01-01T${timeString}`).getTime() - timeOffset();
-    }
-    if (timer.wasEta && timeString != null) {
-      vm.getCardFromId(cardId).eta = new Date(`1970-01-01T${timeString}`).getTime() - timeOffset();
-    }
-    if (timer.wasTimer && timer.wasRunning) {
-      vm.startTimerOn(cardId);
-      // was triggering outOfFocusBehaviour multiple times, this is a workaround
-      timer.wasTimer = false;
-    }
-  };
-
-  vm.isEditing = true;
-  field.setAttribute('contenteditable', 'true');
-  field.focus();
-  document.execCommand('selectAll', false, null);
-
-  $(field).on('blur', () => {
-    outOfFocusBehaviour();
-  });
-  $(field).on('keydown', (e) => {
-    if (e.key != 'Enter') {
-      return;
-    }
-    outOfFocusBehaviour();
-    e.preventDefault();
-  });
 }
 
 function setupClipboard(text) {
