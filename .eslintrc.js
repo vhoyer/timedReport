@@ -8,6 +8,7 @@ module.exports = {
     'airbnb-base',
   ],
   globals: {
+    Vue: 'readonly',
     Atomics: 'readonly',
     SharedArrayBuffer: 'readonly',
   },
