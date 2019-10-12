@@ -115,6 +115,9 @@ Vue.component('card', {
     });
   },
   methods: {
+    timeOffset() {
+      return new Date(0).getTimezoneOffset() * 60000;
+    },
     cardClickedOr(eventName, field) {
       this.clicks++;
 
@@ -143,7 +146,3 @@ Vue.component('card', {
     },
   },
 });
-
-function timeOffset() {
-  return new Date(0).getTimezoneOffset() * 60000;
-}

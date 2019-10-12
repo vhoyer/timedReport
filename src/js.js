@@ -146,8 +146,27 @@ const vm = new Vue({
 
       this.call(this.on.cardClicked, this.ev);
     },
+
+    ifEditingTime(field) {
+      const card = field.parentNode;
+      const isEta = field.classList.contains('eta');
+
+      if (card.classList.contains('selected') && !isEta) {
+        // because if editing title..description the parentNode == card-body
+        this.stopTimerOn(card.id);
+      }
+
+      return {
+        wasEta: isEta,
+        wasTimer: field.classList.contains('timer'),
+        wasRunning: card.classList.contains('selected'),
+      };
+    },
+    timeOffset() {
+      return new Date(0).getTimezoneOffset() * 60000;
+    },
     editField(field, cardId) {
-      const timer = ifEditingTime(field);
+      const timer = this.ifEditingTime(field);
 
       const callback = () => {
         const property = field.dataset.boundProperty;
@@ -164,21 +183,21 @@ const vm = new Vue({
 
         callback();
 
-        let cardId;
+        let cardIdForTimer = 0;
         let timeString;
         if (timer.wasTimer || timer.wasEta) {
-          cardId = field.parentNode.id;
+          cardIdForTimer = field.parentNode.id;
           timeString = field.innerHTML.match(/\d\d:\d\d:\d\d/);
         }
         // if it was editing and has a valid time string
         if (timer.wasTimer && timeString != null) {
-          vm.getCardFromId(cardId).time = new Date(`1970-01-01T${timeString}`).getTime() - timeOffset();
+          vm.getCardFromId(cardIdForTimer).time = new Date(`1970-01-01T${timeString}`).getTime() - this.timeOffset();
         }
         if (timer.wasEta && timeString != null) {
-          vm.getCardFromId(cardId).eta = new Date(`1970-01-01T${timeString}`).getTime() - timeOffset();
+          vm.getCardFromId(cardIdForTimer).eta = new Date(`1970-01-01T${timeString}`).getTime() - this.timeOffset();
         }
         if (timer.wasTimer && timer.wasRunning) {
-          vm.startTimerOn(cardId);
+          vm.startTimerOn(cardIdForTimer);
           // was triggering outOfFocusBehaviour multiple times, this is a workaround
           timer.wasTimer = false;
         }
@@ -304,13 +323,13 @@ const vm = new Vue({
     },
     checkTaskState(taskIndex) {
       const card = this.getCardFromId(this.context.cardId);
-      if (card === undefined) { return; }
+      if (card === undefined) { return false; }
 
       return card.taskState === taskIndex;
     },
     showPercentageOption() {
       const card = this.getCardFromId(this.context.cardId);
-      if (card === undefined) { return; }
+      if (card === undefined) { return false; }
 
       const matchingTaskState = (element) => element.index === card.taskState;
       const hasMatchingPercentage = this.taskStateCustom.find(matchingTaskState) !== undefined;
@@ -319,12 +338,13 @@ const vm = new Vue({
     },
     changePercentage() {
       const card = this.getCardFromId(this.context.cardId);
+      // eslint-disable-next-line no-alert
       let newValue = prompt('Change task percentage:', card.percentage);
 
       // convert to Number
       newValue = Number(newValue);
 
-      if (newValue === NaN) { return; }
+      if (Number.isNaN(newValue)) { return; }
 
       card.percentage = newValue;
     },
@@ -354,14 +374,14 @@ const vm = new Vue({
         fileIdentity = 'MyTimedReport.config.js';
       const workElement = document.createElement('a');
       if ('download' in workElement) {
-        workElement.href = `${'data:' + 'text/plain' + 'charset=utf-8,'}${escape(sourceText)}`;
+        workElement.href = `data:text/plaincharset=utf-8,${escape(sourceText)}`;
         workElement.setAttribute('download', fileIdentity);
         document.body.appendChild(workElement);
         const eventMouse = document.createEvent('MouseEvents');
         eventMouse.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
         workElement.dispatchEvent(eventMouse);
         document.body.removeChild(workElement);
-      } else throw 'File saving not supported for this browser';
+      } else throw new DOMException('File saving not supported for this browser');
     },
     runConfig() {
       // eslint-disable-next-line no-eval
@@ -371,8 +391,9 @@ const vm = new Vue({
     },
 
 
-    excelBase(card) {
-      const time = (time) => (time > 0 ? '' : '-') + new Date((time > 0 ? 1 : -1) * time + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0];
+    excelBase(cardParam) {
+      const card = cardParam;
+      const time = (t) => (t > 0 ? '' : '-') + new Date((t > 0 ? 1 : -1) * t + this.timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0];
       const stateString = this.taskStates[card.taskState];
 
       // removing line breaks
@@ -416,22 +437,6 @@ $(document).ready(() => {
   }
 });
 
-function ifEditingTime(field) {
-  const card = field.parentNode;
-  const isEta = field.classList.contains('eta');
-
-  if (card.classList.contains('selected') && !isEta) {
-    // because if editing title..description the parentNode == card-body
-    vm.stopTimerOn(card.id);
-  }
-
-  return {
-    wasEta: isEta,
-    wasTimer: field.classList.contains('timer'),
-    wasRunning: card.classList.contains('selected'),
-  };
-}
-
 function setupClipboard(text) {
   $('body').append(`<div id="clipboard-container" style="
   position: fixed;
@@ -462,8 +467,9 @@ function copy(text) {
 
 
 function storageAvailable(type) {
+  const storage = window[type];
+
   try {
-    var storage = window[type];
     const x = '__storage_test__';
     storage.setItem(x, x);
     storage.removeItem(x);
@@ -496,6 +502,7 @@ function loadFileToConfig(files) {
     vm.configEntry = evt.target.result;
   };
   reader.onerror = (_evt) => {
+    // eslint-disable-next-line no-alert
     alert("Couldn't load file's content");
   };
 }
