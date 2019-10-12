@@ -392,7 +392,7 @@ function ifEditingTime(field) {
 function editField(field, callback) {
   const timer = ifEditingTime(field);
 
-  const outOfFocusBehaviour = function () {
+  const outOfFocusBehaviour = () => {
     vm.isEditing = false;
     field.setAttribute('contenteditable', 'false');
 
@@ -495,10 +495,10 @@ function loadFileToConfig(files) {
 
   const reader = new FileReader();
   reader.readAsText(file, 'UTF-8');
-  reader.onload = function (evt) {
+  reader.onload = (evt) => {
     vm.configEntry = evt.target.result;
   };
-  reader.onerror = function (_evt) {
+  reader.onerror = (_evt) => {
     alert("Couldn't load file's content");
   };
 }
