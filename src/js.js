@@ -1,5 +1,58 @@
 let autoSaver;
 
+function setupClipboard(text) {
+  $('body').append(`<div id="clipboard-container" style="
+  position: fixed;
+  left: 0px;
+  top: 0px;
+  width: 0px;
+  height: 0px;
+  z-index: 100;
+  opacity: 0;"><textarea id="clipboard" style="
+  width: 1px;
+  height: 1px;
+  padding: 0px;">${text}</textarea></div>`);
+}
+function setoffClipboard() {
+  $('#clipboard-container').remove();
+}
+function copy(text) {
+  setupClipboard(text);
+
+  // Get Input Element
+  document.getElementById('clipboard').select();
+
+  // Copy Content
+  document.execCommand('copy');
+
+  setoffClipboard();
+}
+
+
+function storageAvailable(type) {
+  const storage = window[type];
+
+  try {
+    const x = '__storage_test__';
+    storage.setItem(x, x);
+    storage.removeItem(x);
+    return true;
+  } catch (e) {
+    return e instanceof DOMException && (
+      // everything except Firefox
+      e.code === 22
+      // Firefox
+      || e.code === 1014
+      // test name field too, because code might not be present
+      // everything except Firefox
+      || e.name === 'QuotaExceededError'
+      // Firefox
+      || e.name === 'NS_ERROR_DOM_QUOTA_REACHED')
+      // acknowledge QuotaExceededError only if there's something already stored
+      && storage.length !== 0;
+  }
+}
+
 const vm = new Vue({
   el: '#app',
   data: {
@@ -212,7 +265,7 @@ const vm = new Vue({
         outOfFocusBehaviour();
       });
       $(field).on('keydown', (e) => {
-        if (e.key != 'Enter') {
+        if (e.key !== 'Enter') {
           return;
         }
         outOfFocusBehaviour();
@@ -237,8 +290,10 @@ const vm = new Vue({
 
 
     addCard() {
+      this.idOrigin += 1;
+
       this.cards.push({
-        id: `card-${this.idOrigin++}`,
+        id: `card-${this.idOrigin}`,
         title: 'Task description',
         project: 'Project name',
         description: 'Full description',
@@ -433,65 +488,13 @@ $(document).ready(() => {
 
   // Check if browser have support for window.localStorage
   if (!storageAvailable('localStorage')) {
+    // eslint-disable-next-line no-alert
     alert("Please Update your browser for a better experience, I haven't tested with an outdated browser, so you may have no experience at all xD\n\nHey, I'm doing you a favor");
   }
 });
 
-function setupClipboard(text) {
-  $('body').append(`<div id="clipboard-container" style="
-  position: fixed;
-  left: 0px;
-  top: 0px;
-  width: 0px;
-  height: 0px;
-  z-index: 100;
-  opacity: 0;"><textarea id="clipboard" style="
-  width: 1px;
-  height: 1px;
-  padding: 0px;">${text}</textarea></div>`);
-}
-function setoffClipboard() {
-  $('#clipboard-container').remove();
-}
-function copy(text) {
-  setupClipboard(text);
-
-  // Get Input Element
-  document.getElementById('clipboard').select();
-
-  // Copy Content
-  document.execCommand('copy');
-
-  setoffClipboard();
-}
-
-
-function storageAvailable(type) {
-  const storage = window[type];
-
-  try {
-    const x = '__storage_test__';
-    storage.setItem(x, x);
-    storage.removeItem(x);
-    return true;
-  } catch (e) {
-    return e instanceof DOMException && (
-      // everything except Firefox
-      e.code === 22
-      // Firefox
-      || e.code === 1014
-      // test name field too, because code might not be present
-      // everything except Firefox
-      || e.name === 'QuotaExceededError'
-      // Firefox
-      || e.name === 'NS_ERROR_DOM_QUOTA_REACHED')
-      // acknowledge QuotaExceededError only if there's something already stored
-      && storage.length !== 0;
-  }
-}
-
-function loadFileToConfig(files) {
-  const file = files[0];
+function loadFileToConfig(event) {
+  const file = event.files[0];
   if (file == null) {
     return;
   }
@@ -506,3 +509,5 @@ function loadFileToConfig(files) {
     alert("Couldn't load file's content");
   };
 }
+
+document.getElementById('inputGroupFile04').addEventListener('change', loadFileToConfig);
