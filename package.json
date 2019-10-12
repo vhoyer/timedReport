@@ -19,5 +19,8 @@
   "homepage": "https://github.com/vhoyer/timedReport#readme",
   "devDependencies": {
     "gh-pages-deploy": "^0.5.1"
+  },
+  "gh-pages-deploy": {
+    "staticpath": "src"
   }
 }
