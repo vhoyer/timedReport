@@ -83,13 +83,15 @@ Vue.component('card', {
   },
   computed: {
     timeString() {
-      return new Date(this.time + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0];
+      return new Date(this.time + this.timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0];
     },
     etaString() {
-      return new Date(this.eta + timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0];
+      return new Date(this.eta + this.timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0];
     },
     progressColorCss() {
-      if (this.progressColor == undefined) { return; }
+      if (this.progressColor === undefined) {
+        return '';
+      }
 
       return `${this.progressColor}!important`;
     },
@@ -119,7 +121,7 @@ Vue.component('card', {
       return new Date(0).getTimezoneOffset() * 60000;
     },
     cardClickedOr(eventName, field) {
-      this.clicks++;
+      this.clicks += 1;
 
       if (this.clicks === 1) {
         const self = this;
