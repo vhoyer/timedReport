@@ -74,6 +74,7 @@ const vm = new Vue({
     this.loadStorage();
     // Run config when start
     Vue.nextTick(() => {
+      // eslint-disable-next-line no-eval
       eval(this.configEntry);
     });
     // Start auto save timer
@@ -227,6 +228,7 @@ const vm = new Vue({
       if (_new === undefined) { return; }
 
       const callIt = typeof _new.percentage === 'string';
+      // eslint-disable-next-line no-eval
       card.percentage = callIt ? eval(_new.percentage)(card) : _new.percentage;
     },
     checkTaskState(taskIndex) {
@@ -258,6 +260,7 @@ const vm = new Vue({
 
 
     call(code, handler) {
+      // eslint-disable-next-line no-eval
       eval(`(${code})`)(handler);
     },
 
@@ -290,6 +293,7 @@ const vm = new Vue({
       } else throw 'File saving not supported for this browser';
     },
     runConfig() {
+      // eslint-disable-next-line no-eval
       eval(this.configEntry);
 
       document.querySelector('#config-modal button.btn.d-none.d-sm-block').click();
