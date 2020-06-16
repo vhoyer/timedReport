@@ -23,11 +23,11 @@
   },
   "homepage": "https://vhoyer.github.io/timedReport/",
   "devDependencies": {
-    "eslint": "^6.5.1",
+    "eslint": "^7.2.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-vue": "^5.2.3",
-    "gh-pages": "^2.2.0",
+    "eslint-plugin-vue": "^6.2.2",
+    "gh-pages": "^3.0.0",
     "parcel-bundler": "^1.12.4"
   }
 }

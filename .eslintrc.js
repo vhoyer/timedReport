@@ -21,6 +21,6 @@ module.exports = {
     'vue',
   ],
   rules: {
-    'no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }]
+    'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
   },
 };

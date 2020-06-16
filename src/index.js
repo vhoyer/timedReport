@@ -28,7 +28,6 @@ function copy(text) {
   setoffClipboard();
 }
 
-
 function storageAvailable(type) {
   const storage = window[type];
 
@@ -180,7 +179,6 @@ const vm = new Vue({
       return this.taskStates[card.taskState];
     },
 
-
     cardClicked(cardId) {
       this.ev.senderCard = vm.getCardFromId(cardId);
 
@@ -273,7 +271,6 @@ const vm = new Vue({
       });
     },
 
-
     getRandomPercentage() {
       return Math.floor(
         Math.random() * 100,
@@ -287,7 +284,6 @@ const vm = new Vue({
       }
       return newValue;
     },
-
 
     addCard() {
       this.idOrigin += 1;
@@ -314,7 +310,6 @@ const vm = new Vue({
       this.idOrigin = 0;
       this.cards = [];
     },
-
 
     saveStorage() {
       window.localStorage.setItem('vm-data',
@@ -347,7 +342,6 @@ const vm = new Vue({
 
       window.localStorage.clear();
     },
-
 
     contextmenu(event, cardId) {
       if (this.isEditing) {
@@ -404,12 +398,10 @@ const vm = new Vue({
       card.percentage = newValue;
     },
 
-
     call(code, handler) {
       // eslint-disable-next-line no-eval
       eval(`(${code})`)(handler);
     },
-
 
     showConfigModal() {
       const modal = $('#config-modal');
@@ -444,7 +436,6 @@ const vm = new Vue({
 
       document.querySelector('#config-modal button.btn.d-none.d-sm-block').click();
     },
-
 
     excelBase(cardParam) {
       const card = cardParam;
