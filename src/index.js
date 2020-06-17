@@ -1,3 +1,5 @@
+import './components';
+
 let autoSaver;
 
 function setupClipboard(text) {

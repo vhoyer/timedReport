@@ -1,3 +1,5 @@
+import './context.css';
+
 const templateString = `
 <div
     id="context-menu"
