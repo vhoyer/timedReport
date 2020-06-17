@@ -30,6 +30,7 @@
     "eslint-plugin-vue": "^6.2.2",
     "gh-pages": "^3.0.0",
     "parcel-bundler": "^1.12.4",
+    "sass": "^1.26.8",
     "vue-template-compiler": "^2.6.11"
   },
   "dependencies": {

@@ -1,18 +1,17 @@
-import './context.css';
-
-const templateString = `
-<div
+<template>
+  <div
     id="context-menu"
     class="context-menu dropdown-menu position-fixed"
     data-hj-whitelist
     :class="{ show: isActive }"
     :style="{ transform: 'translate(' + x + 'px,' + y + 'px)' }"
-    >
-    <slot></slot>
-</div>
-`;
+  >
+    <slot />
+  </div>
+</template>
 
-Vue.component('context-menu', {
+<script>
+export default {
   props: {
     isActive: Boolean,
     x: {
@@ -71,5 +70,14 @@ Vue.component('context-menu', {
       });
     },
   },
-  template: templateString,
-});
+};
+</script>
+
+<style lang="scss">
+.context-menu{
+    top: 0;
+}
+.context-menu .dropdown-item {
+    cursor: pointer;
+}
+</style>
