@@ -1,18 +1,22 @@
-const template = `
-            <footer class="bg-light pt-4 pb-2">
-                <div class="container">
-                    <div class="row text-muted">
-                        <small class="col" data-hj-whitelist>
-                            TimedReport!™ — v{{ tagName }}
-                        </small>
-                        <small class="col text-right">
-                            Vinícius Hoyer
-                        </small>
-                    </div>
-                </div>
-            </footer>
-`;
+<template>
+  <footer class="bg-light pt-4 pb-2">
+    <div class="container">
+      <div class="row text-muted">
+        <small
+          class="col"
+          data-hj-whitelist
+        >
+          TimedReport!™ — v{{ tagName }}
+        </small>
+        <small class="col text-right">
+          Vinícius Hoyer
+        </small>
+      </div>
+    </div>
+  </footer>
+</template>
 
+<script>
 function request(obj) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -34,7 +38,7 @@ function request(obj) {
   });
 }
 
-Vue.component('my-footer', {
+export default {
   data() {
     return {
       tagName: '2018.5.1',
@@ -62,5 +66,8 @@ Vue.component('my-footer', {
         this.tagName = data.repository.refs.edges[0].node.name;
       });
   },
-  template,
-});
+};
+</script>
+
+<style lang="scss" scoped>
+</style>

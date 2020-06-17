@@ -1,3 +1,5 @@
 import './card';
 import './context';
-import './my-footer';
+import MyFooter from './my-footer.vue';
+
+Vue.component('my-footer', MyFooter);
