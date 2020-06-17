@@ -11,17 +11,22 @@ const templateString = `
 `;
 
 Vue.component('context-menu', {
-  template: templateString,
+  props: {
+    isActive: Boolean,
+    x: {
+      type: Number,
+      required: true,
+    },
+    y: {
+      type: Number,
+      required: true,
+    },
+  },
   data() {
     return {
       width: 0,
       height: 0,
     };
-  },
-  props: {
-    isActive: Boolean,
-    x: Number,
-    y: Number,
   },
   watch: {
     x() {
@@ -64,4 +69,5 @@ Vue.component('context-menu', {
       });
     },
   },
+  template: templateString,
 });

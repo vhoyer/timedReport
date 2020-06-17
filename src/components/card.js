@@ -65,21 +65,52 @@ const cardTemplate = `
     </div>
 `;
 Vue.component('card', {
-  template: cardTemplate,
   props: {
-    title: String,
-    project: String,
-    description: String,
+    title: {
+      type: String,
+      required: true,
+    },
+    project: {
+      type: String,
+      required: true,
+    },
+    description: {
+      type: String,
+      required: true,
+    },
 
-    progressColor: String,
-    progress: Number,
-    taskStateString: String,
+    progressColor: {
+      type: String,
+      required: true,
+    },
+    progress: {
+      type: Number,
+      required: true,
+    },
+    taskStateString: {
+      type: String,
+      required: true,
+    },
 
-    time: Number,
-    eta: Number,
+    time: {
+      type: Number,
+      required: true,
+    },
+    eta: {
+      type: Number,
+      required: true,
+    },
 
     isSelected: Boolean,
     isEditing: Boolean,
+  },
+  data() {
+    return {
+      HTMLCardId: this.$vnode.key,
+      delay: 200,
+      clicks: 0,
+      timer: null,
+    };
   },
   computed: {
     timeString() {
@@ -95,14 +126,6 @@ Vue.component('card', {
 
       return `${this.progressColor}!important`;
     },
-  },
-  data() {
-    return {
-      HTMLCardId: this.$vnode.key,
-      delay: 200,
-      clicks: 0,
-      timer: null,
-    };
   },
   mounted() {
     const card = document.querySelector(`#${this.HTMLCardId}`);
@@ -147,4 +170,5 @@ Vue.component('card', {
       document.execCommand('insertHTML', false, temp.textContent);
     },
   },
+  template: cardTemplate,
 });

@@ -4,7 +4,7 @@ module.exports = {
     es6: true,
   },
   extends: [
-    'plugin:vue/essential',
+    'plugin:vue/recommended',
     'airbnb-base',
   ],
   globals: {
@@ -22,5 +22,7 @@ module.exports = {
   ],
   rules: {
     'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    'quote-props': ['error', 'consistent-as-needed'],
+    'indent': ['error', 2, { SwitchCase: 1 }],
   },
 };

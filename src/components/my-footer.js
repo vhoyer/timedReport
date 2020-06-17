@@ -35,7 +35,6 @@ function request(obj) {
 }
 
 Vue.component('my-footer', {
-  template,
   data() {
     return {
       tagName: '2018.5.1',
@@ -63,4 +62,5 @@ Vue.component('my-footer', {
         this.tagName = data.repository.refs.edges[0].node.name;
       });
   },
+  template,
 });
