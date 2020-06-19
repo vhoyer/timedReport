@@ -11,7 +11,6 @@ module.exports = {
     $: 'readonly',
     Atomics: 'readonly',
     SharedArrayBuffer: 'readonly',
-    Vue: 'readonly',
     autosize: 'readonly',
   },
   parserOptions: {

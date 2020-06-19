@@ -332,7 +332,7 @@ export default {
   mounted() {
     this.loadStorage();
     // Run config when start
-    Vue.nextTick(() => {
+    this.$nextTick(() => {
       // eslint-disable-next-line no-eval
       eval(this.configEntry);
     });

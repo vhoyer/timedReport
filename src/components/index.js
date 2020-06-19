@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import Card from './card.vue';
 import ContextMenu from './context.vue';
 import MyFooter from './my-footer.vue';

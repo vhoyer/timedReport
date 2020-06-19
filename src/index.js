@@ -1,5 +1,6 @@
 import './components';
 import './utils/validate-storage';
+import Vue from 'vue';
 import App from './app.vue';
 
 // eslint-disable-next-line no-new
