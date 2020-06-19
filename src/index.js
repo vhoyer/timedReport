@@ -28,7 +28,7 @@ function copy(text) {
   setoffClipboard();
 }
 
-const vm = new Vue({
+window.vm = new Vue({
   el: '#app',
   data: {
     autoSaver: null,
@@ -111,6 +111,12 @@ const vm = new Vue({
       () => this.saveStorage(),
       this.timer.delay,
     );
+
+    const selectedCard = this.cards.find((card) => card.isSelected);
+    if (selectedCard) {
+      // restart any selected card's timer
+      this.startTimerOn(selectedCard.id, false);
+    }
 
     window.addEventListener('keydown', (event) => {
       if (event.key !== 'Escape') return;
@@ -459,12 +465,4 @@ const vm = new Vue({
       };
     },
   },
-});
-
-$(document).ready(() => {
-  const selection = document.querySelector('.selected');
-  if (selection != null) {
-    // restart any selected card's timer
-    vm.startTimerOn(selection.id, false);
-  }
 });
