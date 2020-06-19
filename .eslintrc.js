@@ -4,14 +4,13 @@ module.exports = {
     es6: true,
   },
   extends: [
-    'plugin:vue/essential',
+    'plugin:vue/recommended',
     'airbnb-base',
   ],
   globals: {
     $: 'readonly',
     Atomics: 'readonly',
     SharedArrayBuffer: 'readonly',
-    Vue: 'readonly',
     autosize: 'readonly',
   },
   parserOptions: {
@@ -21,6 +20,18 @@ module.exports = {
     'vue',
   ],
   rules: {
-    'no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }]
+    'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    'quote-props': ['error', 'consistent-as-needed'],
+    'indent': ['error', 2, { SwitchCase: 1 }],
+    'vue/html-self-closing': ['error', {
+      html: {
+        void: 'never',
+        normal: 'never',
+        component: 'always',
+      },
+      svg: 'never',
+      math: 'never',
+    }],
+    'import/prefer-default-export': 'off',
   },
 };

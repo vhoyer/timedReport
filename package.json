@@ -4,14 +4,18 @@
   "description": "",
   "main": "src/index.html",
   "scripts": {
-    "lint": "eslint .",
-    "lint:fix": "eslint --fix .",
+    "dev": "parcel src/index.html",
+    "build": "parcel build src/index.html",
+    "deploy": "gh-pages -d dist",
+    "lint": "eslint --ext .js,.vue .",
+    "lint:fix": "eslint  --ext .js,.vue --fix .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/vhoyer/timedReport.git"
   },
+  "keywords": [],
   "author": "Vinícius Hoyer",
   "license": "ISC",
   "bugs": {
@@ -19,9 +23,18 @@
   },
   "homepage": "https://vhoyer.github.io/timedReport/",
   "devDependencies": {
-    "eslint": "^6.5.1",
+    "@vue/component-compiler-utils": "^3.1.2",
+    "eslint": "^7.2.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-vue": "^5.2.3"
+    "eslint-plugin-vue": "^6.2.2",
+    "gh-pages": "^3.0.0",
+    "parcel-bundler": "^1.12.4",
+    "sass": "^1.26.8",
+    "vue-template-compiler": "^2.6.11"
+  },
+  "dependencies": {
+    "vue": "^2.6.11",
+    "vue-hot-reload-api": "^2.3.4"
   }
 }
