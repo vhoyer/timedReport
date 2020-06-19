@@ -28,30 +28,6 @@ function copy(text) {
   setoffClipboard();
 }
 
-function storageAvailable(type) {
-  const storage = window[type];
-
-  try {
-    const x = '__storage_test__';
-    storage.setItem(x, x);
-    storage.removeItem(x);
-    return true;
-  } catch (e) {
-    return e instanceof DOMException && (
-      // everything except Firefox
-      e.code === 22
-      // Firefox
-      || e.code === 1014
-      // test name field too, because code might not be present
-      // everything except Firefox
-      || e.name === 'QuotaExceededError'
-      // Firefox
-      || e.name === 'NS_ERROR_DOM_QUOTA_REACHED')
-      // acknowledge QuotaExceededError only if there's something already stored
-      && storage.length !== 0;
-  }
-}
-
 const vm = new Vue({
   el: '#app',
   data: {
@@ -131,7 +107,7 @@ const vm = new Vue({
       eval(this.configEntry);
     });
     // Start auto save timer
-    autoSaver = setInterval(
+    this.autoSaver = setInterval(
       () => this.saveStorage(),
       this.timer.delay,
     );
@@ -181,7 +157,7 @@ const vm = new Vue({
     },
 
     cardClicked(cardId) {
-      this.ev.senderCard = vm.getCardFromId(cardId);
+      this.ev.senderCard = this.getCardFromId(cardId);
 
       this.call(this.on.cardCliking, this.ev);
 
@@ -230,7 +206,7 @@ const vm = new Vue({
       };
 
       const outOfFocusBehaviour = () => {
-        vm.isEditing = false;
+        this.isEditing = false;
         field.setAttribute('contenteditable', 'false');
 
         callback();
@@ -243,19 +219,19 @@ const vm = new Vue({
         }
         // if it was editing and has a valid time string
         if (timer.wasTimer && timeString != null) {
-          vm.getCardFromId(cardIdForTimer).time = new Date(`1970-01-01T${timeString}`).getTime() - this.timeOffset();
+          this.getCardFromId(cardIdForTimer).time = new Date(`1970-01-01T${timeString}`).getTime() - this.timeOffset();
         }
         if (timer.wasEta && timeString != null) {
-          vm.getCardFromId(cardIdForTimer).eta = new Date(`1970-01-01T${timeString}`).getTime() - this.timeOffset();
+          this.getCardFromId(cardIdForTimer).eta = new Date(`1970-01-01T${timeString}`).getTime() - this.timeOffset();
         }
         if (timer.wasTimer && timer.wasRunning) {
-          vm.startTimerOn(cardIdForTimer);
+          this.startTimerOn(cardIdForTimer);
           // was triggering outOfFocusBehaviour multiple times, this is a workaround
           timer.wasTimer = false;
         }
       };
 
-      vm.isEditing = true;
+      this.isEditing = true;
       field.setAttribute('contenteditable', 'true');
       field.focus();
       document.execCommand('selectAll', false, null);
@@ -334,7 +310,7 @@ const vm = new Vue({
     },
     clearStorage() {
       clearInterval(this.timer.current);
-      clearInterval(autoSaver);
+      clearInterval(this.autoSaver);
 
       this.displayCookieAlert = true;
       this.timer.current = null;
@@ -357,7 +333,7 @@ const vm = new Vue({
       this.context.cardId = cardId;
     },
     closeContextMenu() {
-      vm.context.isActive = false;
+      this.context.isActive = false;
     },
     switchCardState(statesIndex) {
       const card = this.getCardFromId(this.context.cardId);
@@ -418,7 +394,7 @@ const vm = new Vue({
       modal.modal('show');
     },
     saveConfigFile() {
-      const sourceText = vm.configEntry; const
+      const sourceText = this.configEntry; const
         fileIdentity = 'MyTimedReport.config.js';
       const workElement = document.createElement('a');
       if ('download' in workElement) {
@@ -473,16 +449,10 @@ $(document).ready(() => {
   }
 
   window.addEventListener('keydown', (event) => {
-    if (event.key !== 'Escape') { return; }
+    if (event.key !== 'Escape') return;
 
     vm.closeContextMenu();
   });
-
-  // Check if browser have support for window.localStorage
-  if (!storageAvailable('localStorage')) {
-    // eslint-disable-next-line no-alert
-    alert("Please Update your browser for a better experience, I haven't tested with an outdated browser, so you may have no experience at all xD\n\nHey, I'm doing you a favor");
-  }
 });
 
 function loadFileToConfig(event) {
