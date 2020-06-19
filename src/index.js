@@ -1,7 +1,5 @@
 import './components';
 
-let autoSaver;
-
 function setupClipboard(text) {
   $('body').append(`<div id="clipboard-container" style="
   position: fixed;
@@ -57,6 +55,7 @@ function storageAvailable(type) {
 const vm = new Vue({
   el: '#app',
   data: {
+    autoSaver: null,
     displayNotCookieAlert: true,
     beta: false,
     configEntry: '',
