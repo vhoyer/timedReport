@@ -34,5 +34,6 @@ module.exports = {
       svg: 'never',
       math: 'never',
     }],
+    'import/prefer-default-export': 'off',
   },
 };
