@@ -1,4 +1,5 @@
 import './components';
+import './utils/validate-storage';
 
 function setupClipboard(text) {
   $('body').append(`<div id="clipboard-container" style="
