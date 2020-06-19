@@ -6,7 +6,7 @@
     :class="{ show: isActive }"
     :style="{ transform: 'translate(' + x + 'px,' + y + 'px)' }"
   >
-    <slot />
+    <slot></slot>
   </div>
 </template>
 

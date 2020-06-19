@@ -24,11 +24,10 @@ module.exports = {
     'quote-props': ['error', 'consistent-as-needed'],
     'indent': ['error', 2, { SwitchCase: 1 }],
     'vue/html-self-closing': ['error', {
-      // this is never due to the current vue parser we are using :D
       html: {
         void: 'never',
         normal: 'never',
-        component: 'never',
+        component: 'always',
       },
       svg: 'never',
       math: 'never',

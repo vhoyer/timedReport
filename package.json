@@ -7,8 +7,8 @@
     "dev": "parcel src/index.html",
     "build": "parcel build src/index.html",
     "deploy": "gh-pages -d dist",
-    "lint": "eslint .",
-    "lint:fix": "eslint --fix .",
+    "lint": "eslint --ext .js,.vue .",
+    "lint:fix": "eslint  --ext .js,.vue --fix .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

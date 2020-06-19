@@ -92,7 +92,7 @@
           @edit-time="editField($event, card.id)"
           @edit-eta="editField($event, card.id)"
           @contextmenu="contextmenu($event, card.id)"
-        ></card>
+        />
       </div>
     </main>
 
@@ -250,14 +250,22 @@
       </div>
     </aside>
 
-    <my-footer></my-footer>
+    <my-footer />
   </div>
 </template>
 
 <script>
 import { copy } from './utils/copy';
+import Card from './components/card.vue';
+import ContextMenu from './components/context.vue';
+import MyFooter from './components/my-footer.vue';
 
 export default {
+  components: {
+    Card,
+    ContextMenu,
+    MyFooter,
+  },
   data() {
     return {
       autoSaver: null,
