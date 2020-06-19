@@ -7,7 +7,7 @@
     <div
       :id="HTMLCardId"
       class="card text-center h-100"
-      :class="{ selected: isSelected }"
+      :class="{ selected: isSelected, delayed: isDelayed }"
       @contextmenu="$emit('contextmenu', $event)"
     >
       <div class="close-wrapper">
@@ -126,6 +126,7 @@ export default {
     },
 
     isSelected: Boolean,
+    isDelayed: Boolean,
     isEditing: Boolean,
   },
   data() {

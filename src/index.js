@@ -144,6 +144,7 @@ const vm = new Vue({
 
     stopTimerOn(cardId) {
       this.getCardFromId(cardId).isSelected = false;
+      this.getCardFromId(cardId).isDelayed = false;
 
       clearInterval(this.timer.current);
     },
@@ -165,6 +166,7 @@ const vm = new Vue({
       this.timer.current = setInterval(() => {
         const now = Date.now();
         this.getCardFromId(cardId).time += (now - this.timer.startCounting);
+        this.checkForDelay(cardId);
 
         this.timer.startCounting = now;
       }, this.timer.delay);
@@ -301,9 +303,16 @@ const vm = new Vue({
         taskState: 0,
         percentage: 0,
         isSelected: false,
+        isDelayed: false,
         isHidden: false,
       });
     },
+
+    checkForDelay(cardId) {
+      const card = this.getCardFromId(cardId);
+      card.isDelayed = (card.eta !== 0 && card.eta < card.time);
+    },
+
     removeCard(cardId) {
       this.cards = this.cards.filter((element) => element.id !== cardId);
     },
