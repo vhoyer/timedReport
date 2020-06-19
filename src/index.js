@@ -111,6 +111,12 @@ const vm = new Vue({
       () => this.saveStorage(),
       this.timer.delay,
     );
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+
+      this.closeContextMenu();
+    });
   },
   methods: {
     getCardFromId(cardId) {
@@ -461,10 +467,4 @@ $(document).ready(() => {
     // restart any selected card's timer
     vm.startTimerOn(selection.id, false);
   }
-
-  window.addEventListener('keydown', (event) => {
-    if (event.key !== 'Escape') return;
-
-    vm.closeContextMenu();
-  });
 });
