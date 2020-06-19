@@ -438,6 +438,20 @@ const vm = new Vue({
       });
       copy(excel);
     },
+    loadFileToConfig(event) {
+      const file = event.target.files[0];
+      if (file == null) return;
+
+      const reader = new FileReader();
+      reader.readAsText(file, 'UTF-8');
+      reader.onload = (evt) => {
+        this.configEntry = evt.target.result;
+      };
+      reader.onerror = (_evt) => {
+        // eslint-disable-next-line no-alert
+        alert("Couldn't load file's content");
+      };
+    },
   },
 });
 
@@ -454,22 +468,3 @@ $(document).ready(() => {
     vm.closeContextMenu();
   });
 });
-
-function loadFileToConfig(event) {
-  const file = event.files[0];
-  if (file == null) {
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.readAsText(file, 'UTF-8');
-  reader.onload = (evt) => {
-    vm.configEntry = evt.target.result;
-  };
-  reader.onerror = (_evt) => {
-    // eslint-disable-next-line no-alert
-    alert("Couldn't load file's content");
-  };
-}
-
-document.getElementById('inputGroupFile04').addEventListener('change', loadFileToConfig);
