@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - master
+      - refactor-parcel
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -10,8 +12,11 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
+    - name: npm run build
+      run: npm run build
+
     - name: GitHub Pages Deploy
       uses: maxheld83/ghpages@v0.2.1
       env:
-        BUILD_DIR: src/
+        BUILD_DIR: dist/
         GH_PAT: ${{ secrets.GH_PAT }}
