@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "parcel src/index.html",
     "build": "parcel build src/index.html",
-    "deploy": "gh-pages -d dist",
     "lint": "eslint --ext .js,.vue .",
     "lint:fix": "eslint  --ext .js,.vue --fix .",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -28,7 +27,6 @@
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-vue": "^6.2.2",
-    "gh-pages": "^3.0.0",
     "parcel-bundler": "^1.12.4",
     "sass": "^1.26.8",
     "vue-template-compiler": "^2.6.11"
