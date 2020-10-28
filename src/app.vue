@@ -38,6 +38,13 @@
             </button>
             <button
               type="button"
+              class="btn my-2 mr-2 my-sm-0"
+              @click="toggleCompleted()"
+            >
+              {{ showCompletedButtonText }}
+            </button>
+            <button
+              type="button"
               :disabled="!(cards.length > 0)"
               class="btn btn-outline-danger my-2 my-sm-0"
               @click="clearCards()"
@@ -72,7 +79,7 @@
         </div>
 
         <card
-          v-for="card in cards"
+          v-for="card in cardList"
           :key="card.id"
           :title="card.title"
           :project="card.project"
@@ -272,6 +279,7 @@ export default {
       displayNotCookieAlert: true,
       beta: false,
       configEntry: '',
+      hideCompletedCards: false,
 
       isEditing: false,
 
@@ -335,6 +343,18 @@ export default {
         ...exports,
         [propertyName]: this[propertyName],
       }), {});
+    },
+    showCompletedButtonText() {
+      return this.hideCompletedCards ? 'Show Completed' : 'Hide Completed';
+    },
+    cardList() {
+      const filters = [];
+
+      if (this.hideCompletedCards) {
+        filters.push((card) => this.taskStates[card.taskState] !== 'done');
+      }
+
+      return filters.reduce((cardList, handler) => cardList.filter(handler), this.cards);
     },
   },
   mounted() {
@@ -701,6 +721,9 @@ export default {
         // eslint-disable-next-line no-alert
         alert("Couldn't load file's content");
       };
+    },
+    toggleCompleted() {
+      this.hideCompletedCards = !this.hideCompletedCards;
     },
   },
 };
