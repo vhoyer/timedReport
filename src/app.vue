@@ -39,7 +39,7 @@
             <button
               type="button"
               class="btn my-2 mr-2 my-sm-0"
-              @click="hideCompleted()"
+              @click="toggleCompleted()"
             >
               {{ showCompletedButtonText }}
             </button>
@@ -78,30 +78,28 @@
           </div>
         </div>
 
-        <template v-for="card in cards">
-          <card
-            v-if="showCard(card)"
-            :key="card.id"
-            :title="card.title"
-            :project="card.project"
-            :description="card.description"
-            :progress-color="getProgressColor(card)"
-            :progress="card.percentage"
-            :task-state-string="getStateString(card)"
-            :time="card.time"
-            :eta="card.eta"
-            :is-selected="card.isSelected"
-            :is-editing="isEditing"
-            @card-closed="removeCard(card.id)"
-            @card-clicked="cardClicked(card.id)"
-            @edit-title="editField($event, card.id)"
-            @edit-project="editField($event, card.id)"
-            @edit-description="editField($event, card.id)"
-            @edit-time="editField($event, card.id)"
-            @edit-eta="editField($event, card.id)"
-            @contextmenu="contextmenu($event, card.id)"
-          />
-        </template>
+        <card
+          v-for="card in cardList"
+          :key="card.id"
+          :title="card.title"
+          :project="card.project"
+          :description="card.description"
+          :progress-color="getProgressColor(card)"
+          :progress="card.percentage"
+          :task-state-string="getStateString(card)"
+          :time="card.time"
+          :eta="card.eta"
+          :is-selected="card.isSelected"
+          :is-editing="isEditing"
+          @card-closed="removeCard(card.id)"
+          @card-clicked="cardClicked(card.id)"
+          @edit-title="editField($event, card.id)"
+          @edit-project="editField($event, card.id)"
+          @edit-description="editField($event, card.id)"
+          @edit-time="editField($event, card.id)"
+          @edit-eta="editField($event, card.id)"
+          @contextmenu="contextmenu($event, card.id)"
+        />
       </div>
     </main>
 
@@ -348,6 +346,15 @@ export default {
     },
     showCompletedButtonText() {
       return this.hideCompletedCards ? 'Show Completed' : 'Hide Completed';
+    },
+    cardList() {
+      const filters = [];
+
+      if (this.hideCompletedCards) {
+        filters.push((card) => this.taskStates[card.taskState] !== 'done');
+      }
+
+      return filters.reduce((cardList, handler) => cardList.filter(handler), this.cards);
     },
   },
   mounted() {
@@ -715,11 +722,8 @@ export default {
         alert("Couldn't load file's content");
       };
     },
-    hideCompleted() {
+    toggleCompleted() {
       this.hideCompletedCards = !this.hideCompletedCards;
-    },
-    showCard(card) {
-      return !this.hideCompletedCards || (this.hideCompletedCards && this.taskStates[card.taskState] !== 'done');
     },
   },
 };
