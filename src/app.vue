@@ -472,7 +472,8 @@ export default {
           return;
         }
 
-        this.getCardFromId(cardId)[property] = field.innerHTML.trim();
+        this.getCardFromId(cardId)[property] = field.innerHTML.trim() || '-';
+        this.$forceUpdate();
       };
 
       const outOfFocusBehaviour = () => {
