@@ -452,10 +452,8 @@ export default {
           return;
         }
 
-        // eslint-disable-next-line no-param-reassign
-        field.innerHTML = field.innerHTML.trim() || '-';
-
-        this.getCardFromId(cardId)[property] = field.innerHTML;
+        this.getCardFromId(cardId)[property] = field.innerHTML.trim() || '-';
+        this.$forceUpdate();
       };
 
       const outOfFocusBehaviour = () => {
