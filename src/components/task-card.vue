@@ -5,7 +5,8 @@
     data-hj-whitelist
   >
     <div
-      :id="HTMLCardId"
+      ref="card"
+      :id="id"
       class="card text-center h-100"
       :class="{ selected: isSelected }"
       @contextmenu="$emit('contextmenu', $event)"
@@ -23,7 +24,7 @@
 
       <div
         class="card-header eta"
-        @click="cardClickedOr('edit-eta', 'eta')"
+        @click="cardClickedOr('edit-eta', $event)"
         v-html="etaString"
       ></div>
 
@@ -34,7 +35,7 @@
         <div
           class="card-title h5"
           data-bound-property="title"
-          @click="cardClickedOr('edit-title', 'card-title')"
+          @click="cardClickedOr('edit-title', $event)"
         >
           {{ title }}
         </div>
@@ -42,7 +43,7 @@
         <div
           class="card-subtitle mb-2 text-muted"
           data-bound-property="project"
-          @click="cardClickedOr('edit-project', 'card-subtitle')"
+          @click="cardClickedOr('edit-project', $event)"
         >
           {{ project }}
         </div>
@@ -51,7 +52,7 @@
           class="card-text"
           style="flex-grow:inherit"
           data-bound-property="description"
-          @click="cardClickedOr('edit-description', 'card-text')"
+          @click="cardClickedOr('edit-description', $event)"
         >
           {{ description }}
         </p>
@@ -80,16 +81,22 @@
 
       <div
         class="card-footer timer"
-        @click="cardClickedOr('edit-time', 'timer')"
+        @click="cardClickedOr('edit-time', $event)"
         v-html="timeString"
       ></div>
     </div>
   </div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent } from 'vue';
+
+export default defineComponent({
   props: {
+    id: {
+      type: String,
+      required: true,
+    },
     title: {
       type: String,
       required: true,
@@ -128,20 +135,34 @@ export default {
     isSelected: Boolean,
     isEditing: Boolean,
   },
+  emits: {
+    'card-closed': () => true,
+    'card-clicked': () => true,
+    'contextmenu': (_: MouseEvent) => true,
+
+    'edit-eta': (_: HTMLElement) => true,
+    'edit-title': (_: HTMLElement) => true,
+    'edit-project': (_: HTMLElement) => true,
+    'edit-description': (_: HTMLElement) => true,
+    'edit-time': (_: HTMLElement) => true,
+  },
   data() {
     return {
-      HTMLCardId: this.$vnode.key,
       delay: 200,
       clicks: 0,
-      timer: null,
+      timer: undefined as number|undefined,
     };
   },
   computed: {
     timeString() {
-      return new Date(this.time + this.timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0];
+      return new Date(
+        this.time + this.timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/
+      )?.[0];
     },
     etaString() {
-      return new Date(this.eta + this.timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0];
+      return new Date(
+        this.eta + this.timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/
+      )?.[0];
     },
     progressColorCss() {
       if (this.progressColor === undefined) {
@@ -152,13 +173,13 @@ export default {
     },
   },
   mounted() {
-    const card = document.querySelector(`#${this.HTMLCardId}`);
+    const card = this.$refs.card as HTMLDivElement;
 
     const elements = [
       card.querySelector('.card-title'),
       card.querySelector('.card-subtitle'),
       card.querySelector('.card-text'),
-    ].filter((identity) => Boolean(identity));
+    ].filter((identity) => Boolean(identity)) as HTMLDivElement[];
 
     elements.forEach((element) => {
       element.addEventListener('paste', this.pastePureText);
@@ -168,7 +189,10 @@ export default {
     timeOffset() {
       return new Date(0).getTimezoneOffset() * 60000;
     },
-    cardClickedOr(eventName, field) {
+    cardClickedOr(
+      eventName: 'edit-eta'|'edit-title'|'edit-project'|'edit-description'|'edit-time',
+      event: MouseEvent,
+    ) {
       this.clicks += 1;
 
       if (this.clicks === 1) {
@@ -181,19 +205,20 @@ export default {
       } else {
         clearTimeout(this.timer);
 
-        const elementToEdit = $(`#${this.HTMLCardId} .${field}`)[0];
+        const elementToEdit = event.target as HTMLElement;
 
+        // @ts-ignore -- I don't know how this is an error
         this.$emit(eventName, elementToEdit);
         this.clicks = 0;
       }
     },
-    pastePureText(e) {
+    pastePureText(e: ClipboardEvent) {
       e.preventDefault();
-      const text = e.clipboardData.getData('text/plain');
+      const text = e.clipboardData?.getData('text/plain') ?? '';
       const temp = document.createElement('div');
       temp.innerHTML = text;
-      document.execCommand('insertHTML', false, temp.textContent);
+      document.execCommand('insertHTML', false, temp.textContent ?? undefined);
     },
   },
-};
+});
 </script>

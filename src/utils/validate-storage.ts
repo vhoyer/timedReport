@@ -1,4 +1,4 @@
-function storageAvailable(type) {
+export function storageAvailable(type: 'localStorage'|'sessionStorage') {
   const storage = window[type];
 
   try {
@@ -20,10 +20,4 @@ function storageAvailable(type) {
       // acknowledge QuotaExceededError only if there's something already stored
       && storage.length !== 0;
   }
-}
-
-// Check if browser have support for window.localStorage
-if (!storageAvailable('localStorage')) {
-  // eslint-disable-next-line no-alert
-  alert("Please Update your browser for a better experience, I haven't tested with an outdated browser, so you may have no experience at all xD\n\nHey, I'm doing you a favor");
 }

@@ -78,9 +78,10 @@
           </div>
         </div>
 
-        <card
+        <task-card
           v-for="card in cardList"
           :key="card.id"
+          :id="card.id"
           :title="card.title"
           :project="card.project"
           :description="card.description"
@@ -92,7 +93,7 @@
           :is-selected="card.isSelected"
           :is-editing="isEditing"
           @card-closed="removeCard(card.id)"
-          @card-clicked="cardClicked(card.id)"
+          @card-clicked="cardClicked(card)"
           @edit-title="editField($event, card.id)"
           @edit-project="editField($event, card.id)"
           @edit-description="editField($event, card.id)"
@@ -123,7 +124,7 @@
         class="dropdown-item"
         @click="changePercentage()"
       >
-        {{ getCardFromId(context.cardId).percentage }}% - change it
+        {{ getCardFromId(context.cardId)?.percentage }}% - change it
       </div>
 
       <template v-if="customActions.length > 0">
@@ -133,7 +134,7 @@
           v-for="(custom, index) in customActions"
           :key="`${custom.name}${index}`"
           class="dropdown-item"
-          @click="call(custom.action)"
+          @click="callCustomEventHandlers(custom.action)"
         >
           {{ custom.name }}
         </div>
@@ -234,7 +235,7 @@
     </div>
 
     <aside
-      v-if="displayNotCookieAlert"
+      v-if="displayCookieAlert"
       class="container fixed-bottom"
     >
       <div
@@ -250,7 +251,7 @@
           class="close"
           data-dismiss="alert"
           aria-label="Close"
-          @click="displayNotCookieAlert = false"
+          @click="displayCookieAlert = false"
         >
           <span aria-hidden="true">&times;</span>
         </button>
@@ -261,76 +262,78 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import type { Card } from './global';
+import { defineComponent } from 'vue';
+import $ from 'jquery';
+import autosize from 'autosize';
 import { copy } from './utils/copy';
-import Card from './components/card.vue';
-import ContextMenu from './components/context.vue';
+import TaskCard from './components/task-card.vue';
+import ContextMenu from './components/context-menu.vue';
 import MyFooter from './components/my-footer.vue';
 
-export default {
+export default defineComponent({
   components: {
-    Card,
+    TaskCard,
     ContextMenu,
     MyFooter,
   },
-  data() {
-    return {
-      autoSaver: null,
-      displayNotCookieAlert: true,
-      beta: false,
-      configEntry: '',
-      hideCompletedCards: false,
+  data: () => ({
+    autoSaver: undefined as number|undefined,
+    displayCookieAlert: true,
+    beta: false,
+    configEntry: '',
+    hideCompletedCards: false,
 
-      isEditing: false,
+    isEditing: false,
 
-      timer: {
-        startCounting: 0,
-        current: null,
-        delay: 200,
+    timer: {
+      startCounting: 0,
+      current: undefined as number|undefined,
+      delay: 200,
+    },
+
+    idOrigin: 0,
+    cards: [] as Card[],
+
+    taskStateCustom: [
+      { index: 3, percentage: 100, color: 'var(--success)' },
+    ],
+    taskStates: [
+      'todo',
+      'doing',
+      'paused',
+      'done',
+    ],
+
+    context: {
+      isActive: false,
+      cardId: '',
+      x: 0,
+      y: 0,
+    },
+
+    customActions: [
+      {
+        name: 'Now with custom actions',
+        action: "(function(){vm.showConfigModal();vm.configEntry=\"vm.customActions[0]=({\\n    name: 'Increment It!',\\n    action: '( function(){\\\\\\n    let card=vm.getCardFromId(vm.context.cardId);\\\\\\n    if( card.percentage == 0 ) { card.taskState = 1; }\\\\\\n    if( card.percentage == 100 ) { return; }\\\\\\n    let n = vm.incrementWithRandom(card);\\\\\\n    if( n == 100 ) { card.taskState = 3; }\\\\\\n    card.percentage=n;\\\\\\n})'});\";setTimeout(()=>{autosize.update(document.querySelector('#config-entry'))},0)})",
       },
+    ],
 
-      idOrigin: 0,
-      cards: [],
-
-      taskStateCustom: [
-        { index: 3, percentage: 100, color: 'var(--success)' },
-      ],
-      taskStates: [
-        'todo',
-        'doing',
-        'paused',
-        'done',
-      ],
-
-      context: {
-        isActive: false,
-        cardId: '',
-        x: 0,
-        y: 0,
-      },
-
-      customActions: [
-        {
-          name: 'Now with custom actions',
-          action: "(function(){vm.showConfigModal();vm.configEntry=\"vm.customActions[0]=({\\n    name: 'Increment It!',\\n    action: '( function(){\\\\\\n    let card=vm.getCardFromId(vm.context.cardId);\\\\\\n    if( card.percentage == 0 ) { card.taskState = 1; }\\\\\\n    if( card.percentage == 100 ) { return; }\\\\\\n    let n = vm.incrementWithRandom(card);\\\\\\n    if( n == 100 ) { card.taskState = 3; }\\\\\\n    card.percentage=n;\\\\\\n})'});\";setTimeout(()=>{autosize.update(document.querySelector('#config-entry'))},0)})",
-        },
-      ],
-
-      // event args
-      ev: {
-        previousActiveCard: null,
-        senderCard: null,
-      },
-      on: {
-        cardCliking: '()=>{}',
-        cardClicked: '()=>{}',
-      },
-    };
-  },
+    // event args
+    eventArgs: {
+      previousActiveCard: undefined as Card|undefined,
+      senderCard: undefined as Card|undefined,
+    },
+    on: {
+      cardCliking: '()=>{}',
+      cardClicked: '()=>{}',
+    },
+  }),
   computed: {
     storage() {
       return [
-        'displayNotCookieAlert',
+        'displayCookieAlert',
         'taskStateCustom',
         'customActions',
         'configEntry',
@@ -339,16 +342,17 @@ export default {
         'timer',
         'cards',
         'beta',
-      ].reduce((exports, propertyName) => ({
-        ...exports,
-        [propertyName]: this[propertyName],
-      }), {});
+      ].reduce((exports: any, key) => {
+        exports[key] = (this as any)[key]
+        return exports;
+      }, {});
     },
     showCompletedButtonText() {
       return this.hideCompletedCards ? 'Show Completed' : 'Hide Completed';
     },
     cardList() {
-      const filters = [];
+      type Filter = (card: Card) => boolean;
+      const filters: Filter[] = [];
 
       if (this.hideCompletedCards) {
         filters.push((card) => this.taskStates[card.taskState] !== 'done');
@@ -373,7 +377,7 @@ export default {
     const selectedCard = this.cards.find((card) => card.isSelected);
     if (selectedCard) {
       // restart any selected card's timer
-      this.startTimerOn(selectedCard.id, false);
+      this.startTimerOn(selectedCard, false);
     }
 
     window.addEventListener('keydown', (event) => {
@@ -383,25 +387,27 @@ export default {
     });
   },
   methods: {
-    getCardFromId(cardId) {
+    getCardFromId(cardId: string) {
       return this.cards.find((card) => card.id === cardId);
     },
 
-    stopTimerOn(cardId) {
-      this.getCardFromId(cardId).isSelected = false;
+    stopTimerOn(card: Card) {
+      card.isSelected = false;
 
       clearInterval(this.timer.current);
     },
-    startTimerOn(cardId, updateNowValue = true) {
+    startTimerOn(card: Card, updateNowValue = true): void {
       const selection = document.querySelector('.selected');
+
       if (selection != null) {
+        const previous = this.getCardFromId(selection.id) as Card;
         // stop any running timer
-        this.stopTimerOn(selection.id);
+        this.stopTimerOn(previous);
         // set the events properties
-        this.ev.previousActiveCard = this.getCardFromId(selection.id);
+        this.eventArgs.previousActiveCard = previous;
       }
 
-      this.getCardFromId(cardId).isSelected = true;
+      card.isSelected = true;
 
       if (updateNowValue) {
         this.timer.startCounting = Date.now();
@@ -409,70 +415,75 @@ export default {
 
       this.timer.current = setInterval(() => {
         const now = Date.now();
-        this.getCardFromId(cardId).time += (now - this.timer.startCounting);
+        card.time += (now - this.timer.startCounting);
 
         this.timer.startCounting = now;
       }, this.timer.delay);
     },
 
-    getProgressColor(card) {
-      const matchingTaskState = (element) => element.index === card.taskState;
-      const newState = this.taskStateCustom.find(matchingTaskState);
+    getProgressColor(card: Card): string {
+      const newState = this.taskStateCustom.find((element) => {
+        return element.index === card.taskState;
+      });
+
       if (newState === undefined) { return ''; }
 
       return newState.color;
     },
-    getStateString(card) {
+    getStateString(card: Card): string {
       return this.taskStates[card.taskState];
     },
 
-    cardClicked(cardId) {
-      this.ev.senderCard = this.getCardFromId(cardId);
+    cardClicked(card: Card): void {
+      this.eventArgs.senderCard = card;
 
-      this.call(this.on.cardCliking, this.ev);
+      this.callCustomEventHandlers(this.on.cardCliking, this.eventArgs);
 
       if (this.isEditing) {
         return;
       }
 
-      if (this.ev.senderCard.isSelected) {
-        this.stopTimerOn(cardId);
-        return;
+      if (this.eventArgs.senderCard.isSelected) {
+        this.stopTimerOn(card);
+      } else {
+        this.startTimerOn(card);
+
+        this.callCustomEventHandlers(this.on.cardClicked, this.eventArgs);
       }
-
-      this.startTimerOn(cardId);
-
-      this.call(this.on.cardClicked, this.ev);
     },
 
-    ifEditingTime(field) {
-      const card = field.parentNode;
+    ifEditingTime(field: HTMLElement) {
+      const cardElement = field.parentNode as HTMLDivElement;
+      const card = this.getCardFromId(cardElement.id) as Card;
       const isEta = field.classList.contains('eta');
 
-      if (card.classList.contains('selected') && !isEta) {
+      if (cardElement?.classList.contains('selected') && !isEta) {
         // because if editing title..description the parentNode == card-body
-        this.stopTimerOn(card.id);
+        this.stopTimerOn(card);
       }
 
       return {
         wasEta: isEta,
         wasTimer: field.classList.contains('timer'),
-        wasRunning: card.classList.contains('selected'),
+        wasRunning: cardElement.classList.contains('selected'),
       };
     },
     timeOffset() {
       return new Date(0).getTimezoneOffset() * 60000;
     },
-    editField(field, cardId) {
+    editField(field: HTMLElement, cardId: string) {
       const timer = this.ifEditingTime(field);
 
       const callback = () => {
-        const property = field.dataset.boundProperty;
+        const property = field.dataset.boundProperty as 'title'|'project'|'description';
         if (property === undefined) {
           return;
         }
 
-        this.getCardFromId(cardId)[property] = field.innerHTML.trim() || '-';
+        const card = this.getCardFromId(cardId);
+        if (card) {
+          card[property] = field.innerHTML.trim() || '-';
+        }
         this.$forceUpdate();
       };
 
@@ -482,21 +493,25 @@ export default {
 
         callback();
 
-        let cardIdForTimer = 0;
+        let cardIdForTimer: string|undefined = undefined;
         let timeString;
         if (timer.wasTimer || timer.wasEta) {
-          cardIdForTimer = field.parentNode.id;
+          cardIdForTimer = (field.parentNode as HTMLDivElement|undefined)?.id;
           timeString = field.innerHTML.match(/\d\d:\d\d:\d\d/);
         }
+
+        if (!cardIdForTimer) return;
+        const card = this.getCardFromId(cardIdForTimer) as Card;
+
         // if it was editing and has a valid time string
         if (timer.wasTimer && timeString != null) {
-          this.getCardFromId(cardIdForTimer).time = new Date(`1970-01-01T${timeString}`).getTime() - this.timeOffset();
+          card.time = new Date(`1970-01-01T${timeString}`).getTime() - this.timeOffset();
         }
         if (timer.wasEta && timeString != null) {
-          this.getCardFromId(cardIdForTimer).eta = new Date(`1970-01-01T${timeString}`).getTime() - this.timeOffset();
+          card.eta = new Date(`1970-01-01T${timeString}`).getTime() - this.timeOffset();
         }
         if (timer.wasTimer && timer.wasRunning) {
-          this.startTimerOn(cardIdForTimer);
+          this.startTimerOn(card);
           // was triggering outOfFocusBehaviour multiple times, this is a workaround
           timer.wasTimer = false;
         }
@@ -505,7 +520,13 @@ export default {
       this.isEditing = true;
       field.setAttribute('contenteditable', 'true');
       field.focus();
-      document.execCommand('selectAll', false, null);
+
+      // select text in field
+      const range = document.createRange();
+      range.selectNodeContents(field);
+      const sel = window.getSelection();
+      sel?.removeAllRanges();
+      sel?.addRange(range);
 
       $(field).on('blur', () => {
         outOfFocusBehaviour();
@@ -524,7 +545,7 @@ export default {
         Math.random() * 100,
       );
     },
-    incrementWithRandom(card) {
+    incrementWithRandom(card: Card) {
       const increment = Math.floor(Math.random() * 10);
       let newValue = increment + card.percentage;
       if (newValue > 100) {
@@ -550,7 +571,7 @@ export default {
         isHidden: false,
       });
     },
-    removeCard(cardId) {
+    removeCard(cardId: string) {
       this.cards = this.cards.filter((element) => element.id !== cardId);
     },
     clearCards() {
@@ -575,7 +596,7 @@ export default {
         const loaded = load[loadedProperty];
 
         if (loaded !== undefined) {
-          this[loadedProperty] = loaded;
+          (this as any)[loadedProperty] = loaded;
         }
       });
     },
@@ -584,14 +605,14 @@ export default {
       clearInterval(this.autoSaver);
 
       this.displayCookieAlert = true;
-      this.timer.current = null;
+      this.timer.current = undefined;
       this.beta = false;
       this.clearCards();
 
       window.localStorage.clear();
     },
 
-    contextmenu(event, cardId) {
+    contextmenu(event: MouseEvent, cardId: string) {
       if (this.isEditing) {
         return;
       }
@@ -606,19 +627,20 @@ export default {
     closeContextMenu() {
       this.context.isActive = false;
     },
-    switchCardState(statesIndex) {
-      const card = this.getCardFromId(this.context.cardId);
+    switchCardState(statesIndex: number) {
+      const card = this.getCardFromId(this.context.cardId) as Card;
       card.taskState = statesIndex;
 
-      const matchingTaskState = (element) => element.index === statesIndex;
-      const newState = this.taskStateCustom.find(matchingTaskState);
+      const newState = this.taskStateCustom.find((element) => {
+        return element.index === statesIndex;
+      });
       if (newState === undefined) { return; }
 
       const callIt = typeof newState.percentage === 'string';
       // eslint-disable-next-line no-eval
-      card.percentage = callIt ? eval(newState.percentage)(card) : newState.percentage;
+      card.percentage = callIt ? eval(`${newState.percentage}`)(card) : newState.percentage;
     },
-    checkTaskState(taskIndex) {
+    checkTaskState(taskIndex: number) {
       const card = this.getCardFromId(this.context.cardId);
       if (card === undefined) { return false; }
 
@@ -628,27 +650,31 @@ export default {
       const card = this.getCardFromId(this.context.cardId);
       if (card === undefined) { return false; }
 
-      const matchingTaskState = (element) => element.index === card.taskState;
-      const hasMatchingPercentage = this.taskStateCustom.find(matchingTaskState) !== undefined;
+      const hasMatchingPercentage = this.taskStateCustom.find((element) => {
+        return element.index === card.taskState;
+      }) !== undefined;
 
       return !hasMatchingPercentage;
     },
     changePercentage() {
-      const card = this.getCardFromId(this.context.cardId);
+      const card = this.getCardFromId(this.context.cardId) as Card;
       // eslint-disable-next-line no-alert
-      let newValue = prompt('Change task percentage:', card.percentage);
+      const promptAnswer = prompt(
+        'Change task percentage:',
+        card?.percentage.toString(),
+      );
 
       // convert to Number
-      newValue = Number(newValue);
+      const newValue = Number(promptAnswer);
 
-      if (Number.isNaN(newValue)) { return; }
+      if (Number.isNaN(newValue)) return;
 
       card.percentage = newValue;
     },
 
-    call(code, handler) {
+    callCustomEventHandlers(code: string, args?: any) {
       // eslint-disable-next-line no-eval
-      eval(`(${code})`)(handler);
+      eval(`(${code})`)(args);
     },
 
     showConfigModal() {
@@ -665,40 +691,54 @@ export default {
       modal.modal('show');
     },
     saveConfigFile() {
-      const sourceText = this.configEntry; const
-        fileIdentity = 'MyTimedReport.config.js';
-      const workElement = document.createElement('a');
-      if ('download' in workElement) {
-        workElement.href = `data:text/plaincharset=utf-8,${escape(sourceText)}`;
-        workElement.setAttribute('download', fileIdentity);
-        document.body.appendChild(workElement);
-        const eventMouse = document.createEvent('MouseEvents');
-        eventMouse.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-        workElement.dispatchEvent(eventMouse);
-        document.body.removeChild(workElement);
-      } else throw new DOMException('File saving not supported for this browser');
+      if ('download' in HTMLAnchorElement) {
+        throw new DOMException('File saving not supported for this browser');
+      }
+
+      const sourceText = encodeURIComponent(this.configEntry);
+
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.href = `data:text/plaincharset=utf-8,${sourceText}`;
+      downloadAnchor.setAttribute('download', 'MyTimedReport.config.js');
+
+      downloadAnchor.click();
     },
     runConfig() {
       // eslint-disable-next-line no-eval
       eval(this.configEntry);
 
-      document.querySelector('#config-modal button.btn.d-none.d-sm-block').click();
+      // close modal
+      const buttonSelector = '#config-modal button.btn.d-none.d-sm-block';
+      const closeButton = document.querySelector(buttonSelector) as HTMLButtonElement|null;
+      closeButton?.click();
     },
 
-    excelBase(cardParam) {
-      const card = cardParam;
-      const time = (t) => (t > 0 ? '' : '-') + new Date((t > 0 ? 1 : -1) * t + this.timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/)[0];
+    excelBase(card: Card) {
+      const time = (t: number) => {
+        const sign = (t > 0 ? '' : '-');
+        const date = new Date(Math.abs(t) + this.timeOffset());
+
+        return sign + date.toTimeString().match(/\d\d:\d\d:\d\d/)?.[0];
+      };
       const stateString = this.taskStates[card.taskState];
 
-      // removing line breaks
-      card.title = card.title.replace(/\n/g, ' ');
-      card.project = card.project.replace(/\n/g, ' ');
-      card.description = card.description.replace(/\n/g, ' ');
+      const regexLineBreak = /\n/g;
+      const cleanLineBreaks = (value: string) => value.replace(regexLineBreak, ' ');
 
-      return `${card.project}\t${card.title}\t${card.description}\t${stateString}\t\t${card.percentage}%\t\t${time(card.time)}\t${time(card.eta - card.time)}\n`;
+      return [
+        cleanLineBreaks(card.project),
+        cleanLineBreaks(card.title),
+        cleanLineBreaks(card.description),
+        stateString,
+        '',
+        card.percentage + '%',
+        '',
+        time(card.time),
+        time(card.eta - card.time)
+      ].join('\t') + '\n';
     },
     toExcel() {
-      const card = this.getCardFromId(this.context.cardId);
+      const card = this.getCardFromId(this.context.cardId) as Card;
       const excel = this.excelBase(card);
       copy(excel);
     },
@@ -709,14 +749,14 @@ export default {
       });
       copy(excel);
     },
-    loadFileToConfig(event) {
-      const file = event.target.files[0];
+    loadFileToConfig(event: Event) {
+      const file = (event.target as HTMLInputElement).files?.[0];
       if (file == null) return;
 
       const reader = new FileReader();
       reader.readAsText(file, 'UTF-8');
       reader.onload = (evt) => {
-        this.configEntry = evt.target.result;
+        this.configEntry = String(evt.target?.result);
       };
       reader.onerror = (_evt) => {
         // eslint-disable-next-line no-alert
@@ -727,5 +767,5 @@ export default {
       this.hideCompletedCards = !this.hideCompletedCards;
     },
   },
-};
+});
 </script>
