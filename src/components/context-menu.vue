@@ -10,8 +10,10 @@
   </div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent } from 'vue';
+
+export default defineComponent({
   props: {
     isActive: Boolean,
     x: {
@@ -49,7 +51,7 @@ export default {
   },
   methods: {
     onSizeChange() {
-      const menu = document.querySelector('#context-menu');
+      const menu = this.$el;
 
       const observer = new MutationObserver((_mutations) => {
         if (menu.offsetWidth > this.width) {
@@ -70,7 +72,7 @@ export default {
       });
     },
   },
-};
+});
 </script>
 
 <style lang="scss">

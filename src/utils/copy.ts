@@ -1,4 +1,6 @@
-function setupClipboard(text) {
+import $ from 'jquery';
+
+function setupClipboard(text: string) {
   $('body').append(`<div id="clipboard-container" style="
   position: fixed;
   left: 0px;
@@ -11,15 +13,17 @@ function setupClipboard(text) {
   height: 1px;
   padding: 0px;">${text}</textarea></div>`);
 }
+
 function setoffClipboard() {
   $('#clipboard-container').remove();
 }
 
-export function copy(text) {
+export function copy(text: string) {
   setupClipboard(text);
 
   // Get Input Element
-  document.getElementById('clipboard').select();
+  const textarea = document.getElementById('clipboard') as HTMLTextAreaElement|null;
+  textarea?.select();
 
   // Copy Content
   document.execCommand('copy');
