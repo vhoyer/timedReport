@@ -8,7 +8,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "test": "vitest --environment jsdom",
     "test:unit": "npm run test",
-    "test:unit:ci": "npm run test",
+    "test:unit:ci": "npm run test -- --run",
     "test:e2e": "PORT=5173 cypress open --e2e",
     "test:e2e:ci": "start-server-and-test preview http://localhost:4173/ 'cypress run --e2e'",
     "preview": "vite preview",
