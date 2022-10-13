@@ -158,3 +158,22 @@ it('can delete tasks', () => {
 
   cy.get('.task-card').should('have.length', 0);
 });
+
+it('can change manually progress of the task', () => {
+  cy.visit('/', {
+    onBeforeLoad(win) {
+      cy.stub(win, 'prompt').returns('69')
+    },
+  });
+
+  cy.get('[aria-label="Add Task"]').click()
+
+  cy.get('#card-1')
+    .rightclick()
+    .get('#context-menu')
+    .findByText('0% - change it')
+    .click() // opens prompt with custom stub
+    .get('#card-1')
+    .findByRole('progressbar')
+    .should('have.attr', 'aria-valuenow', '69') // nice
+});
