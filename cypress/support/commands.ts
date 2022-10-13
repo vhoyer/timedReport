@@ -1,6 +1,8 @@
 /// <reference types="cypress" />
 import '@testing-library/cypress/add-commands'
 
+const CypressMagic = undefined;
+
 // ***********************************************
 // This example commands.ts shows you how to
 // create various custom commands and overwrite
@@ -26,16 +28,70 @@ import '@testing-library/cypress/add-commands'
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
-//
-// declare global {
-//   namespace Cypress {
-//     interface Chainable {
-//       login(email: string, password: string): Chainable<void>
-//       drag(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       dismiss(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       visit(originalFn: CommandOriginalFn, url: string, options: Partial<VisitOptions>): Chainable<Element>
-//     }
-//   }
-// }
+
+const fieldMap = {
+  eta: '.eta',
+  title: '.card-title',
+  project: '.card-subtitle',
+  description: '.card-text',
+  time: '.timer',
+}
+type FieldMap = typeof fieldMap;
+type EditableField = keyof FieldMap;
+type TimedReportTask = { [key in EditableField]?: string; } & {
+  status?: string;
+};
+
+Cypress.Commands.add(
+  'taskFieldEdit',
+  { prevSubject: ['element'] },
+  (subject: any, fieldName: EditableField, value: string) => {
+    cy.wrap(subject)
+      .find(fieldMap[fieldName])
+      .dblclick()
+      .type(`${value}{enter}`)
+      .contains(value)
+      .wrap(subject)
+
+    return undefined; // cypress magic
+  },
+);
+
+Cypress.Commands.add(
+  'taskCreate',
+  (task: TimedReportTask = {}) => {
+    cy.get('[aria-label="Add Task"]').click();
+
+    const { status, ...taskRest } = task
+
+    if (status) {
+      cy.get('.task-card')
+        .last()
+        .rightclick()
+        .get('#context-menu')
+        .findByText(status)
+        .click();
+    }
+
+    for (const key in taskRest) {
+      const field = key as EditableField;
+      const value = task[field] as string;
+      cy.get('.task-card')
+        .last()
+        .taskFieldEdit(field, value);
+    }
+
+    return CypressMagic;
+  },
+);
+
+declare global {
+  namespace Cypress {
+    interface Chainable {
+      taskFieldEdit(field: keyof FieldMap, value: string): Chainable<Element>
+      taskCreate(task?: TimedReportTask): Chainable<Element>
+    }
+  }
+}
 
 export {};

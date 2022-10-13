@@ -6,7 +6,7 @@ it('can access page', () => {
 });
 
 it('can create and start a new task', () => {
-  cy.get('[aria-label="Add Task"]').click();
+  cy.taskCreate();
 
   cy.get('#card-1').find('.eta').contains('00:00:00');
   cy.get('#card-1').contains('Task description');
@@ -38,17 +38,8 @@ it('can create and edit another task while the other is running', () => {
   cy.get('#card-1')
     .should('have.attr', 'aria-selected', 'true');
 
-  // edit it
   cy.get('#card-2')
-    .find('.card-title')
-    .dblclick()
-    // dblclick enables edition
-    .should('have.attr', 'contenteditable', 'true')
-    .type('A new hope{enter}')
-    // when user {enter}s set editable false
-    .should('have.attr', 'contenteditable', 'false')
-    // leave the content behind
-    .contains('A new hope');
+    .taskFieldEdit('title', 'A new hope');
 
   // keep the other one running
   cy.get('#card-1')
@@ -152,9 +143,8 @@ it('can delete tasks', () => {
   cy.get('.task-card').should('have.length', 1);
 
   // create two cards
-  cy.get('[aria-label="Add Task"]')
-    .click()
-    .click();
+  cy.taskCreate();
+  cy.taskCreate();
 
   cy.get('.task-card').should('have.length', 3);
 
@@ -181,4 +171,15 @@ it('can change manually progress of the task', () => {
     .get('#card-1')
     .findByRole('progressbar')
     .should('have.attr', 'aria-valuenow', '69') // nice
+});
+
+it('can edit all field', () => {
+  cy.taskCreate({
+    eta: '02:20:00',
+    title: 'Revenge of the Sith',
+    project: 'Star Wars: Episode III',
+    description: 'Star Wars: Episode III – Revenge of the Sith is a 2005 American epic space opera film written and directed by George Lucas.',
+    status: 'doing',
+    time: '01:00:00',
+  });
 });
