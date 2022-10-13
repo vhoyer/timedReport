@@ -21,8 +21,10 @@ it('can create and start a new task', () => {
   cy.get('#card-1')
     .should('have.attr', 'aria-selected', 'true');
 
+  // eslint-disable-next-line
   cy.wait(1000);
   cy.get('#card-1').find('.timer').contains('00:00:01');
+  // eslint-disable-next-line
   cy.wait(1000);
   cy.get('#card-1').find('.timer').contains('00:00:02');
 });
@@ -64,6 +66,7 @@ it('click task2 stops task1; click task2 again stops itself', () => {
   cy.get('#card-1')
     .should('have.attr', 'aria-selected', 'false');
 
+  // eslint-disable-next-line
   cy.get('#card-2')
     .find('.timer')
     .contains('00:00:00')
@@ -82,6 +85,7 @@ it('stops timer while editing time, but not other fields', () => {
     .find('.timer')
     .contains('00:00:02')
 
+  // eslint-disable-next-line
   cy.get('#card-2')
     .click() // start timer
     .should('have.attr', 'aria-selected', 'true')
@@ -91,6 +95,7 @@ it('stops timer while editing time, but not other fields', () => {
     .wait(1000)
     .type('{enter}')
 
+  // eslint-disable-next-line
   cy.get('#card-2')
     .find('.timer')
     .contains('00:00:03') // time kept running while editing subtitle
