@@ -100,3 +100,41 @@ it('stops timer while editing time, but not other fields', () => {
     .type('{enter}')
     .contains('01:00:00')
 });
+
+it('change task status; done sets progress to 100%', () => {
+  cy.get('#card-2')
+    .findByRole('progressbar')
+    .should('have.attr', 'aria-valuenow', '0')
+
+  cy.get('#card-2')
+    .rightclick()
+    .get('#context-menu')
+    .findByText('doing')
+    .click()
+
+  cy.get('#card-2')
+    .findByText('todo')
+    .should('not.exist')
+    .get('#card-2')
+    .findByText('doing')
+    .should('exist')
+    .get('#card-2')
+    .findByRole('progressbar')
+    .should('have.attr', 'aria-valuenow', '0')
+
+  cy.get('#card-1')
+    .findByRole('progressbar')
+    .should('have.attr', 'aria-valuenow', '0')
+
+  cy.get('#card-1')
+    .rightclick()
+    .get('#context-menu')
+    .findByText('done')
+    .click()
+    .get('#card-1')
+    .findByText('done')
+    .should('exist')
+    .get('#card-1')
+    .findByRole('progressbar')
+    .should('have.attr', 'aria-valuenow', '100')
+});
