@@ -68,6 +68,7 @@
           <div
             id="add-new"
             class="card h-100 add-card"
+            aria-label="Add Task"
             @click="addCard()"
           >
             <div class="card-body text-center d-flex flex-column justify-content-center">
