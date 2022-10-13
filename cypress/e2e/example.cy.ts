@@ -52,3 +52,26 @@ it('can create and edit another task while the other is running', () => {
   cy.get('#card-1')
     .should('have.attr', 'aria-selected', 'true');
 });
+
+it('click task2 stops task1; click task2 again stops itself', () => {
+  cy.get('#card-1')
+    .should('have.attr', 'aria-selected', 'true');
+
+  cy.get('#card-2')
+    .click()
+    .should('have.attr', 'aria-selected', 'true');
+
+  cy.get('#card-1')
+    .should('have.attr', 'aria-selected', 'false');
+
+  cy.get('#card-2')
+    .find('.timer')
+    .contains('00:00:00')
+    .wait(1000)
+    .contains('00:00:01')
+    .wait(1000)
+    .contains('00:00:02')
+    .click() // stop timer
+    .wait(1000)
+    .contains('00:00:02'); // timer is stopped
+});
