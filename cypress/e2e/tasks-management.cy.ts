@@ -3,6 +3,7 @@
 it('can access page', () => {
   cy.visit('/');
   cy.contains('h1', 'Timed Report!');
+  cy.matchImage();
 });
 
 it('can create and start a new task', () => {
@@ -27,6 +28,8 @@ it('can create and start a new task', () => {
   // eslint-disable-next-line
   cy.wait(1000);
   cy.get('#card-1').find('.timer').contains('00:00:02');
+
+  cy.matchImage();
 });
 
 it('can create and edit another task while the other is running', () => {
@@ -44,6 +47,8 @@ it('can create and edit another task while the other is running', () => {
   // keep the other one running
   cy.get('#card-1')
     .should('have.attr', 'aria-selected', 'true');
+
+  cy.matchImage();
 });
 
 it('click task2 stops task1; click task2 again stops itself', () => {
@@ -68,6 +73,8 @@ it('click task2 stops task1; click task2 again stops itself', () => {
     .click() // stop timer
     .wait(1000)
     .contains('00:00:02'); // timer is stopped
+
+  cy.matchImage();
 });
 
 it('stops timer while editing time, but not other fields', () => {
@@ -95,6 +102,8 @@ it('stops timer while editing time, but not other fields', () => {
     .wait(1000)
     .type('{enter}')
     .contains('01:00:00')
+
+  cy.matchImage();
 });
 
 it('change task status; done sets progress to 100%', () => {
@@ -133,6 +142,8 @@ it('change task status; done sets progress to 100%', () => {
     .get('#card-1')
     .findByRole('progressbar')
     .should('have.attr', 'aria-valuenow', '100')
+
+  cy.matchImage();
 });
 
 it('can delete tasks', () => {
@@ -152,6 +163,8 @@ it('can delete tasks', () => {
     .click();
 
   cy.get('.task-card').should('have.length', 0);
+
+  cy.matchImage();
 });
 
 it('can change manually progress of the task', () => {
@@ -171,6 +184,8 @@ it('can change manually progress of the task', () => {
     .get('#card-1')
     .findByRole('progressbar')
     .should('have.attr', 'aria-valuenow', '69') // nice
+
+  cy.matchImage();
 });
 
 it('can edit all field', () => {
@@ -182,4 +197,6 @@ it('can edit all field', () => {
     status: 'doing',
     time: '01:00:00',
   });
+
+  cy.matchImage();
 });

@@ -1,5 +1,6 @@
 /// <reference types="cypress" />
 import '@testing-library/cypress/add-commands'
+import '@frsource/cypress-plugin-visual-regression-diff';
 
 const CypressMagic = undefined;
 
