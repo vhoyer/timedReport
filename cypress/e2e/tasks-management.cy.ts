@@ -93,7 +93,7 @@ it('stops timer while editing time, but not other fields', () => {
 
   cy.get('#card-2')
     .find('.timer')
-    .contains('00:00:03')
+    .contains('00:00:03') // time kept running while editing subtitle
     .dblclick()
     .type('01:00:00')
     .wait(1000)
