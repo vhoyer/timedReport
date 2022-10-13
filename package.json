@@ -30,6 +30,7 @@
   "homepage": "https://vhoyer.github.io/timedReport/",
   "dependencies": {
     "@rushstack/eslint-patch": "^1.2.0",
+    "@testing-library/cypress": "^8.0.3",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/vue": "^6.6.1",
     "@types/autosize": "^4.0.1",
