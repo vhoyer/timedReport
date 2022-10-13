@@ -26,3 +26,29 @@ it('can create and start a new task', () => {
   cy.wait(1000);
   cy.get('#card-1').find('.timer').contains('00:00:02');
 });
+
+it('can create and edit another task while the other is running', () => {
+  cy.get('[aria-label="Add Task"]').click();
+
+  cy.get('.task-card').should('have.length', 2);
+
+  // keep the other one running
+  cy.get('#card-1')
+    .should('have.attr', 'aria-selected', 'true');
+
+  // edit it
+  cy.get('#card-2')
+    .find('.card-title')
+    .dblclick()
+    // dblclick enables edition
+    .should('have.attr', 'contenteditable', 'true')
+    .type('A new hope{enter}')
+    // when user {enter}s set editable false
+    .should('have.attr', 'contenteditable', 'false')
+    // leave the content behind
+    .contains('A new hope');
+
+  // keep the other one running
+  cy.get('#card-1')
+    .should('have.attr', 'aria-selected', 'true');
+});
