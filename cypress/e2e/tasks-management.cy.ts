@@ -138,3 +138,23 @@ it('change task status; done sets progress to 100%', () => {
     .findByRole('progressbar')
     .should('have.attr', 'aria-valuenow', '100')
 });
+
+it('can delete tasks', () => {
+  cy.get('#card-1')
+    .findByLabelText('Delete Task')
+    .click()
+
+  cy.get('.task-card').should('have.length', 1);
+
+  // create two cards
+  cy.get('[aria-label="Add Task"]')
+    .click()
+    .click();
+
+  cy.get('.task-card').should('have.length', 3);
+
+  cy.findByText('Clear Cards')
+    .click();
+
+  cy.get('.task-card').should('have.length', 0);
+});

@@ -19,7 +19,8 @@
         <button
           type="button"
           class="close close-card"
-          aria-label="Close"
+          aria-label="Delete Task"
+          title="Delete Task"
           @click="$emit('card-closed')"
         >
           <span aria-hidden="true">&times;</span>
