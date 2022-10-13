@@ -75,3 +75,28 @@ it('click task2 stops task1; click task2 again stops itself', () => {
     .wait(1000)
     .contains('00:00:02'); // timer is stopped
 });
+
+it('stops timer while editing time, but not other fields', () => {
+  cy.get('#card-2')
+    .should('have.attr', 'aria-selected', 'false')
+    .find('.timer')
+    .contains('00:00:02')
+
+  cy.get('#card-2')
+    .click() // start timer
+    .should('have.attr', 'aria-selected', 'true')
+    .find('.card-subtitle')
+    .dblclick()
+    .type('Star Wars IV')
+    .wait(1000)
+    .type('{enter}')
+
+  cy.get('#card-2')
+    .find('.timer')
+    .contains('00:00:03')
+    .dblclick()
+    .type('01:00:00')
+    .wait(1000)
+    .type('{enter}')
+    .contains('01:00:00')
+});
