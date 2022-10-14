@@ -3,6 +3,7 @@
   "include": [
     "env.config.d.ts",
     ".eslintrc.cjs",
+    "cypress.config.*",
     "vite.config.*",
     "vitest.config.*"
   ],

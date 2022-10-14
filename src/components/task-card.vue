@@ -7,15 +7,20 @@
     <div
       ref="card"
       :id="id"
-      class="card text-center h-100"
+      class="card task-card text-center h-100"
       :class="{ selected: isSelected }"
+      :aria-selected="isSelected"
+      :aria-labelledby="`${id}-title`"
+      role="button"
+      tabindex="0"
       @contextmenu="$emit('contextmenu', $event)"
     >
       <div class="close-wrapper">
         <button
           type="button"
           class="close close-card"
-          aria-label="Close"
+          aria-label="Delete Task"
+          title="Delete Task"
           @click="$emit('card-closed')"
         >
           <span aria-hidden="true">&times;</span>
@@ -33,6 +38,7 @@
         @click.self="$emit('card-clicked')"
       >
         <div
+          :id="`${id}-title`"
           class="card-title h5"
           data-bound-property="title"
           @click="cardClickedOr('edit-title', $event)"

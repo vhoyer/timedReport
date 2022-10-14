@@ -1,4 +1,4 @@
-export type Card = {
+export type Task = {
   /** id of the card */
   id: string;
   /** title of the task */

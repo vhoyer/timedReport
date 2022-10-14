@@ -7,7 +7,7 @@ env:
 
 jobs:
   lint:
-    name: lint
+    name: Linting
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
@@ -15,12 +15,12 @@ jobs:
     - run: npm run lint
 
   test:
-    name: tests
+    name: Tests
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
     - run: npm install
-    - run: npm test
+    - run: npm run test:unit:ci
 
   build:
     needs: [lint, test]
@@ -30,3 +30,20 @@ jobs:
     - uses: actions/checkout@master
     - run: npm install
     - run: npm run build
+    - uses: actions/upload-artifact@v3
+      with:
+        name: dist
+        path: ./dist
+
+  e2e:
+    name: End to End Testing
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - run: npm install
+    - uses: actions/download-artifact@v3
+      with:
+        name: dist
+        path: ./dist
+    - run: npm run test:e2e:ci

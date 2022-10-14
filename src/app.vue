@@ -68,6 +68,7 @@
           <div
             id="add-new"
             class="card h-100 add-card"
+            aria-label="Add Task"
             @click="addCard()"
           >
             <div class="card-body text-center d-flex flex-column justify-content-center">
@@ -234,30 +235,6 @@
       </div>
     </div>
 
-    <aside
-      v-if="displayCookieAlert"
-      class="container fixed-bottom"
-    >
-      <div
-        class="alert alert-warning alert-dismissible fade show mx-3"
-        role="alert"
-      >
-        <strong>Holy guacamole!</strong>
-        This site uses your <s>cookies</s> <code>window.localStorage</code>.
-        Deal with it!
-        <small>— The cool kids now use <code>window.localStorage</code></small>
-        <button
-          type="button"
-          class="close"
-          data-dismiss="alert"
-          aria-label="Close"
-          @click="displayCookieAlert = false"
-        >
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-    </aside>
-
     <my-footer />
   </div>
 </template>
@@ -280,7 +257,6 @@ export default defineComponent({
   },
   data: () => ({
     autoSaver: undefined as number|undefined,
-    displayCookieAlert: true,
     beta: false,
     configEntry: '',
     hideCompletedCards: false,
@@ -333,7 +309,6 @@ export default defineComponent({
   computed: {
     storage() {
       return [
-        'displayCookieAlert',
         'taskStateCustom',
         'customActions',
         'configEntry',
@@ -604,7 +579,6 @@ export default defineComponent({
       clearInterval(this.timer.current);
       clearInterval(this.autoSaver);
 
-      this.displayCookieAlert = true;
       this.timer.current = undefined;
       this.beta = false;
       this.clearCards();
