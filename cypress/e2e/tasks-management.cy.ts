@@ -1,12 +1,19 @@
 // https://docs.cypress.io/api/introduction/api.html
 
+const clearLocalStorage: Partial<Cypress.VisitOptions> = {
+  onBeforeLoad(win) {
+    win.localStorage.clear();
+  },
+};
+
 it('can access page', () => {
-  cy.visit('/');
+  cy.visit('/', clearLocalStorage);
   cy.contains('h1', 'Timed Report!');
   cy.matchImage();
 });
 
 it('can create and start a new task', () => {
+  cy.visit('/', clearLocalStorage);
   cy.taskCreate();
 
   cy.get('#card-1').find('.eta').contains('00:00:00');
@@ -33,7 +40,10 @@ it('can create and start a new task', () => {
 });
 
 it('can create and edit another task while the other is running', () => {
-  cy.get('[aria-label="Add Task"]').click();
+  cy.visit('/', clearLocalStorage);
+  cy.taskCreate({ time: '00:00:02' })
+    .click();
+  cy.taskCreate();
 
   cy.get('.task-card').should('have.length', 2);
 
@@ -52,6 +62,11 @@ it('can create and edit another task while the other is running', () => {
 });
 
 it('click task2 stops task1; click task2 again stops itself', () => {
+  cy.visit('/', clearLocalStorage);
+  cy.taskCreate({ time: '00:00:02' })
+    .click();
+  cy.taskCreate({ title: 'A new hope' });
+
   cy.get('#card-1')
     .should('have.attr', 'aria-selected', 'true');
 
@@ -78,6 +93,10 @@ it('click task2 stops task1; click task2 again stops itself', () => {
 });
 
 it('stops timer while editing time, but not other fields', () => {
+  cy.visit('/', clearLocalStorage);
+  cy.taskCreate({ time: '00:00:02' });
+  cy.taskCreate({ title: 'A new hope', time: '00:00:02' });
+
   cy.get('#card-2')
     .should('have.attr', 'aria-selected', 'false')
     .find('.timer')
@@ -107,6 +126,14 @@ it('stops timer while editing time, but not other fields', () => {
 });
 
 it('change task status; done sets progress to 100%', () => {
+  cy.visit('/', clearLocalStorage);
+  cy.taskCreate({ time: '00:00:02' });
+  cy.taskCreate({
+    title: 'A new hope',
+    project: 'Star Wars IV',
+    time: '01:00:00'
+  }).click();
+
   cy.get('#card-2')
     .findByRole('progressbar')
     .should('have.attr', 'aria-valuenow', '0')
@@ -147,6 +174,12 @@ it('change task status; done sets progress to 100%', () => {
 });
 
 it('can delete tasks', () => {
+  cy.visit('/', clearLocalStorage);
+  cy.taskCreate();
+  cy.taskCreate();
+
+  cy.get('.task-card').should('have.length', 2);
+
   cy.get('#card-1')
     .findByLabelText('Delete Task')
     .click()
@@ -170,11 +203,12 @@ it('can delete tasks', () => {
 it('can change manually progress of the task', () => {
   cy.visit('/', {
     onBeforeLoad(win) {
-      cy.stub(win, 'prompt').returns('69')
+      clearLocalStorage.onBeforeLoad?.(win);
+      cy.stub(win, 'prompt').returns('69');
     },
   });
 
-  cy.get('[aria-label="Add Task"]').click()
+  cy.taskCreate();
 
   cy.get('#card-1')
     .rightclick()
@@ -189,6 +223,8 @@ it('can change manually progress of the task', () => {
 });
 
 it('can edit all field', () => {
+  cy.visit('/', clearLocalStorage);
+
   cy.taskCreate({
     eta: '02:20:00',
     title: 'Revenge of the Sith',
