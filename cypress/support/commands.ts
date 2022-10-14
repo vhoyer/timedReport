@@ -82,6 +82,7 @@ Cypress.Commands.add(
         .taskFieldEdit(field, value);
     }
 
+    cy.get('.task-card').last();
     return CypressMagic;
   },
 );
