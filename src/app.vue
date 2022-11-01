@@ -240,7 +240,7 @@
 </template>
 
 <script lang="ts">
-import type { Card } from './global';
+import type { Task } from './global';
 import { defineComponent } from 'vue';
 import $ from 'jquery';
 import autosize from 'autosize';
@@ -270,7 +270,7 @@ export default defineComponent({
     },
 
     idOrigin: 0,
-    cards: [] as Card[],
+    cards: [] as Task[],
 
     taskStateCustom: [
       { index: 3, percentage: 100, color: 'var(--success)' },
@@ -298,8 +298,8 @@ export default defineComponent({
 
     // event args
     eventArgs: {
-      previousActiveCard: undefined as Card|undefined,
-      senderCard: undefined as Card|undefined,
+      previousActiveCard: undefined as Task|undefined,
+      senderCard: undefined as Task|undefined,
     },
     on: {
       cardCliking: '()=>{}',
@@ -326,7 +326,7 @@ export default defineComponent({
       return this.hideCompletedCards ? 'Show Completed' : 'Hide Completed';
     },
     cardList() {
-      type Filter = (card: Card) => boolean;
+      type Filter = (card: Task) => boolean;
       const filters: Filter[] = [];
 
       if (this.hideCompletedCards) {
@@ -366,16 +366,16 @@ export default defineComponent({
       return this.cards.find((card) => card.id === cardId);
     },
 
-    stopTimerOn(card: Card) {
+    stopTimerOn(card: Task) {
       card.isSelected = false;
 
       clearInterval(this.timer.current);
     },
-    startTimerOn(card: Card, updateNowValue = true): void {
+    startTimerOn(card: Task, updateNowValue = true): void {
       const selection = document.querySelector('.selected');
 
       if (selection != null) {
-        const previous = this.getCardFromId(selection.id) as Card;
+        const previous = this.getCardFromId(selection.id) as Task;
         // stop any running timer
         this.stopTimerOn(previous);
         // set the events properties
@@ -396,7 +396,7 @@ export default defineComponent({
       }, this.timer.delay);
     },
 
-    getProgressColor(card: Card): string {
+    getProgressColor(card: Task): string {
       const newState = this.taskStateCustom.find((element) => {
         return element.index === card.taskState;
       });
@@ -405,11 +405,11 @@ export default defineComponent({
 
       return newState.color;
     },
-    getStateString(card: Card): string {
+    getStateString(card: Task): string {
       return this.taskStates[card.taskState];
     },
 
-    cardClicked(card: Card): void {
+    cardClicked(card: Task): void {
       this.eventArgs.senderCard = card;
 
       this.callCustomEventHandlers(this.on.cardCliking, this.eventArgs);
@@ -429,7 +429,7 @@ export default defineComponent({
 
     ifEditingTime(field: HTMLElement) {
       const cardElement = field.parentNode as HTMLDivElement;
-      const card = this.getCardFromId(cardElement.id) as Card;
+      const card = this.getCardFromId(cardElement.id) as Task;
       const isEta = field.classList.contains('eta');
 
       if (cardElement?.classList.contains('selected') && !isEta) {
@@ -476,7 +476,7 @@ export default defineComponent({
         }
 
         if (!cardIdForTimer) return;
-        const card = this.getCardFromId(cardIdForTimer) as Card;
+        const card = this.getCardFromId(cardIdForTimer) as Task;
 
         // if it was editing and has a valid time string
         if (timer.wasTimer && timeString != null) {
@@ -520,7 +520,7 @@ export default defineComponent({
         Math.random() * 100,
       );
     },
-    incrementWithRandom(card: Card) {
+    incrementWithRandom(card: Task) {
       const increment = Math.floor(Math.random() * 10);
       let newValue = increment + card.percentage;
       if (newValue > 100) {
@@ -602,7 +602,7 @@ export default defineComponent({
       this.context.isActive = false;
     },
     switchCardState(statesIndex: number) {
-      const card = this.getCardFromId(this.context.cardId) as Card;
+      const card = this.getCardFromId(this.context.cardId) as Task;
       card.taskState = statesIndex;
 
       const newState = this.taskStateCustom.find((element) => {
@@ -631,7 +631,7 @@ export default defineComponent({
       return !hasMatchingPercentage;
     },
     changePercentage() {
-      const card = this.getCardFromId(this.context.cardId) as Card;
+      const card = this.getCardFromId(this.context.cardId) as Task;
       // eslint-disable-next-line no-alert
       const promptAnswer = prompt(
         'Change task percentage:',
@@ -687,7 +687,7 @@ export default defineComponent({
       closeButton?.click();
     },
 
-    excelBase(card: Card) {
+    excelBase(card: Task) {
       const time = (t: number) => {
         const sign = (t > 0 ? '' : '-');
         const date = new Date(Math.abs(t) + this.timeOffset());
@@ -712,7 +712,7 @@ export default defineComponent({
       ].join('\t') + '\n';
     },
     toExcel() {
-      const card = this.getCardFromId(this.context.cardId) as Card;
+      const card = this.getCardFromId(this.context.cardId) as Task;
       const excel = this.excelBase(card);
       copy(excel);
     },
