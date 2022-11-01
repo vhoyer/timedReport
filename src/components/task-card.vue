@@ -29,6 +29,7 @@
 
       <div
         class="card-header eta"
+        data-bound-property="eta"
         @click="cardClickedOr('edit-eta', $event)"
         v-html="etaString"
       ></div>
@@ -87,6 +88,7 @@
 
       <div
         class="card-footer timer"
+        data-bound-property="time"
         @click="cardClickedOr('edit-time', $event)"
         v-html="timeString"
       ></div>

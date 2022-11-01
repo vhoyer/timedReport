@@ -6,6 +6,9 @@ import { storageAvailable } from './utils/validate-storage';
 import { createApp, h } from 'vue';
 import App from './app.vue';
 
+import { analyticsInit } from './services/analytics';
+analyticsInit();
+
 // Check if browser have support for window.localStorage
 if (!storageAvailable('localStorage')) {
   // eslint-disable-next-line no-alert

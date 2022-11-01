@@ -187,7 +187,7 @@
               id="config-entry"
               v-model="configEntry"
               class="form-control"
-              @keyup.ctrl.enter="runConfig()"
+              @keyup.ctrl.enter="updateConfig()"
             ></textarea>
           </div>
           <div class="modal-footer">
@@ -210,7 +210,7 @@
               type="button"
               class="btn btn-primary"
               data-dismiss="modal"
-              @click="runConfig()"
+              @click="updateConfig()"
             >
               <i class="fas fa-play d-inline d-sm-none d-lg-inline"></i>
               <span class="d-none d-sm-inline">Run code</span>
@@ -248,6 +248,7 @@ import { copy } from './utils/copy';
 import TaskCard from './components/task-card.vue';
 import ContextMenu from './components/context-menu.vue';
 import MyFooter from './components/my-footer.vue';
+import { analyticsTrack } from './services/analytics';
 
 export default defineComponent({
   components: {
@@ -340,8 +341,7 @@ export default defineComponent({
     this.loadStorage();
     // Run config when start
     this.$nextTick(() => {
-      // eslint-disable-next-line no-eval
-      eval(this.configEntry);
+      this.runConfig();
     });
     // Start auto save timer
     this.autoSaver = setInterval(
@@ -448,16 +448,21 @@ export default defineComponent({
     },
     editField(field: HTMLElement, cardId: string) {
       const timer = this.ifEditingTime(field);
+      const property = field.dataset.boundProperty as keyof Task;
 
       const callback = () => {
-        const property = field.dataset.boundProperty as 'title'|'project'|'description';
-        if (property === undefined) {
-          return;
-        }
+        const textBasedProperties = [
+          'title',
+          'project',
+          'description',
+        ] as const;
+
+        if (!textBasedProperties.includes(property as any)) return;
 
         const card = this.getCardFromId(cardId);
         if (card) {
-          card[property] = field.innerHTML.trim() || '-';
+          type TextBasedProperties = typeof textBasedProperties[number];
+          card[property as TextBasedProperties] = field.innerHTML.trim() || '-';
         }
         this.$forceUpdate();
       };
@@ -490,6 +495,10 @@ export default defineComponent({
           // was triggering outOfFocusBehaviour multiple times, this is a workaround
           timer.wasTimer = false;
         }
+
+        analyticsTrack('task_edit', {
+          name: property,
+        });
       };
 
       this.isEditing = true;
@@ -545,14 +554,22 @@ export default defineComponent({
         isSelected: false,
         isHidden: false,
       });
+
+      analyticsTrack('task_create', { count: this.idOrigin });
     },
     removeCard(cardId: string) {
       this.cards = this.cards.filter((element) => element.id !== cardId);
+
+      analyticsTrack('task_delete');
     },
     clearCards() {
       clearInterval(this.timer.current);
       this.idOrigin = 0;
       this.cards = [];
+
+      analyticsTrack('navbar', {
+        name: 'Clear Cards',
+      });
     },
 
     saveStorage() {
@@ -613,6 +630,12 @@ export default defineComponent({
       const callIt = typeof newState.percentage === 'string';
       // eslint-disable-next-line no-eval
       card.percentage = callIt ? eval(`${newState.percentage}`)(card) : newState.percentage;
+
+      analyticsTrack('contextmenu', {
+        event: 'select',
+        name: this.taskStates[statesIndex],
+        type: 'state',
+      });
     },
     checkTaskState(taskIndex: number) {
       const card = this.getCardFromId(this.context.cardId);
@@ -644,6 +667,20 @@ export default defineComponent({
       if (Number.isNaN(newValue)) return;
 
       card.percentage = newValue;
+      analyticsTrack('contextmenu', {
+        event: 'select',
+        name: 'change percentage',
+        type: 'builtin',
+      });
+    },
+
+    onCustomActionHandler(action: { name: string; action: string; }) {
+      this.callCustomEventHandlers(action.action);
+      analyticsTrack('contextmenu', {
+        event: 'select',
+        name: 'name',
+        type: 'custom',
+      });
     },
 
     callCustomEventHandlers(code: string, args?: any) {
@@ -663,6 +700,10 @@ export default defineComponent({
         });
       });
       modal.modal('show');
+
+      analyticsTrack('navbar', {
+        name: 'Load configs',
+      });
     },
     saveConfigFile() {
       if ('download' in HTMLAnchorElement) {
@@ -676,15 +717,28 @@ export default defineComponent({
       downloadAnchor.setAttribute('download', 'MyTimedReport.config.js');
 
       downloadAnchor.click();
+
+      analyticsTrack('custom_config', {
+        event: 'download',
+      })
     },
-    runConfig() {
-      // eslint-disable-next-line no-eval
-      eval(this.configEntry);
+    updateConfig() {
+      this.runConfig();
 
       // close modal
       const buttonSelector = '#config-modal button.btn.d-none.d-sm-block';
       const closeButton = document.querySelector(buttonSelector) as HTMLButtonElement|null;
       closeButton?.click();
+    },
+    runConfig() {
+      // eslint-disable-next-line no-eval
+      eval(this.configEntry);
+
+      if (this.configEntry !== '') {
+        analyticsTrack('custom_config', {
+          event: 'run',
+        });
+      }
     },
 
     excelBase(card: Task) {
@@ -715,6 +769,12 @@ export default defineComponent({
       const card = this.getCardFromId(this.context.cardId) as Task;
       const excel = this.excelBase(card);
       copy(excel);
+
+      analyticsTrack('contextmenu', {
+        event: 'select',
+        name: 'to excel',
+        type: 'builtin',
+      });
     },
     exportToExcel() {
       let excel = '';
@@ -722,6 +782,10 @@ export default defineComponent({
         excel += this.excelBase(card);
       });
       copy(excel);
+
+      analyticsTrack('navbar', {
+        name: 'To Excel',
+      });
     },
     loadFileToConfig(event: Event) {
       const file = (event.target as HTMLInputElement).files?.[0];
@@ -731,6 +795,10 @@ export default defineComponent({
       reader.readAsText(file, 'UTF-8');
       reader.onload = (evt) => {
         this.configEntry = String(evt.target?.result);
+
+        analyticsTrack('custom_config', {
+          event: 'load',
+        });
       };
       reader.onerror = (_evt) => {
         // eslint-disable-next-line no-alert
@@ -739,6 +807,10 @@ export default defineComponent({
     },
     toggleCompleted() {
       this.hideCompletedCards = !this.hideCompletedCards;
+
+      analyticsTrack('navbar', {
+        name: 'Hide Completed',
+      });
     },
   },
 });
