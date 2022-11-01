@@ -28,6 +28,7 @@
   },
   "homepage": "https://vhoyer.github.io/timedReport/",
   "dependencies": {
+    "@amplitude/analytics-browser": "^1.6.0",
     "@frsource/cypress-plugin-visual-regression-diff": "^2.3.8",
     "@rushstack/eslint-patch": "^1.2.0",
     "@testing-library/cypress": "^8.0.3",
