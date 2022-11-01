@@ -248,6 +248,7 @@ import { copy } from './utils/copy';
 import TaskCard from './components/task-card.vue';
 import ContextMenu from './components/context-menu.vue';
 import MyFooter from './components/my-footer.vue';
+import { analyticsTrack } from './services/analytics';
 
 export default defineComponent({
   components: {
@@ -613,6 +614,11 @@ export default defineComponent({
       const callIt = typeof newState.percentage === 'string';
       // eslint-disable-next-line no-eval
       card.percentage = callIt ? eval(`${newState.percentage}`)(card) : newState.percentage;
+
+      analyticsTrack('contextmenu_select', {
+        name: this.taskStates[statesIndex],
+        type: 'state',
+      });
     },
     checkTaskState(taskIndex: number) {
       const card = this.getCardFromId(this.context.cardId);
@@ -644,6 +650,18 @@ export default defineComponent({
       if (Number.isNaN(newValue)) return;
 
       card.percentage = newValue;
+      analyticsTrack('contextmenu_select', {
+        name: 'change percentage',
+        type: 'builtin',
+      });
+    },
+
+    onCustomActionHandler(action: { name: string; action: string; }) {
+      this.callCustomEventHandlers(action.action);
+      analyticsTrack('contextmenu_select', {
+        name: 'name',
+        type: 'custom',
+      });
     },
 
     callCustomEventHandlers(code: string, args?: any) {
@@ -715,6 +733,11 @@ export default defineComponent({
       const card = this.getCardFromId(this.context.cardId) as Task;
       const excel = this.excelBase(card);
       copy(excel);
+
+      analyticsTrack('contextmenu_select', {
+        name: 'to excel',
+        type: 'builtin',
+      });
     },
     exportToExcel() {
       let excel = '';

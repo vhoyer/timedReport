@@ -5,8 +5,15 @@ export const analyticsInit = () => {
 };
 
 export type Events = {
+  'contextmenu_select': {
+    name: string;
+    type: 'builtin'|'custom'|'state';
+  };
 };
 
-export const analyticsTrack = <T extends keyof Events>(name: T, properties: Events[T]) => {
+export const analyticsTrack = <T extends keyof Events>(
+  name: T,
+  properties: Events[T],
+) => {
   track(name, properties);
 }
