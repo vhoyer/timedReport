@@ -360,6 +360,10 @@ export default defineComponent({
 
       this.closeContextMenu();
     });
+
+    analyticsTrack('app', {
+      event: 'start',
+    });
   },
   methods: {
     getCardFromId(cardId: string) {

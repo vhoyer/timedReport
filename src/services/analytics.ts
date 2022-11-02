@@ -6,6 +6,9 @@ export const analyticsInit = () => {
 };
 
 type AnalyticsTrack = {
+  (name: 'app', properties: {
+    event: 'start';
+  }): void;
   (name: 'contextmenu', properties: {
     event: 'select';
     name: string;
