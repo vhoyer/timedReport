@@ -30,5 +30,12 @@ type AnalyticsTrack = {
 };
 
 export const analyticsTrack: AnalyticsTrack = (name: string, properties?: any) => {
+  if (import.meta.env.DEV) {
+    // do not send event in dev mode but log to console
+    console.log(`[analytics/track(${name})]:`, properties);
+
+    return;
+  }
+
   track(name, properties);
 }
