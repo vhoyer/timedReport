@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - run: npm install
+    - run: npm clean-install
     - run: npm run lint
 
   test:
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - run: npm install
+    - run: npm clean-install
     - run: npm run test:unit:ci
 
   build:
@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - run: npm install
+    - run: npm clean-install
     - run: npm run build
     - uses: actions/upload-artifact@v3
       with:
@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - run: npm install
+    - run: npm clean-install
     - uses: actions/download-artifact@v3
       with:
         name: dist
@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - run: npm install
+    - run: npm clean-install
     - run: npm install -g @lhci/cli
     - uses: actions/download-artifact@v3
       with:
