@@ -94,28 +94,20 @@
       <section class="goals mb-4">
         <div class="d-flex justify-content-between align-items-baseline mb-3">
           <h2 class="section-title">Weekly Goals</h2>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-primary"
+            @click="addGoal()"
+          >
+            Add Goal
+          </button>
         </div>
 
         <div class="row">
-          <!-- Add Goal Card -->
-          <div class="col-12 col-md-6 col-lg-4 mb-3">
-            <div
-              class="card add-card"
-              aria-label="Add Goal"
-              @click="addGoal()"
-            >
-              <div class="card-body text-center d-flex flex-column justify-content-center">
-                <div class="plus-wrapper">
-                  <span class="plus-btn rounded-circle"></span>
-                </div>
-              </div>
-            </div>
-          </div>
-
           <!-- Goal Cards -->
-          <div v-for="goal in goals" :key="goal.id" class="col-12 col-md-6 col-lg-4 mb-3">
+          <div v-for="goal in goals" :key="goal.id" class="col-12 col-sm-6 col-md-4 col-xl-5-cols mb-2">
             <div class="card">
-              <div class="card-body">
+              <div class="card-body px-3 py-2">
                 <div class="close-wrapper">
                   <button
                     type="button"
@@ -155,7 +147,7 @@
                   </div>
                 </div>
 
-                <div class="progress mb-2" style="height: 8px;">
+                <div class="progress mb-2" style="height: 6px;">
                   <div
                     class="progress-bar"
                     role="progressbar"
@@ -167,10 +159,6 @@
                     aria-valuemin="0"
                     aria-valuemax="100"
                   ></div>
-                </div>
-
-                <div class="text-muted small">
-                  {{ Math.round((getProjectWeeklyTime(goal.project) / goal.weeklyTimeGoal) * 100) }}% of weekly goal
                 </div>
               </div>
             </div>
@@ -1194,51 +1182,66 @@ export default defineComponent({
 }
 
 .goals {
+  .col-xl-5-cols {
+    @media (min-width: 1200px) {
+      flex: 0 0 20%;
+      max-width: 20%;
+    }
+  }
+
   .card {
-    border-radius: 8px;
+    border-radius: 6px;
     transition: transform 0.2s ease;
 
     &:hover {
       transform: translateY(-2px);
     }
+
+    .card-title {
+      font-size: 1rem;
+      margin-bottom: 0.4rem;
+
+      .project-name {
+        cursor: pointer;
+        padding: 0.2em 0.4em;
+        margin: -0.2em -0.4em;
+        border-radius: 4px;
+
+        &:hover {
+          background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        &[contenteditable="true"] {
+          outline: 2px solid var(--primary);
+          background-color: white;
+        }
+      }
+    }
   }
 
   .badge {
-    font-size: 0.875rem;
-    padding: 0.4em 0.6em;
+    font-size: 0.75rem;
+    padding: 0.3em 0.5em;
   }
 
   .progress {
     border-radius: 4px;
     background-color: rgba(0, 0, 0, 0.05);
+    height: 6px !important;
+    margin-bottom: 0.5rem;
   }
 
   .progress-bar {
     transition: width 0.3s ease;
   }
 
-  .project-name {
-    cursor: pointer;
-    padding: 0.2em 0.4em;
-    margin: -0.2em -0.4em;
-    border-radius: 4px;
-
-    &:hover {
-      background-color: rgba(0, 0, 0, 0.05);
-    }
-
-    &[contenteditable="true"] {
-      outline: 2px solid var(--primary);
-      background-color: white;
-    }
-  }
-
   .times-wrapper {
     gap: 0.4em;
+    margin-bottom: 0.5rem;
   }
 
   .current-time {
-    font-size: 1.25rem;
+    font-size: 1rem;
     color: #6c757d;
     line-height: 1;
     margin-inline-end: 0.4em;
@@ -1247,7 +1250,7 @@ export default defineComponent({
   .time-separator {
     color: #6c757d;
     opacity: 0.5;
-    font-size: 1.25rem;
+    font-size: 1rem;
     line-height: 1;
     display: flex;
     align-items: center;
@@ -1256,7 +1259,7 @@ export default defineComponent({
   .time-goal {
     cursor: pointer;
     display: inline-block;
-    font-size: 1.25rem;
+    font-size: 1rem;
     font-weight: 500;
     padding: 0.2em 0.4em;
     margin: -0.2em 0;
@@ -1271,6 +1274,10 @@ export default defineComponent({
       outline: 2px solid var(--primary);
       background-color: white;
     }
+  }
+
+  .text-muted.small {
+    font-size: 0.75rem;
   }
 }
 </style>
