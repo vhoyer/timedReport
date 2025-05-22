@@ -89,6 +89,9 @@ export default defineComponent({
     isValid(): boolean {
       return this.localPercentage >= 0 && this.localPercentage <= 100;
     },
+    isDark(): boolean {
+      return document.documentElement.classList.contains('dark');
+    }
   },
   watch: {
     currentPercentage(newValue: number) {
@@ -131,5 +134,60 @@ export default defineComponent({
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: -1;
+}
+
+:root.dark .modal-content {
+  background-color: var(--card-bg);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+:root.dark .modal-header,
+:root.dark .modal-footer {
+  border-color: var(--border);
+}
+
+:root.dark .close {
+  color: var(--text);
+  text-shadow: none;
+  opacity: 0.5;
+}
+
+:root.dark .close:hover {
+  opacity: 0.75;
+}
+
+:root.dark .form-control {
+  background-color: var(--bg);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+:root.dark .form-control:focus {
+  background-color: var(--bg);
+  border-color: var(--text-muted);
+  color: var(--text);
+  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.15);
+}
+
+:root.dark .progress {
+  background-color: var(--hover);
+}
+
+:root.dark .modal-title {
+  color: var(--text);
+}
+
+:root.dark label {
+  color: var(--text-muted);
+}
+
+.modal-content,
+.form-control,
+.close,
+.progress,
+.modal-header,
+.modal-footer {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 </style> 

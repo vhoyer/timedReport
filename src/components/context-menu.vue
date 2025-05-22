@@ -3,7 +3,7 @@
     ref="menu"
     class="context-menu dropdown-menu position-fixed"
     data-hj-whitelist
-    :class="{ show: isActive }"
+    :class="{ show: isActive, 'dropdown-menu-dark': isDark }"
     :style="{ transform: 'translate(' + x + 'px,' + y + 'px)' }"
   >
     <slot></slot>
@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 
 interface Props {
   isActive?: boolean;
@@ -29,6 +29,10 @@ const emit = defineEmits<{
 const menu = ref<HTMLDivElement>();
 const width = ref(0);
 const height = ref(0);
+
+const isDark = computed(() => {
+  return document.documentElement.classList.contains('dark');
+});
 
 watch(() => props.x, () => {
   const outsideScreen = window.innerWidth - 18 - (props.x + width.value);
@@ -74,10 +78,28 @@ function onScroll() {
 </script>
 
 <style lang="scss">
-.context-menu{
-    top: 0;
+.context-menu {
+  top: 0;
+  background-color: var(--card-bg);
+  border-color: var(--border);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+
+  &.dropdown-menu-dark {
+    .dropdown-item {
+      color: var(--text);
+
+      &:hover {
+        background-color: var(--hover);
+      }
+
+      &:active {
+        background-color: var(--text-muted);
+      }
+    }
+  }
 }
+
 .context-menu .dropdown-item {
-    cursor: pointer;
+  cursor: pointer;
 }
 </style>

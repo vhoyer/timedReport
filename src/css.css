@@ -1,8 +1,37 @@
+:root {
+	--bg: #ffffff;
+	--card-bg: #ffffff;
+	--text: #212529;
+	--text-muted: #6c757d;
+	--border: rgba(0, 0, 0, 0.125);
+	--hover: rgba(0, 0, 0, 0.05);
+}
+
+:root.dark {
+	--bg: #1a1a1a;
+	--card-bg: #2a2a2a;
+	--card-header-bg: #252525;
+	--text: #d0d0d0;
+	--text-muted: #888888;
+	--border: rgba(255, 255, 255, 0.1);
+	--hover: rgba(255, 255, 255, 0.05);
+}
+
+body {
+	background-color: var(--bg);
+	color: var(--text);
+	transition: background-color 0.3s ease, color 0.3s ease;
+}
+
 .bg-svg{
 	background-image: url(resources/body-bg.svg);
 	background-attachment: fixed;
 	background-position: bottom right;
 	background-size: 100vw 100vh;
+}
+
+:root.dark .bg-svg {
+	opacity: 0.1;
 }
 
 .add-card {
@@ -22,12 +51,31 @@
 	display: inline-block;
 	margin-bottom: -1rem;
 	background-color: rgba(0,0,0,.07);
-	font-size: calc( var(--size) * .67);
-	width: var(--size); /* match .h1 */
+	font-size: calc(var(--size) * .67);
+	width: var(--size);
+	color: var(--text-muted);
+	border: 2px solid var(--border);
+	border-radius: 50%;
 }
 
-.card{
+:root.dark .add-card .plus-btn {
+	background-color: rgba(255, 255, 255, 0.05);
+	color: var(--text-muted);
+	border-color: rgba(255, 255, 255, 0.1);
+}
+
+:root.dark .add-card:hover .plus-btn {
+	background-color: rgba(255, 255, 255, 0.08);
+	color: var(--text);
+	border-color: rgba(255, 255, 255, 0.15);
+}
+
+.card {
 	transition: box-shadow .3s ease-out;
+	background-color: var(--card-bg);
+	border-color: var(--border);
+	transition: background-color 0.3s ease, border-color 0.3s ease;
+	border: 1px solid var(--border);
 }
 
 .task-card {
@@ -77,4 +125,219 @@
 
 #config-entry{
 	max-height: 58vh;
+}
+
+.text-muted {
+	color: var(--text-muted) !important;
+}
+
+/* Update navbar in dark mode */
+:root.dark .navbar {
+	background-color: var(--card-bg) !important;
+}
+
+:root.dark .navbar-brand,
+:root.dark .nav-link {
+	color: var(--text) !important;
+}
+
+:root.dark .nav-link:hover {
+	color: var(--text-muted) !important;
+}
+
+/* Scrollbar styling for both themes */
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--text-muted);
+	border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: var(--text);
+}
+
+/* Remove dark mode specific scrollbar styles since they're now handled above */
+:root.dark ::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+:root.dark ::-webkit-scrollbar-track {
+	background: var(--card-bg);
+}
+
+:root.dark ::-webkit-scrollbar-thumb {
+	background: var(--text-muted);
+	border-radius: 4px;
+}
+
+:root.dark ::-webkit-scrollbar-thumb:hover {
+	background: var(--text);
+}
+
+/* Progress bars in dark mode */
+:root.dark .progress {
+	background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+:root.dark .project-breakdown .progress {
+	background-color: var(--card-bg) !important;
+}
+
+/* Close button styling */
+.close {
+	color: var(--text);
+	text-shadow: none;
+	opacity: 0.5;
+	transition: opacity 0.2s ease;
+	padding: 0.5rem;
+	margin: -0.5rem;
+}
+
+.close:hover {
+	opacity: 0.75;
+	color: var(--text);
+}
+
+/* Task card close button */
+.task-card .close-wrapper {
+	position: absolute;
+	top: 0;
+	right: 0;
+	height: 48px; /* Match the ETA header height */
+	width: 48px;
+}
+
+.task-card .close-card {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0;
+	padding: 0;
+	position: relative;
+	top: 0;
+	right: 0;
+}
+
+.task-card .close-card > span {
+	font-size: 1.25rem;
+	line-height: 1;
+	display: block;
+	transform: translateY(-1px); /* Fine-tune vertical alignment */
+}
+
+/* Goal card close button */
+.goals .card .close {
+	width: 40px; /* Match the goal card header height */
+	height: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0;
+	padding: 0;
+	position: relative;
+	right: -0.75rem; /* Offset the card's padding */
+}
+
+.goals .card .close > span {
+	font-size: 1.25rem;
+	line-height: 1;
+	display: block;
+	transform: translateY(-1px); /* Fine-tune vertical alignment */
+}
+
+:root.dark .close {
+	color: var(--text);
+	text-shadow: none;
+	opacity: 0.5;
+}
+
+:root.dark .close:hover {
+	opacity: 0.75;
+	color: var(--text);
+}
+
+.date-header {
+	font-size: 1.25rem;
+	font-weight: 500;
+	color: #495057;
+	padding-bottom: 0.5rem;
+	border-bottom: 1px solid var(--border);
+	margin-bottom: 1rem;
+}
+
+.date-header small {
+	font-size: 0.875rem;
+	font-weight: normal;
+}
+
+:root.dark .date-header {
+	color: #e0e0e0;
+	border-bottom-color: rgba(255, 255, 255, 0.2);
+}
+
+:root.dark .date-header small {
+	color: var(--text-muted);
+}
+
+/* Card headers and footers in dark mode */
+:root.dark .card-header,
+:root.dark .card-footer,
+:root.dark .goals .card .card-header,
+:root.dark .goals .card .card-footer {
+	background-color: var(--card-header-bg);
+	border-color: var(--border);
+}
+
+/* Override any Bootstrap default background colors */
+.card-header,
+.card-footer {
+	background-color: inherit;
+}
+
+/* Context menu styling */
+.context-menu {
+	background-color: var(--card-bg);
+	border-color: var(--border);
+}
+
+.context-menu .dropdown-item {
+	color: var(--text);
+}
+
+.context-menu .dropdown-item:hover {
+	background-color: var(--hover);
+	color: var(--text);
+}
+
+:root.dark .context-menu {
+	background-color: var(--card-header-bg);
+}
+
+:root.dark .context-menu .dropdown-item {
+	color: var(--text);
+}
+
+:root.dark .context-menu .dropdown-item:hover {
+	background-color: var(--hover);
+	color: var(--text);
+}
+
+.goals .card {
+	border-radius: 6px;
+	transition: transform 0.2s ease, box-shadow .3s ease-out, border-color .3s ease-out;
+}
+
+.goals .card:hover {
+	transform: translateY(-2px);
 }

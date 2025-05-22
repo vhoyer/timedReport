@@ -21,12 +21,22 @@
             </li>
           </ul>
 
-          <ul class="navbar-nav">
-            <li class="nav-item">
+          <ul class="navbar-nav d-flex align-items-center">
+            <li class="nav-item d-flex align-items-center">
               <router-link
                 class="nav-link"
                 to="/reports"
               >Reports</router-link>
+              <button
+                type="button"
+                class="btn btn-link nav-link p-0 d-flex align-items-center justify-content-center ml-2"
+                style="width: 32px; height: 32px; border-radius: 4px;"
+                @click="toggleDarkMode"
+                :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+              >
+                <span v-if="isDark">☀️</span>
+                <span v-else>🌙</span>
+              </button>
             </li>
           </ul>
         </div>
@@ -56,9 +66,9 @@
             }"
             :title="`${project.project}: ${Math.round(project.percentage)}% (${new Date(project.time).toISOString().substr(11, 8)})`"
           >
-            <span 
-              class="project-label" 
-              :style="{ 
+            <span
+              class="project-label"
+              :style="{
                 display: project.percentage > 5 ? 'inline' : 'none'
               }"
             >
@@ -67,12 +77,12 @@
           </div>
         </div>
         <div class="project-legend mt-2 d-flex flex-wrap">
-          <div 
-            v-for="project in projectBreakdown" 
+          <div
+            v-for="project in projectBreakdown"
             :key="project.project"
             class="mr-3 mb-1"
           >
-            <span 
+            <span
               class="color-dot"
               :style="{ backgroundColor: project.color }"
             ></span>
@@ -138,8 +148,8 @@
                   </div>
                 </div>
 
-                <div 
-                  class="progress mb-2" 
+                <div
+                  class="progress mb-2"
                   style="height: 6px;"
                   :style="{ backgroundColor: `color-mix(in srgb, ${getProjectColor(goal.project)} 10%, white)` }"
                 >
@@ -225,8 +235,8 @@
             />
 
             <!-- Add Task card at the end of today's group -->
-            <div 
-              v-if="group.isToday" 
+            <div
+              v-if="group.isToday"
               class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4"
             >
               <div
@@ -348,6 +358,8 @@ export default defineComponent({
       streak: number;
       lastWeekAchieved: string; // YYYY-WW format
     }[],
+
+    isDark: false,
   }),
   computed: {
     storage() {
@@ -437,7 +449,7 @@ export default defineComponent({
     groupedCards() {
       const groups = new Map<string, Task[]>();
       const today = new Date().toISOString().split('T')[0];
-      
+
       // Initialize today's group even if empty
       groups.set(today, []);
 
@@ -471,7 +483,7 @@ export default defineComponent({
   },
   mounted() {
     this.loadStorage();
-    
+
     // Start auto save timer
     this.autoSaver = setInterval(
       () => {
@@ -501,9 +513,27 @@ export default defineComponent({
 
     // Check goals every hour
     setInterval(() => this.checkGoals(), 3600000);
-    
+
     // Initial goals check
     this.checkGoals();
+
+    // Initialize dark mode from localStorage or system preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      this.isDark = savedTheme === 'dark';
+    } else {
+      // Check system preference
+      this.isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    this.applyTheme();
+
+    // Listen for system theme changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      if (!localStorage.getItem('theme')) {
+        this.isDark = e.matches;
+        this.applyTheme();
+      }
+    });
   },
   methods: {
     getCardFromId(cardId: string) {
@@ -919,10 +949,10 @@ export default defineComponent({
       };
 
       this.cards.push(newCard);
-      
+
       // Start the timer on the new card
       this.startTimerOn(newCard);
-      
+
       analyticsTrack('task_duplicate');
     },
 
@@ -930,10 +960,10 @@ export default defineComponent({
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - 45); // 45 days ago
       const cutoffString = cutoffDate.toISOString().split('T')[0];
-      
+
       const oldTaskCount = this.cards.filter(card => card.createdAt < cutoffString).length;
       this.cards = this.cards.filter(card => card.createdAt >= cutoffString);
-      
+
       if (oldTaskCount > 0) {
         console.log(`Cleared ${oldTaskCount} tasks older than 45 days`);
       }
@@ -956,14 +986,14 @@ export default defineComponent({
       const hours = Math.floor(totalSeconds / 3600);
       const minutes = Math.floor((totalSeconds % 3600) / 60);
       const seconds = totalSeconds % 60;
-      
+
       return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     },
 
     parseTimeString(timeStr: string): number {
       const match = timeStr.match(/(\d+):(\d{2}):(\d{2})/);
       if (!match) return 0;
-      
+
       const [, hours, minutes, seconds] = match;
       return (parseInt(hours) * 3600000) + (parseInt(minutes) * 60000) + (parseInt(seconds) * 1000);
     },
@@ -1000,10 +1030,10 @@ export default defineComponent({
 
     checkGoals() {
       const currentWeek = this.currentWeek;
-      
+
       this.goals.forEach(goal => {
         const weeklyTime = this.getProjectWeeklyTime(goal.project);
-        
+
         // If we're in a new week
         if (goal.lastWeekAchieved !== currentWeek) {
           // Check if previous week's goal was met
@@ -1063,7 +1093,7 @@ export default defineComponent({
 
       $(field).on('blur', () => {
         let value: string | number = field.textContent?.trim() || originalText;
-        
+
         if (property === 'weeklyTimeGoal') {
           // Parse time format (HH:MM:SS) to milliseconds
           const timeMs = this.parseTimeString(value);
@@ -1097,6 +1127,19 @@ export default defineComponent({
         value: card.billable,
       });
     },
+
+    toggleDarkMode() {
+      this.isDark = !this.isDark;
+      this.applyTheme();
+      localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
+      analyticsTrack('theme_change', {
+        theme: this.isDark ? 'dark' : 'light'
+      });
+    },
+
+    applyTheme() {
+      document.documentElement.classList.toggle('dark', this.isDark);
+    },
   },
 });
 </script>
@@ -1112,7 +1155,7 @@ export default defineComponent({
     transition: width 0.3s ease;
     position: relative;
     overflow: hidden;
-    
+
     &:hover {
       opacity: 0.9;
     }
@@ -1146,7 +1189,7 @@ export default defineComponent({
 .dropdown-item {
   cursor: pointer;
   text-transform: capitalize;
-  
+
   &:active {
     color: white;
   }
@@ -1174,6 +1217,8 @@ export default defineComponent({
   align-items: center;
   justify-content: center;
   min-height: 18rem;
+  border-style: dashed;
+  border-width: 2px;
 
   &:hover {
     border-color: #6c757d;
@@ -1194,11 +1239,11 @@ export default defineComponent({
       transition: all .2s ease-out;
       line-height: 0;
       position: relative;
-      
+
       &::before {
         content: "+";
         display: block;
-        transform: translateY(-1px); /* Fine-tune vertical position */
+        transform: translateY(-3px); /* Fine-tune vertical position */
       }
     }
   }
@@ -1270,7 +1315,7 @@ export default defineComponent({
         padding: 0.25rem;
         margin: -0.25rem -0.25rem -0.25rem 0.5rem;
         opacity: 0.5;
-        
+
         &:hover {
           opacity: 1;
         }
