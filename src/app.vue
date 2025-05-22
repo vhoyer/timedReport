@@ -131,23 +131,26 @@
             @change-state="openStateMenu(card)"
             @change-percentage="openPercentageDialog(card)"
           />
-        </template>
 
-        <!-- Add Task card at the end -->
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
-          <div
-            id="add-new"
-            class="card h-100 add-card"
-            aria-label="Add Task"
-            @click="addCard()"
+          <!-- Add Task card at the end of today's group -->
+          <div 
+            v-if="group.isToday" 
+            class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4"
           >
-            <div class="card-body text-center d-flex flex-column justify-content-center">
-              <div class="plus-wrapper">
-                <span class="plus-btn rounded-circle"></span>
+            <div
+              id="add-new"
+              class="card h-100 add-card"
+              aria-label="Add Task"
+              @click="addCard()"
+            >
+              <div class="card-body text-center d-flex flex-column justify-content-center">
+                <div class="plus-wrapper">
+                  <span class="plus-btn rounded-circle"></span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </template>
       </div>
     </main>
 
