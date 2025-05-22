@@ -190,14 +190,20 @@ export default defineComponent({
   },
   computed: {
     timeString() {
-      return new Date(
-        this.time + this.timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/
-      )?.[0];
+      const totalSeconds = Math.floor(this.time / 1000);
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     },
     etaString() {
-      return new Date(
-        this.eta + this.timeOffset()).toTimeString().match(/\d\d:\d\d:\d\d/
-      )?.[0];
+      const totalSeconds = Math.floor(this.eta / 1000);
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     },
     progressColorCss() {
       if (this.progressColor === undefined) {

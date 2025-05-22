@@ -610,7 +610,7 @@ export default defineComponent({
         let timeString;
         if (timer.wasTimer || timer.wasEta) {
           cardIdForTimer = (field.parentNode as HTMLDivElement|undefined)?.id;
-          timeString = field.innerHTML.match(/\d\d:\d\d:\d\d/);
+          timeString = field.innerHTML.match(/(\d+):(\d{2}):(\d{2})/);
         }
 
         if (!cardIdForTimer) return;
@@ -618,10 +618,10 @@ export default defineComponent({
 
         // if it was editing and has a valid time string
         if (timer.wasTimer && timeString != null) {
-          card.time = new Date(`1970-01-01T${timeString}`).getTime() - this.timeOffset();
+          card.time = this.parseTimeString(timeString[0]);
         }
         if (timer.wasEta && timeString != null) {
-          card.eta = new Date(`1970-01-01T${timeString}`).getTime() - this.timeOffset();
+          card.eta = this.parseTimeString(timeString[0]);
         }
         if (timer.wasTimer && timer.wasRunning) {
           this.startTimerOn(card);
@@ -923,8 +923,20 @@ export default defineComponent({
     },
 
     formatTime(ms: number) {
-      const date = new Date(ms + this.timeOffset());
-      return date.toTimeString().match(/\d\d:\d\d:\d\d/)?.[0] || '00:00:00';
+      const totalSeconds = Math.floor(ms / 1000);
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    },
+
+    parseTimeString(timeStr: string): number {
+      const match = timeStr.match(/(\d+):(\d{2}):(\d{2})/);
+      if (!match) return 0;
+      
+      const [, hours, minutes, seconds] = match;
+      return (parseInt(hours) * 3600000) + (parseInt(minutes) * 60000) + (parseInt(seconds) * 1000);
     },
 
     openGoalModal(goal = null) {
@@ -1025,12 +1037,8 @@ export default defineComponent({
         
         if (property === 'weeklyTimeGoal') {
           // Parse time format (HH:MM:SS) to milliseconds
-          const timeParts = value.split(':').map(Number);
-          if (timeParts.length === 3) {
-            value = (timeParts[0] * 3600000) + (timeParts[1] * 60000) + (timeParts[2] * 1000);
-          } else {
-            value = goal.weeklyTimeGoal;
-          }
+          const timeMs = this.parseTimeString(value);
+          value = timeMs || goal.weeklyTimeGoal;
           field.textContent = this.formatTime(value);
         }
 
