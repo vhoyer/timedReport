@@ -339,7 +339,12 @@ export default defineComponent({
     
     // Start auto save timer
     this.autoSaver = setInterval(
-      () => this.saveStorage(),
+      () => {
+        // Only save if there's an active timer
+        if (this.timer.current !== undefined) {
+          this.saveStorage();
+        }
+      },
       this.timer.delay,
     );
 
@@ -368,6 +373,8 @@ export default defineComponent({
       card.isSelected = false;
 
       clearInterval(this.timer.current);
+      this.timer.current = undefined;
+      this.saveStorage(); // Save when timer stops
     },
     startTimerOn(card: Task, updateNowValue = true): void {
       const selection = document.querySelector('.selected');
@@ -540,18 +547,20 @@ export default defineComponent({
         createdAt: new Date().toISOString().split('T')[0]
       });
 
+      this.saveStorage(); // Save when adding a new card
       analyticsTrack('task_create', { count: this.idOrigin });
     },
     removeCard(cardId: string) {
       this.cards = this.cards.filter((element) => element.id !== cardId);
-
+      this.saveStorage(); // Save when removing a card
       analyticsTrack('task_delete');
     },
     clearCards() {
       clearInterval(this.timer.current);
+      this.timer.current = undefined;
       this.idOrigin = 0;
       this.cards = [];
-
+      this.saveStorage(); // Save when clearing all cards
       analyticsTrack('navbar', {
         name: 'Clear Cards',
       });
@@ -612,6 +621,7 @@ export default defineComponent({
       if (newState === undefined) { return; }
 
       card.percentage = newState.percentage;
+      this.saveStorage(); // Save when changing task state
 
       analyticsTrack('contextmenu', {
         event: 'select',
@@ -688,6 +698,7 @@ export default defineComponent({
       const card = this.getCardFromId(this.percentageModal.cardId);
       if (card) {
         card.percentage = newPercentage;
+        this.saveStorage(); // Save when changing percentage
         analyticsTrack('task_edit', {
           name: 'percentage',
         });
