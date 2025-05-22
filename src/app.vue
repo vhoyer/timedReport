@@ -266,6 +266,7 @@ export default defineComponent({
     projectBreakdown() {
       const projects = new Map<string, { time: number; color: string }>();
       let totalTime = 0;
+      const today = new Date().toISOString().split('T')[0];
 
       // Generate random color for a project
       const getProjectColor = (project: string) => {
@@ -276,14 +277,16 @@ export default defineComponent({
       };
 
       // Calculate total time and assign colors
-      this.cards.forEach(card => {
-        if (!projects.has(card.project)) {
-          projects.set(card.project, { time: 0, color: getProjectColor(card.project) });
-        }
-        const projectData = projects.get(card.project)!;
-        projectData.time += card.time;
-        totalTime += card.time;
-      });
+      this.cards
+        .filter(card => card.createdAt === today) // Only consider today's tasks
+        .forEach(card => {
+          if (!projects.has(card.project)) {
+            projects.set(card.project, { time: 0, color: getProjectColor(card.project) });
+          }
+          const projectData = projects.get(card.project)!;
+          projectData.time += card.time;
+          totalTime += card.time;
+        });
 
       // Convert to array and calculate percentages
       return Array.from(projects.entries())
@@ -307,7 +310,10 @@ export default defineComponent({
       return filters.reduce((cardList, handler) => cardList.filter(handler), this.cards);
     },
     totalWorkTime() {
-      const totalMs = this.cards.reduce((total, card) => total + card.time, 0);
+      const today = new Date().toISOString().split('T')[0];
+      const totalMs = this.cards
+        .filter(card => card.createdAt === today)
+        .reduce((total, card) => total + card.time, 0);
       const date = new Date(totalMs + this.timeOffset());
       return date.toTimeString().match(/\d\d:\d\d:\d\d/)?.[0] || '00:00:00';
     },
