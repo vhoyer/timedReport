@@ -49,7 +49,7 @@
       >
         <div
           :id="`${id}-title`"
-          class="card-title h5"
+          class="card-title h4"
           data-bound-property="title"
           @click="cardClickedOr('edit-title', $event)"
         >
@@ -387,5 +387,11 @@ export default defineComponent({
   &:hover .project-color-indicator {
     width: 7px;
   }
+}
+
+.card-title.h4 {
+  font-size: 1.125rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
 }
 </style>

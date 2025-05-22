@@ -46,11 +46,12 @@
       class="container"
       style="flex-grow:1"
     >
-      <div class="project-breakdown mb-4">
+      <section class="project-breakdown mb-4">
         <div class="d-flex justify-content-between align-items-baseline">
-          <h5 class="mb-2">Project Breakdown</h5>
-          <div class="total-time text-muted">
-            Total work time: {{ totalWorkTime }}
+          <h2 class="section-title mb-2">Project Breakdown</h2>
+          <div class="total-times text-muted">
+            <span class="mr-4">Today: {{ totalWorkTime }}</span>
+            <span>This Week: {{ weeklyWorkTime }}</span>
           </div>
         </div>
         <div class="progress" style="height: 30px;">
@@ -88,70 +89,70 @@
             ({{ new Date(project.time).toISOString().substr(11, 8) }})
           </div>
         </div>
-      </div>
+      </section>
 
-      <div
-        id="container"
-        class="row"
-      >
-        <template v-for="group in groupedCards" :key="group.date">
-          <div class="col-12 mb-3">
-            <h4 class="date-header">
-              {{ group.formattedDate }}
-              <small class="text-muted" v-if="!group.isToday">
-                (click task to duplicate to today)
-              </small>
-            </h4>
-          </div>
+      <section class="task-history">
+        <h2 class="section-title mb-4">Task History</h2>
+        <div class="row">
+          <template v-for="group in groupedCards" :key="group.date">
+            <div class="col-12 mb-3">
+              <h3 class="date-header">
+                {{ group.formattedDate }}
+                <small class="text-muted" v-if="!group.isToday">
+                  (click task to duplicate to today)
+                </small>
+              </h3>
+            </div>
 
-          <task-card
-            v-for="card in group.cards"
-            :key="card.id"
-            class="col-12 col-sm-6 col-md-4 col-lg-3"
-            :id="card.id"
-            :title="card.title"
-            :project="card.project"
-            :description="card.description"
-            :progress-color="getProgressColor(card)"
-            :progress="card.percentage"
-            :task-state-string="getStateString(card)"
-            :time="card.time"
-            :eta="card.eta"
-            :is-selected="card.isSelected"
-            :is-editing="isEditing"
-            :project-color="getProjectColor(card.project)"
-            @card-closed="removeCard(card.id)"
-            @card-clicked="cardClicked(card)"
-            @edit-title="editField($event, card.id)"
-            @edit-project="editField($event, card.id)"
-            @edit-description="editField($event, card.id)"
-            @edit-time="editField($event, card.id)"
-            @edit-eta="editField($event, card.id)"
-            @contextmenu="contextmenu($event, card.id)"
-            @change-state="openStateMenu(card)"
-            @change-percentage="openPercentageDialog(card)"
-          />
+            <task-card
+              v-for="card in group.cards"
+              :key="card.id"
+              class="col-12 col-sm-6 col-md-4 col-lg-3"
+              :id="card.id"
+              :title="card.title"
+              :project="card.project"
+              :description="card.description"
+              :progress-color="getProgressColor(card)"
+              :progress="card.percentage"
+              :task-state-string="getStateString(card)"
+              :time="card.time"
+              :eta="card.eta"
+              :is-selected="card.isSelected"
+              :is-editing="isEditing"
+              :project-color="getProjectColor(card.project)"
+              @card-closed="removeCard(card.id)"
+              @card-clicked="cardClicked(card)"
+              @edit-title="editField($event, card.id)"
+              @edit-project="editField($event, card.id)"
+              @edit-description="editField($event, card.id)"
+              @edit-time="editField($event, card.id)"
+              @edit-eta="editField($event, card.id)"
+              @contextmenu="contextmenu($event, card.id)"
+              @change-state="openStateMenu(card)"
+              @change-percentage="openPercentageDialog(card)"
+            />
 
-          <!-- Add Task card at the end of today's group -->
-          <div 
-            v-if="group.isToday" 
-            class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4"
-          >
-            <div
-              id="add-new"
-              class="card h-100 add-card"
-              aria-label="Add Task"
-              @click="addCard()"
+            <!-- Add Task card at the end of today's group -->
+            <div 
+              v-if="group.isToday" 
+              class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4"
             >
-              <div class="card-body text-center d-flex flex-column justify-content-center">
-                <div class="plus-wrapper">
-                  <span class="plus-btn rounded-circle"></span>
+              <div
+                id="add-new"
+                class="card h-100 add-card"
+                aria-label="Add Task"
+                @click="addCard()"
+              >
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                  <div class="plus-wrapper">
+                    <span class="plus-btn rounded-circle"></span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </template>
-      </div>
+          </template>
+        </div>
+      </section>
     </main>
 
     <context-menu
@@ -314,6 +315,20 @@ export default defineComponent({
       const totalMs = this.cards
         .filter(card => card.createdAt === today)
         .reduce((total, card) => total + card.time, 0);
+      const date = new Date(totalMs + this.timeOffset());
+      return date.toTimeString().match(/\d\d:\d\d:\d\d/)?.[0] || '00:00:00';
+    },
+    weeklyWorkTime() {
+      const now = new Date();
+      const sunday = new Date(now);
+      sunday.setDate(now.getDate() - now.getDay()); // Go back to last Sunday
+      sunday.setHours(0, 0, 0, 0); // Start of the day
+
+      const weekStart = sunday.toISOString().split('T')[0];
+      const totalMs = this.cards
+        .filter(card => card.createdAt >= weekStart)
+        .reduce((total, card) => total + card.time, 0);
+
       const date = new Date(totalMs + this.timeOffset());
       return date.toTimeString().match(/\d\d:\d\d:\d\d/)?.[0] || '00:00:00';
     },
@@ -874,6 +889,22 @@ export default defineComponent({
     background: #e9ecef;
     border-color: #6c757d;
     color: #495057;
+  }
+}
+
+.section-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6c757d;
+  margin: 0;
+}
+
+.task-history {
+  .section-title {
+    border-bottom: none;
+    margin-top: 1rem;
   }
 }
 </style>
