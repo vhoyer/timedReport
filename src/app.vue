@@ -159,84 +159,6 @@
       </div>
     </context-menu>
 
-    <div
-      id="config-modal"
-      class="modal"
-      tabindex="-1"
-      role="dialog"
-    >
-      <div
-        class="modal-dialog modal-lg modal-dialog-centered"
-        role="document"
-      >
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">
-              Your custom configuragions
-            </h5>
-            <button
-              type="button"
-              class="close"
-              data-dismiss="modal"
-              aria-label="Close"
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <p>Insert valid JavaScript here, or else, face the consequences.</p>
-            <textarea
-              id="config-entry"
-              v-model="configEntry"
-              class="form-control"
-              @keyup.ctrl.enter="updateConfig()"
-            ></textarea>
-          </div>
-          <div class="modal-footer">
-            <div class="input-group">
-              <div class="custom-file">
-                <input
-                  id="inputGroupFile04"
-                  type="file"
-                  class="custom-file-input"
-                  @change="loadFileToConfig"
-                >
-                <label
-                  class="custom-file-label"
-                  for="inputGroupFile04"
-                >Load a file</label>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              class="btn btn-primary"
-              data-dismiss="modal"
-              @click="updateConfig()"
-            >
-              <i class="fas fa-play d-inline d-sm-none d-lg-inline"></i>
-              <span class="d-none d-sm-inline">Run code</span>
-            </button>
-            <button
-              type="button"
-              class="btn btn-secondary"
-              @click="saveConfigFile()"
-            >
-              <i class="fas fa-download d-inline d-md-none d-lg-inline"></i>
-              <span class="d-none d-md-inline">Download file</span>
-            </button>
-            <button
-              type="button"
-              class="btn d-none d-sm-block"
-              data-dismiss="modal"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <my-footer />
   </div>
 </template>
@@ -676,24 +598,6 @@ export default defineComponent({
       });
     },
 
-    loadFileToConfig(event: Event) {
-      const file = (event.target as HTMLInputElement).files?.[0];
-      if (file == null) return;
-
-      const reader = new FileReader();
-      reader.readAsText(file, 'UTF-8');
-      reader.onload = (evt) => {
-        this.configEntry = String(evt.target?.result);
-
-        analyticsTrack('custom_config', {
-          event: 'load',
-        });
-      };
-      reader.onerror = (_evt) => {
-        // eslint-disable-next-line no-alert
-        alert("Couldn't load file's content");
-      };
-    },
     toggleCompleted() {
       this.hideCompletedCards = !this.hideCompletedCards;
 
