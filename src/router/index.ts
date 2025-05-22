@@ -5,7 +5,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'Timers',
-    component: () => import('../views/Index.vue')
+    component: () => import('../views/Timers.vue')
   },
   {
     path: '/reports',
