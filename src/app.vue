@@ -25,13 +25,6 @@
             <button
               type="button"
               class="btn my-2 mr-2 my-sm-0"
-              @click="exportToExcel()"
-            >
-              To Excel
-            </button>
-            <button
-              type="button"
-              class="btn my-2 mr-2 my-sm-0"
               @click="toggleCompleted()"
             >
               {{ showCompletedButtonText }}
@@ -146,13 +139,6 @@
       @close-context="context.isActive = false"
     >
       <div
-        class="dropdown-item"
-        @click="toExcel()"
-      >
-        to excel
-      </div>
-
-      <div
         v-if="showPercentageOption()"
         class="dropdown-item"
         @click="changePercentage()"
@@ -263,7 +249,6 @@ import type { Task } from './global';
 import { defineComponent } from 'vue';
 import $ from 'jquery';
 import autosize from 'autosize';
-import { copy } from './utils/copy';
 import TaskCard from './components/task-card.vue';
 import ContextMenu from './components/context-menu.vue';
 import MyFooter from './components/my-footer.vue';
@@ -689,52 +674,6 @@ export default defineComponent({
       });
     },
 
-    excelBase(card: Task) {
-      const time = (t: number) => {
-        const sign = (t > 0 ? '' : '-');
-        const date = new Date(Math.abs(t) + this.timeOffset());
-
-        return sign + date.toTimeString().match(/\d\d:\d\d:\d\d/)?.[0];
-      };
-      const stateString = this.taskStates[card.taskState];
-
-      const regexLineBreak = /\n/g;
-      const cleanLineBreaks = (value: string) => value.replace(regexLineBreak, ' ');
-
-      return [
-        cleanLineBreaks(card.project),
-        cleanLineBreaks(card.title),
-        cleanLineBreaks(card.description),
-        stateString,
-        '',
-        card.percentage + '%',
-        '',
-        time(card.time),
-        time(card.eta - card.time)
-      ].join('\t') + '\n';
-    },
-    toExcel() {
-      const card = this.getCardFromId(this.context.cardId) as Task;
-      const excel = this.excelBase(card);
-      copy(excel);
-
-      analyticsTrack('contextmenu', {
-        event: 'select',
-        name: 'to excel',
-        type: 'builtin',
-      });
-    },
-    exportToExcel() {
-      let excel = '';
-      this.cards.forEach((card) => {
-        excel += this.excelBase(card);
-      });
-      copy(excel);
-
-      analyticsTrack('navbar', {
-        name: 'To Excel',
-      });
-    },
     loadFileToConfig(event: Event) {
       const file = (event.target as HTMLInputElement).files?.[0];
       if (file == null) return;
