@@ -263,10 +263,32 @@ export default defineComponent({
       card.querySelector('.card-title'),
       card.querySelector('.card-subtitle'),
       card.querySelector('.card-text'),
+      card.querySelector('.card-header.eta'),
+      card.querySelector('.card-footer.timer'),
     ].filter((identity) => Boolean(identity)) as HTMLDivElement[];
 
     elements.forEach((element) => {
+      // Remove any existing paste handlers first
+      element.removeEventListener('paste', this.pastePureText);
+      // Add the paste handler
       element.addEventListener('paste', this.pastePureText);
+    });
+  },
+  beforeDestroy() {
+    // Clean up paste event listeners
+    const card = this.$refs.card as HTMLDivElement;
+    if (!card) return;
+
+    const elements = [
+      card.querySelector('.card-title'),
+      card.querySelector('.card-subtitle'),
+      card.querySelector('.card-text'),
+      card.querySelector('.card-header.eta'),
+      card.querySelector('.card-footer.timer'),
+    ].filter((identity) => Boolean(identity)) as HTMLDivElement[];
+
+    elements.forEach((element) => {
+      element.removeEventListener('paste', this.pastePureText);
     });
   },
   methods: {
@@ -299,9 +321,7 @@ export default defineComponent({
     pastePureText(e: ClipboardEvent) {
       e.preventDefault();
       const text = e.clipboardData?.getData('text/plain') ?? '';
-      const temp = document.createElement('div');
-      temp.innerHTML = text;
-      document.execCommand('insertHTML', false, temp.textContent ?? undefined);
+      document.execCommand('insertText', false, text);
     },
   },
 });

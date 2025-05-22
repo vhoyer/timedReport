@@ -608,6 +608,7 @@ export default defineComponent({
         if (card) {
           type TextBasedProperties = typeof textBasedProperties[number];
           card[property as TextBasedProperties] = field.innerHTML.trim() || '-';
+          this.saveStorage(); // Save text-based edits
         }
         this.$forceUpdate();
       };
@@ -631,9 +632,11 @@ export default defineComponent({
         // if it was editing and has a valid time string
         if (timer.wasTimer && timeString != null) {
           card.time = this.parseTimeString(timeString[0]);
+          this.saveStorage(); // Save time edits
         }
         if (timer.wasEta && timeString != null) {
           card.eta = this.parseTimeString(timeString[0]);
+          this.saveStorage(); // Save ETA edits
         }
         if (timer.wasTimer && timer.wasRunning) {
           this.startTimerOn(card);
@@ -1069,13 +1072,6 @@ export default defineComponent({
           e.preventDefault();
           field.blur();
         }
-      });
-
-      // Prevent paste with formatting
-      $(field).on('paste', (e) => {
-        e.preventDefault();
-        const text = e.originalEvent?.clipboardData?.getData('text/plain') || '';
-        document.execCommand('insertText', false, text);
       });
     },
   },
