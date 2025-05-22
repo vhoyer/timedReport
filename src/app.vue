@@ -94,7 +94,47 @@
         id="container"
         class="row"
       >
-        <div class="mb-4 col-12 col-sm-6 col-md-4 col-lg-3 order-last">
+        <template v-for="group in groupedCards" :key="group.date">
+          <div class="col-12 mb-3">
+            <h4 class="date-header">
+              {{ group.formattedDate }}
+              <small class="text-muted" v-if="!group.isToday">
+                (click task to duplicate to today)
+              </small>
+            </h4>
+          </div>
+
+          <task-card
+            v-for="card in group.cards"
+            :key="card.id"
+            class="col-12 col-sm-6 col-md-4 col-lg-3"
+            :id="card.id"
+            :title="card.title"
+            :project="card.project"
+            :description="card.description"
+            :progress-color="getProgressColor(card)"
+            :progress="card.percentage"
+            :task-state-string="getStateString(card)"
+            :time="card.time"
+            :eta="card.eta"
+            :is-selected="card.isSelected"
+            :is-editing="isEditing"
+            :project-color="getProjectColor(card.project)"
+            @card-closed="removeCard(card.id)"
+            @card-clicked="cardClicked(card)"
+            @edit-title="editField($event, card.id)"
+            @edit-project="editField($event, card.id)"
+            @edit-description="editField($event, card.id)"
+            @edit-time="editField($event, card.id)"
+            @edit-eta="editField($event, card.id)"
+            @contextmenu="contextmenu($event, card.id)"
+            @change-state="openStateMenu(card)"
+            @change-percentage="openPercentageDialog(card)"
+          />
+        </template>
+
+        <!-- Add Task card at the end -->
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
           <div
             id="add-new"
             class="card h-100 add-card"
@@ -103,38 +143,11 @@
           >
             <div class="card-body text-center d-flex flex-column justify-content-center">
               <div class="plus-wrapper">
-                <span class="plus-btn rounded-circle">+</span>
+                <span class="plus-btn rounded-circle"></span>
               </div>
             </div>
           </div>
         </div>
-
-        <task-card
-          v-for="card in cardList"
-          :key="card.id"
-          :id="card.id"
-          :title="card.title"
-          :project="card.project"
-          :description="card.description"
-          :progress-color="getProgressColor(card)"
-          :progress="card.percentage"
-          :task-state-string="getStateString(card)"
-          :time="card.time"
-          :eta="card.eta"
-          :is-selected="card.isSelected"
-          :is-editing="isEditing"
-          :project-color="getProjectColor(card.project)"
-          @card-closed="removeCard(card.id)"
-          @card-clicked="cardClicked(card)"
-          @edit-title="editField($event, card.id)"
-          @edit-project="editField($event, card.id)"
-          @edit-description="editField($event, card.id)"
-          @edit-time="editField($event, card.id)"
-          @edit-eta="editField($event, card.id)"
-          @contextmenu="contextmenu($event, card.id)"
-          @change-state="openStateMenu(card)"
-          @change-percentage="openPercentageDialog(card)"
-        />
       </div>
     </main>
 
@@ -295,6 +308,31 @@ export default defineComponent({
       const date = new Date(totalMs + this.timeOffset());
       return date.toTimeString().match(/\d\d:\d\d:\d\d/)?.[0] || '00:00:00';
     },
+    groupedCards() {
+      const groups = new Map<string, Task[]>();
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Initialize today's group even if empty
+      groups.set(today, []);
+
+      this.cardList.forEach(card => {
+        const date = card.createdAt || today;
+        if (!groups.has(date)) {
+          groups.set(date, []);
+        }
+        groups.get(date)!.push(card);
+      });
+
+      // Convert to array and sort by date descending
+      return Array.from(groups.entries())
+        .sort((a, b) => b[0].localeCompare(a[0]))
+        .map(([date, cards]) => ({
+          date,
+          isToday: date === today,
+          formattedDate: this.formatDate(date),
+          cards
+        }));
+    }
   },
   mounted() {
     this.loadStorage();
@@ -373,6 +411,11 @@ export default defineComponent({
       this.eventArgs.senderCard = card;
 
       if (this.isEditing) {
+        return;
+      }
+
+      if (card.createdAt !== new Date().toISOString().split('T')[0]) {
+        this.duplicateCard(card);
         return;
       }
 
@@ -489,12 +532,12 @@ export default defineComponent({
         project: 'Project name',
         description: 'Full description',
         time: 0,
-        // estimated time of completion
         eta: 0,
         taskState: 0,
         percentage: 0,
         isSelected: false,
         isHidden: false,
+        createdAt: new Date().toISOString().split('T')[0]
       });
 
       analyticsTrack('task_create', { count: this.idOrigin });
@@ -662,6 +705,46 @@ export default defineComponent({
       }, 0);
       return `hsl(${hash % 360}, 70%, 50%)`;
     },
+
+    formatDate(dateStr: string): string {
+      const date = new Date(dateStr);
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      if (dateStr === today.toISOString().split('T')[0]) {
+        return 'Today';
+      }
+      if (dateStr === yesterday.toISOString().split('T')[0]) {
+        return 'Yesterday';
+      }
+
+      return date.toLocaleDateString(undefined, {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    },
+
+    duplicateCard(card: Task) {
+      // Only duplicate if it's not from today
+      if (card.createdAt === new Date().toISOString().split('T')[0]) {
+        return;
+      }
+
+      this.idOrigin += 1;
+      const newCard: Task = {
+        ...card,
+        id: `card-${this.idOrigin}`,
+        time: 0,
+        isSelected: false,
+        createdAt: new Date().toISOString().split('T')[0]
+      };
+
+      this.cards.push(newCard);
+      analyticsTrack('task_duplicate');
+    },
   },
 });
 </script>
@@ -714,6 +797,63 @@ export default defineComponent({
   
   &:active {
     color: white;
+  }
+}
+
+.date-header {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #495057;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(0,0,0,.1);
+  margin-bottom: 1rem;
+
+  small {
+    font-size: 0.875rem;
+    font-weight: normal;
+  }
+}
+
+.add-card {
+  cursor: pointer;
+  transition: box-shadow .3s ease-out, border-color .3s ease-out;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    border-color: #6c757d;
+    box-shadow: 0 0 0 8px rgba(108, 117, 125, 0.1);
+  }
+
+  .plus-wrapper {
+    .plus-btn {
+      width: 48px;
+      height: 48px;
+      background: #f8f9fa;
+      border: 2px solid #dee2e6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: #6c757d;
+      transition: all .2s ease-out;
+      line-height: 0;
+      position: relative;
+      
+      &::before {
+        content: "+";
+        display: block;
+        transform: translateY(-1px); /* Fine-tune vertical position */
+      }
+    }
+  }
+
+  &:hover .plus-btn {
+    background: #e9ecef;
+    border-color: #6c757d;
+    color: #495057;
   }
 }
 </style>
