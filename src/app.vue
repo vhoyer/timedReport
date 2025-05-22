@@ -591,6 +591,7 @@ export default defineComponent({
     },
 
     saveStorage() {
+      this.clearOldTasks();
       window.localStorage.setItem('vm-data',
         JSON.stringify(this.storage));
     },
@@ -609,6 +610,8 @@ export default defineComponent({
           (this as any)[loadedProperty] = loaded;
         }
       });
+
+      this.clearOldTasks();
     },
     clearStorage() {
       clearInterval(this.timer.current);
@@ -779,6 +782,19 @@ export default defineComponent({
 
       this.cards.push(newCard);
       analyticsTrack('task_duplicate');
+    },
+
+    clearOldTasks() {
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - 45); // 45 days ago
+      const cutoffString = cutoffDate.toISOString().split('T')[0];
+      
+      const oldTaskCount = this.cards.filter(card => card.createdAt < cutoffString).length;
+      this.cards = this.cards.filter(card => card.createdAt >= cutoffString);
+      
+      if (oldTaskCount > 0) {
+        console.log(`Cleared ${oldTaskCount} tasks older than 45 days`);
+      }
     },
   },
 });
