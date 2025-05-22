@@ -147,7 +147,11 @@
                   </div>
                 </div>
 
-                <div class="progress mb-2" style="height: 6px;">
+                <div 
+                  class="progress mb-2" 
+                  style="height: 6px;"
+                  :style="{ backgroundColor: `color-mix(in srgb, ${getProjectColor(goal.project)} 10%, white)` }"
+                >
                   <div
                     class="progress-bar"
                     role="progressbar"
