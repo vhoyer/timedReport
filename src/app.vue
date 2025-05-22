@@ -47,7 +47,12 @@
       style="flex-grow:1"
     >
       <div class="project-breakdown mb-4">
-        <h5 class="mb-2">Project Breakdown</h5>
+        <div class="d-flex justify-content-between align-items-baseline">
+          <h5 class="mb-2">Project Breakdown</h5>
+          <div class="total-time text-muted">
+            Total work time: {{ totalWorkTime }}
+          </div>
+        </div>
         <div class="progress" style="height: 30px;">
           <div
             v-for="project in projectBreakdown"
@@ -355,6 +360,11 @@ export default defineComponent({
       }
 
       return filters.reduce((cardList, handler) => cardList.filter(handler), this.cards);
+    },
+    totalWorkTime() {
+      const totalMs = this.cards.reduce((total, card) => total + card.time, 0);
+      const date = new Date(totalMs + this.timeOffset());
+      return date.toTimeString().match(/\d\d:\d\d:\d\d/)?.[0] || '00:00:00';
     },
   },
   mounted() {
