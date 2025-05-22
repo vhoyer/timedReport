@@ -67,7 +67,7 @@
         <div class="card-actions d-flex justify-content-between align-items-center mb-2">
           <button
             type="button"
-            class="btn btn-sm btn-link px-2"
+            class="btn btn-sm btn-link px-2 state-button"
             @click.stop="$emit('change-state')"
           >
             {{ taskStateString }}

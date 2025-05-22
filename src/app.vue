@@ -146,16 +146,6 @@
       @close-context="context.isActive = false"
     >
       <div
-        v-if="showPercentageOption()"
-        class="dropdown-item"
-        @click="changePercentage()"
-      >
-        {{ getCardFromId(context.cardId)?.percentage }}% - change it
-      </div>
-
-      <div class="dropdown-divider"></div>
-
-      <div
         v-for="(state,index) in taskStates"
         :key="`${state}${index}`"
         class="dropdown-item"
@@ -713,13 +703,16 @@ export default defineComponent({
     },
 
     openStateMenu(card: Task) {
-      // Create a fake event at the card's position to show the context menu
-      const element = document.getElementById(card.id);
-      if (!element) return;
+      // Position the context menu next to the state button
+      const cardElement = document.getElementById(card.id);
+      if (!cardElement) return;
 
-      const rect = element.getBoundingClientRect();
-      this.context.x = rect.x + rect.width / 2;
-      this.context.y = rect.y + rect.height / 2;
+      const stateButton = cardElement.querySelector('.state-button') as HTMLElement;
+      if (!stateButton) return;
+
+      const rect = stateButton.getBoundingClientRect();
+      this.context.x = rect.x + rect.width;
+      this.context.y = rect.y;
       this.context.isActive = true;
       this.context.cardId = card.id;
     },
@@ -784,6 +777,15 @@ export default defineComponent({
   .project-legend {
     font-size: 0.875rem;
     color: #666;
+  }
+}
+
+.dropdown-item {
+  cursor: pointer;
+  text-transform: capitalize;
+  
+  &:active {
+    color: white;
   }
 }
 </style>
