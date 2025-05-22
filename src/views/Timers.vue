@@ -700,6 +700,14 @@ export default defineComponent({
       });
 
       this.clearOldTasks();
+      
+      // Track when goals are loaded
+      if (this.goals.length > 0) {
+        analyticsTrack('goals', {
+          event: 'loaded',
+          count: this.goals.length
+        });
+      }
     },
     clearStorage() {
       clearInterval(this.timer.current);

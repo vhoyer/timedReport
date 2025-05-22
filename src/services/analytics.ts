@@ -27,6 +27,10 @@ type AnalyticsTrack = {
   (name: 'navbar', properties: {
     name: string;
   }): void;
+  (name: 'goals', properties: {
+    event: 'loaded';
+    count: number;
+  }): void;
 };
 
 export const analyticsTrack: AnalyticsTrack = (name: string, properties?: any) => {
