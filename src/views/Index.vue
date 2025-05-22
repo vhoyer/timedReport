@@ -1,266 +1,213 @@
 <template>
-  <div
-    class="d-flex flex-column"
-    style="min-height:100vh"
-  >
-    <header class="mb-3">
-      <nav class="navbar navbar-light bg-light">
-        <div class="container">
-          <h1 class="navbar-brand mb-0">
-            Timed Report!
-          </h1>
-
-          <ul class="navbar-nav mr-auto">
-            <li class="nav-item">
-              <a
-                class="nav-link"
-                target="_blank"
-                href="https://github.com/vhoyer/timedReport/issues/new"
-              >Feature request?</a>
-            </li>
-          </ul>
-
-          <ul class="navbar-nav d-flex align-items-center">
-            <li class="nav-item d-flex align-items-center">
-              <router-link
-                class="nav-link mr-3"
-                to="/"
-                active-class="active"
-              >Timers</router-link>
-              <router-link
-                class="nav-link mr-3"
-                to="/reports"
-                active-class="active"
-              >Reports</router-link>
-              <button
-                type="button"
-                class="btn btn-link nav-link p-0 d-flex align-items-center justify-content-center"
-                style="width: 32px; height: 32px; border-radius: 4px;"
-                @click="toggleDarkMode"
-                :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-              >
-                <span v-if="isDark">☀️</span>
-                <span v-else>🌙</span>
-              </button>
-            </li>
-          </ul>
+  <div class="container" style="flex-grow:1">
+    <section class="project-breakdown mb-4">
+      <div class="d-flex justify-content-between align-items-baseline">
+        <h2 class="section-title mb-2">Project Breakdown</h2>
+        <div class="total-times text-muted">
+          <span class="mr-4">Today: {{ totalWorkTime }}</span>
+          <span>This Week: {{ weeklyWorkTime }}</span>
         </div>
-      </nav>
-    </header>
-
-    <main
-      class="container"
-      style="flex-grow:1"
-    >
-      <section class="project-breakdown mb-4">
-        <div class="d-flex justify-content-between align-items-baseline">
-          <h2 class="section-title mb-2">Project Breakdown</h2>
-          <div class="total-times text-muted">
-            <span class="mr-4">Today: {{ totalWorkTime }}</span>
-            <span>This Week: {{ weeklyWorkTime }}</span>
-          </div>
-        </div>
-        <div class="progress" style="height: 30px;">
-          <div
-            v-for="project in projectBreakdown"
-            :key="project.project"
-            class="progress-bar"
+      </div>
+      <div class="progress" style="height: 30px;">
+        <div
+          v-for="project in projectBreakdown"
+          :key="project.project"
+          class="progress-bar"
+          :style="{
+            width: project.percentage + '%',
+            backgroundColor: project.color
+          }"
+          :title="`${project.project}: ${Math.round(project.percentage)}% (${new Date(project.time).toISOString().substr(11, 8)})`"
+        >
+          <span
+            class="project-label"
             :style="{
-              width: project.percentage + '%',
-              backgroundColor: project.color
+              display: project.percentage > 5 ? 'inline' : 'none'
             }"
-            :title="`${project.project}: ${Math.round(project.percentage)}% (${new Date(project.time).toISOString().substr(11, 8)})`"
           >
-            <span
-              class="project-label"
-              :style="{
-                display: project.percentage > 5 ? 'inline' : 'none'
-              }"
-            >
-              {{ project.project }}
-            </span>
-          </div>
+            {{ project.project }}
+          </span>
         </div>
-        <div class="project-legend mt-2 d-flex flex-wrap">
-          <div
-            v-for="project in projectBreakdown"
-            :key="project.project"
-            class="mr-3 mb-1"
-          >
-            <span
-              class="color-dot"
-              :style="{ backgroundColor: project.color }"
-            ></span>
-            {{ project.project }}: {{ Math.round(project.percentage) }}%
-            ({{ new Date(project.time).toISOString().substr(11, 8) }})
-          </div>
+      </div>
+      <div class="project-legend mt-2 d-flex flex-wrap">
+        <div
+          v-for="project in projectBreakdown"
+          :key="project.project"
+          class="mr-3 mb-1"
+        >
+          <span
+            class="color-dot"
+            :style="{ backgroundColor: project.color }"
+          ></span>
+          {{ project.project }}: {{ Math.round(project.percentage) }}%
+          ({{ new Date(project.time).toISOString().substr(11, 8) }})
         </div>
-      </section>
+      </div>
+    </section>
 
-      <section class="goals mb-4">
-        <div class="d-flex justify-content-between align-items-baseline mb-3">
-          <h2 class="section-title">Weekly Goals</h2>
+    <section class="goals mb-4">
+      <div class="d-flex justify-content-between align-items-baseline mb-3">
+        <h2 class="section-title">Weekly Goals</h2>
+        <button
+          type="button"
+          class="btn btn-sm btn-outline-primary"
+          @click="addGoal()"
+        >
+          Add Goal
+        </button>
+      </div>
+
+      <div class="row">
+        <!-- Goal Cards -->
+        <div v-for="goal in goals" :key="goal.id" class="col-12 col-sm-6 col-md-4 col-xl-5-cols mb-2">
+          <div class="card">
+            <div class="card-header px-3 py-2">
+              <div class="d-flex justify-content-between align-items-center">
+                <div
+                  class="project-name"
+                  data-bound-property="project"
+                  @dblclick="editGoalField($event, goal.id)"
+                >
+                  {{ goal.project }}
+                </div>
+                <div class="d-flex align-items-center">
+                  <span class="badge badge-success mr-2" v-if="goal.streak > 0">
+                    🔥 {{ goal.streak }} weeks
+                  </span>
+                  <button
+                    type="button"
+                    class="close"
+                    aria-label="Delete Goal"
+                    title="Delete Goal"
+                    @click="removeGoal(goal.id)"
+                  >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="card-body px-3 py-2">
+              <div class="d-flex align-items-center mb-2 times-wrapper">
+                <div class="current-time">
+                  {{ formatTime(getProjectWeeklyTime(goal.project)) }}
+                </div>
+                <div class="time-separator">/</div>
+                <div
+                  class="time-goal"
+                  data-bound-property="weeklyTimeGoal"
+                  @dblclick="editGoalField($event, goal.id)"
+                >
+                  {{ formatTime(goal.weeklyTimeGoal) }}
+                </div>
+              </div>
+
+              <div
+                class="progress mb-2"
+                style="height: 6px;"
+                :style="{ backgroundColor: `color-mix(in srgb, ${getProjectColor(goal.project)} 10%, white)` }"
+              >
+                <div
+                  class="progress-bar"
+                  role="progressbar"
+                  :style="{
+                    width: Math.min((getProjectWeeklyTime(goal.project) / goal.weeklyTimeGoal) * 100, 100) + '%',
+                    backgroundColor: getProjectColor(goal.project)
+                  }"
+                  :aria-valuenow="Math.min((getProjectWeeklyTime(goal.project) / goal.weeklyTimeGoal) * 100, 100)"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="task-history">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="section-title mb-0">Task History</h2>
+        <div class="d-flex align-items-center">
           <button
             type="button"
-            class="btn btn-sm btn-outline-primary"
-            @click="addGoal()"
+            class="btn btn-outline-secondary btn-sm mr-2"
+            @click="toggleCompleted()"
           >
-            Add Goal
+            {{ showCompletedButtonText }}
+          </button>
+          <button
+            type="button"
+            :disabled="!(cards.length > 0)"
+            class="btn btn-outline-danger btn-sm"
+            @click="clearCards()"
+          >
+            Clear Cards
           </button>
         </div>
+      </div>
 
-        <div class="row">
-          <!-- Goal Cards -->
-          <div v-for="goal in goals" :key="goal.id" class="col-12 col-sm-6 col-md-4 col-xl-5-cols mb-2">
-            <div class="card">
-              <div class="card-header px-3 py-2">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div
-                    class="project-name"
-                    data-bound-property="project"
-                    @dblclick="editGoalField($event, goal.id)"
-                  >
-                    {{ goal.project }}
-                  </div>
-                  <div class="d-flex align-items-center">
-                    <span class="badge badge-success mr-2" v-if="goal.streak > 0">
-                      🔥 {{ goal.streak }} weeks
-                    </span>
-                    <button
-                      type="button"
-                      class="close"
-                      aria-label="Delete Goal"
-                      title="Delete Goal"
-                      @click="removeGoal(goal.id)"
-                    >
-                      <span aria-hidden="true">&times;</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div class="card-body px-3 py-2">
-                <div class="d-flex align-items-center mb-2 times-wrapper">
-                  <div class="current-time">
-                    {{ formatTime(getProjectWeeklyTime(goal.project)) }}
-                  </div>
-                  <div class="time-separator">/</div>
-                  <div
-                    class="time-goal"
-                    data-bound-property="weeklyTimeGoal"
-                    @dblclick="editGoalField($event, goal.id)"
-                  >
-                    {{ formatTime(goal.weeklyTimeGoal) }}
-                  </div>
-                </div>
-
-                <div
-                  class="progress mb-2"
-                  style="height: 6px;"
-                  :style="{ backgroundColor: `color-mix(in srgb, ${getProjectColor(goal.project)} 10%, white)` }"
-                >
-                  <div
-                    class="progress-bar"
-                    role="progressbar"
-                    :style="{
-                      width: Math.min((getProjectWeeklyTime(goal.project) / goal.weeklyTimeGoal) * 100, 100) + '%',
-                      backgroundColor: getProjectColor(goal.project)
-                    }"
-                    :aria-valuenow="Math.min((getProjectWeeklyTime(goal.project) / goal.weeklyTimeGoal) * 100, 100)"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                  ></div>
-                </div>
-              </div>
-            </div>
+      <div class="row">
+        <template v-for="group in groupedCards" :key="group.date">
+          <div class="col-12 mb-3">
+            <h3 class="date-header">
+              {{ group.formattedDate }}
+              <small class="text-muted" v-if="!group.isToday">
+                (click task to duplicate to today)
+              </small>
+            </h3>
           </div>
-        </div>
-      </section>
 
-      <section class="task-history">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <h2 class="section-title mb-0">Task History</h2>
-          <div class="d-flex align-items-center">
-            <button
-              type="button"
-              class="btn btn-outline-secondary btn-sm mr-2"
-              @click="toggleCompleted()"
-            >
-              {{ showCompletedButtonText }}
-            </button>
-            <button
-              type="button"
-              :disabled="!(cards.length > 0)"
-              class="btn btn-outline-danger btn-sm"
-              @click="clearCards()"
-            >
-              Clear Cards
-            </button>
-          </div>
-        </div>
+          <task-card
+            v-for="card in group.cards"
+            :key="card.id"
+            class="col-12 col-sm-6 col-md-4 col-lg-3"
+            :id="card.id"
+            :title="card.title"
+            :project="card.project"
+            :description="card.description"
+            :progress-color="getProgressColor(card)"
+            :progress="card.percentage"
+            :task-state-string="getStateString(card)"
+            :time="card.time"
+            :eta="card.eta"
+            :is-selected="card.isSelected"
+            :is-editing="isEditing"
+            :project-color="getProjectColor(card.project)"
+            :billable="card.billable"
+            @card-closed="removeCard(card.id)"
+            @card-clicked="cardClicked(card)"
+            @edit-title="editField($event, card.id)"
+            @edit-project="editField($event, card.id)"
+            @edit-description="editField($event, card.id)"
+            @edit-time="editField($event, card.id)"
+            @edit-eta="editField($event, card.id)"
+            @contextmenu="contextmenu($event, card.id)"
+            @change-state="openStateMenu(card)"
+            @change-percentage="openPercentageDialog(card)"
+            @toggle-billable="toggleBillable(card)"
+          />
 
-        <div class="row">
-          <template v-for="group in groupedCards" :key="group.date">
-            <div class="col-12 mb-3">
-              <h3 class="date-header">
-                {{ group.formattedDate }}
-                <small class="text-muted" v-if="!group.isToday">
-                  (click task to duplicate to today)
-                </small>
-              </h3>
-            </div>
-
-            <task-card
-              v-for="card in group.cards"
-              :key="card.id"
-              class="col-12 col-sm-6 col-md-4 col-lg-3"
-              :id="card.id"
-              :title="card.title"
-              :project="card.project"
-              :description="card.description"
-              :progress-color="getProgressColor(card)"
-              :progress="card.percentage"
-              :task-state-string="getStateString(card)"
-              :time="card.time"
-              :eta="card.eta"
-              :is-selected="card.isSelected"
-              :is-editing="isEditing"
-              :project-color="getProjectColor(card.project)"
-              :billable="card.billable"
-              @card-closed="removeCard(card.id)"
-              @card-clicked="cardClicked(card)"
-              @edit-title="editField($event, card.id)"
-              @edit-project="editField($event, card.id)"
-              @edit-description="editField($event, card.id)"
-              @edit-time="editField($event, card.id)"
-              @edit-eta="editField($event, card.id)"
-              @contextmenu="contextmenu($event, card.id)"
-              @change-state="openStateMenu(card)"
-              @change-percentage="openPercentageDialog(card)"
-              @toggle-billable="toggleBillable(card)"
-            />
-
-            <!-- Add Task card at the end of today's group -->
+          <!-- Add Task card at the end of today's group -->
+          <div
+            v-if="group.isToday"
+            class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4"
+          >
             <div
-              v-if="group.isToday"
-              class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4"
+              id="add-new"
+              class="card h-100 add-card"
+              aria-label="Add Task"
+              @click="addCard()"
             >
-              <div
-                id="add-new"
-                class="card h-100 add-card"
-                aria-label="Add Task"
-                @click="addCard()"
-              >
-                <div class="card-body text-center d-flex flex-column justify-content-center">
-                  <div class="plus-wrapper">
-                    <span class="plus-btn rounded-circle"></span>
-                  </div>
+              <div class="card-body text-center d-flex flex-column justify-content-center">
+                <div class="plus-wrapper">
+                  <span class="plus-btn rounded-circle"></span>
                 </div>
               </div>
             </div>
-          </template>
-        </div>
-      </section>
-    </main>
+          </div>
+        </template>
+      </div>
+    </section>
 
     <context-menu
       v-model:is-active="context.isActive"
@@ -289,8 +236,6 @@
       @save="handlePercentageChange"
       @close="closePercentageModal"
     />
-
-    <my-footer />
   </div>
 </template>
 
@@ -300,7 +245,6 @@ import { defineComponent } from 'vue';
 import $ from 'jquery';
 import TaskCard from '../components/task-card.vue';
 import ContextMenu from '../components/context-menu.vue';
-import MyFooter from '../components/my-footer.vue';
 import PercentageModal from '../components/percentage-modal.vue';
 import { analyticsTrack } from '../services/analytics';
 
@@ -308,7 +252,6 @@ export default defineComponent({
   components: {
     TaskCard,
     ContextMenu,
-    MyFooter,
     PercentageModal,
   },
   data: () => ({
@@ -361,8 +304,6 @@ export default defineComponent({
       streak: number;
       lastWeekAchieved: string; // YYYY-WW format
     }[],
-
-    isDark: false,
   }),
   computed: {
     storage() {
@@ -519,24 +460,6 @@ export default defineComponent({
 
     // Initial goals check
     this.checkGoals();
-
-    // Initialize dark mode from localStorage or system preference
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      this.isDark = savedTheme === 'dark';
-    } else {
-      // Check system preference
-      this.isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
-    this.applyTheme();
-
-    // Listen for system theme changes
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-      if (!localStorage.getItem('theme')) {
-        this.isDark = e.matches;
-        this.applyTheme();
-      }
-    });
   },
   methods: {
     getCardFromId(cardId: string) {
@@ -800,7 +723,6 @@ export default defineComponent({
       this.context.isActive = true;
       this.context.cardId = cardId;
     },
-
     switchCardState(statesIndex: number) {
       const card = this.getCardFromId(this.context.cardId) as Task;
       card.taskState = statesIndex;
@@ -1127,19 +1049,6 @@ export default defineComponent({
         name: 'billable',
         value: card.billable,
       });
-    },
-
-    toggleDarkMode() {
-      this.isDark = !this.isDark;
-      this.applyTheme();
-      localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
-      analyticsTrack('theme_change', {
-        theme: this.isDark ? 'dark' : 'light'
-      });
-    },
-
-    applyTheme() {
-      document.documentElement.classList.toggle('dark', this.isDark);
     },
   },
 });
