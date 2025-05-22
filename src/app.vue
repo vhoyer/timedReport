@@ -160,6 +160,13 @@
       </div>
     </context-menu>
 
+    <percentage-modal
+      :is-visible="percentageModal.isVisible"
+      :current-percentage="getCardFromId(percentageModal.cardId)?.percentage || 0"
+      @save="handlePercentageChange"
+      @close="closePercentageModal"
+    />
+
     <my-footer />
   </div>
 </template>
@@ -172,6 +179,7 @@ import autosize from 'autosize';
 import TaskCard from './components/task-card.vue';
 import ContextMenu from './components/context-menu.vue';
 import MyFooter from './components/my-footer.vue';
+import PercentageModal from './components/percentage-modal.vue';
 import { analyticsTrack } from './services/analytics';
 
 export default defineComponent({
@@ -179,6 +187,7 @@ export default defineComponent({
     TaskCard,
     ContextMenu,
     MyFooter,
+    PercentageModal,
   },
   data: () => ({
     autoSaver: undefined as number|undefined,
@@ -215,6 +224,11 @@ export default defineComponent({
     eventArgs: {
       previousActiveCard: undefined as Task|undefined,
       senderCard: undefined as Task|undefined,
+    },
+
+    percentageModal: {
+      isVisible: false,
+      cardId: '',
     },
   }),
   computed: {
@@ -623,21 +637,23 @@ export default defineComponent({
     },
 
     openPercentageDialog(card: Task) {
-      // eslint-disable-next-line no-alert
-      const promptAnswer = prompt(
-        'Change task percentage:',
-        card.percentage.toString(),
-      );
+      this.percentageModal.cardId = card.id;
+      this.percentageModal.isVisible = true;
+    },
 
-      // convert to Number
-      const newValue = Number(promptAnswer);
+    handlePercentageChange(newPercentage: number) {
+      const card = this.getCardFromId(this.percentageModal.cardId);
+      if (card) {
+        card.percentage = newPercentage;
+        analyticsTrack('task_edit', {
+          name: 'percentage',
+        });
+      }
+      this.percentageModal.isVisible = false;
+    },
 
-      if (Number.isNaN(newValue)) return;
-
-      card.percentage = newValue;
-      analyticsTrack('task_edit', {
-        name: 'percentage',
-      });
+    closePercentageModal() {
+      this.percentageModal.isVisible = false;
     },
 
     getProjectColor(project: string) {
