@@ -343,6 +343,7 @@ export default defineComponent({
         'idOrigin',
         'timer',
         'cards',
+        'goals',
       ].reduce((exports: any, key) => {
         exports[key] = (this as any)[key]
         return exports;
