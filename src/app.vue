@@ -131,6 +131,8 @@
           @edit-time="editField($event, card.id)"
           @edit-eta="editField($event, card.id)"
           @contextmenu="contextmenu($event, card.id)"
+          @change-state="openStateMenu(card)"
+          @change-percentage="openPercentageDialog(card)"
         />
       </div>
     </main>
@@ -707,6 +709,36 @@ export default defineComponent({
 
       analyticsTrack('navbar', {
         name: 'Hide Completed',
+      });
+    },
+
+    openStateMenu(card: Task) {
+      // Create a fake event at the card's position to show the context menu
+      const element = document.getElementById(card.id);
+      if (!element) return;
+
+      const rect = element.getBoundingClientRect();
+      this.context.x = rect.x + rect.width / 2;
+      this.context.y = rect.y + rect.height / 2;
+      this.context.isActive = true;
+      this.context.cardId = card.id;
+    },
+
+    openPercentageDialog(card: Task) {
+      // eslint-disable-next-line no-alert
+      const promptAnswer = prompt(
+        'Change task percentage:',
+        card.percentage.toString(),
+      );
+
+      // convert to Number
+      const newValue = Number(promptAnswer);
+
+      if (Number.isNaN(newValue)) return;
+
+      card.percentage = newValue;
+      analyticsTrack('task_edit', {
+        name: 'percentage',
       });
     },
   },

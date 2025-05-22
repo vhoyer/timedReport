@@ -64,8 +64,26 @@
           {{ description }}
         </p>
 
+        <div class="card-actions d-flex justify-content-between align-items-center mb-2">
+          <button
+            type="button"
+            class="btn btn-sm btn-link px-2"
+            @click.stop="$emit('change-state')"
+          >
+            {{ taskStateString }}
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-sm btn-link px-2"
+            @click.stop="$emit('change-percentage')"
+          >
+            {{ progress }}%
+          </button>
+        </div>
+
         <div
-          class="progress my-2"
+          class="progress"
           style="height: 2px;"
         >
           <div
@@ -82,7 +100,7 @@
           class="card-status"
           @click="$emit('card-clicked')"
         >
-          {{ taskStateString }}
+          <small class="text-muted">click to {{ isSelected ? 'stop' : 'start' }} timer</small>
         </div>
       </div>
 
@@ -147,7 +165,8 @@ export default defineComponent({
     'card-closed': () => true,
     'card-clicked': () => true,
     'contextmenu': (_: MouseEvent) => true,
-
+    'change-state': () => true,
+    'change-percentage': () => true,
     'edit-eta': (_: HTMLElement) => true,
     'edit-title': (_: HTMLElement) => true,
     'edit-project': (_: HTMLElement) => true,
@@ -230,3 +249,52 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss">
+.btn-icon {
+  padding: 0.25rem;
+  line-height: 1;
+  color: #6c757d;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: #495057;
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+  }
+
+  svg {
+    display: block;
+  }
+}
+
+.btn-link {
+  color: #6c757d;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+
+  &:hover {
+    color: #495057;
+    text-decoration: none;
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  &:focus {
+    text-decoration: none;
+    box-shadow: none;
+  }
+}
+
+.card-actions {
+  margin-left: -0.5rem;
+  margin-right: -0.5rem;
+}
+</style>
