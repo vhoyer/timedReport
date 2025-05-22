@@ -771,6 +771,12 @@ export default defineComponent({
         return;
       }
 
+      // Stop any currently running timer
+      const currentlyRunning = this.cards.find(c => c.isSelected);
+      if (currentlyRunning) {
+        this.stopTimerOn(currentlyRunning);
+      }
+
       this.idOrigin += 1;
       const newCard: Task = {
         ...card,
@@ -781,6 +787,10 @@ export default defineComponent({
       };
 
       this.cards.push(newCard);
+      
+      // Start the timer on the new card
+      this.startTimerOn(newCard);
+      
       analyticsTrack('task_duplicate');
     },
 
