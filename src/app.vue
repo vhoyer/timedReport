@@ -1134,6 +1134,7 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 18rem;
 
   &:hover {
     border-color: #6c757d;
