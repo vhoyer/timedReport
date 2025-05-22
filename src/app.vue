@@ -91,6 +91,93 @@
         </div>
       </section>
 
+      <section class="goals mb-4">
+        <div class="d-flex justify-content-between align-items-baseline mb-3">
+          <h2 class="section-title">Weekly Goals</h2>
+        </div>
+
+        <div class="row">
+          <!-- Add Goal Card -->
+          <div class="col-12 col-md-6 col-lg-4 mb-3">
+            <div
+              class="card add-card"
+              aria-label="Add Goal"
+              @click="addGoal()"
+            >
+              <div class="card-body text-center d-flex flex-column justify-content-center">
+                <div class="plus-wrapper">
+                  <span class="plus-btn rounded-circle"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Goal Cards -->
+          <div v-for="goal in goals" :key="goal.id" class="col-12 col-md-6 col-lg-4 mb-3">
+            <div class="card">
+              <div class="card-body">
+                <div class="close-wrapper">
+                  <button
+                    type="button"
+                    class="close"
+                    aria-label="Delete Goal"
+                    title="Delete Goal"
+                    @click="removeGoal(goal.id)"
+                  >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+
+                <h4 class="card-title d-flex justify-content-between align-items-center">
+                  <div
+                    class="project-name"
+                    data-bound-property="project"
+                    @dblclick="editGoalField($event, goal.id)"
+                  >
+                    {{ goal.project }}
+                  </div>
+                  <span class="badge badge-success" v-if="goal.streak > 0">
+                    🔥 {{ goal.streak }} weeks
+                  </span>
+                </h4>
+                
+                <div class="d-flex align-items-center mb-2 times-wrapper">
+                  <div class="current-time">
+                    {{ formatTime(getProjectWeeklyTime(goal.project)) }}
+                  </div>
+                  <div class="time-separator">/</div>
+                  <div
+                    class="time-goal"
+                    data-bound-property="weeklyTimeGoal"
+                    @dblclick="editGoalField($event, goal.id)"
+                  >
+                    {{ formatTime(goal.weeklyTimeGoal) }}
+                  </div>
+                </div>
+
+                <div class="progress mb-2" style="height: 8px;">
+                  <div
+                    class="progress-bar"
+                    role="progressbar"
+                    :style="{
+                      width: Math.min((getProjectWeeklyTime(goal.project) / goal.weeklyTimeGoal) * 100, 100) + '%',
+                      backgroundColor: getProjectColor(goal.project)
+                    }"
+                    :aria-valuenow="Math.min((getProjectWeeklyTime(goal.project) / goal.weeklyTimeGoal) * 100, 100)"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                  ></div>
+                </div>
+
+                <div class="text-muted small">
+                  {{ Math.round((getProjectWeeklyTime(goal.project) / goal.weeklyTimeGoal) * 100) }}% of weekly goal
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section class="task-history">
         <h2 class="section-title mb-4">Task History</h2>
         <div class="row">
@@ -247,6 +334,14 @@ export default defineComponent({
       isVisible: false,
       cardId: '',
     },
+
+    goals: [] as {
+      id: string;
+      project: string;
+      weeklyTimeGoal: number; // in milliseconds
+      streak: number;
+      lastWeekAchieved: string; // YYYY-WW format
+    }[],
   }),
   computed: {
     storage() {
@@ -356,7 +451,16 @@ export default defineComponent({
           formattedDate: this.formatDate(date),
           cards
         }));
-    }
+    },
+    currentWeek() {
+      const now = new Date();
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      const week = Math.ceil((((now.getTime() - startOfYear.getTime()) / 86400000) + startOfYear.getDay() + 1) / 7);
+      return `${now.getFullYear()}-${week.toString().padStart(2, '0')}`;
+    },
+    availableProjects() {
+      return [...new Set(this.cards.map(card => card.project))];
+    },
   },
   mounted() {
     this.loadStorage();
@@ -387,6 +491,12 @@ export default defineComponent({
     analyticsTrack('app', {
       event: 'start',
     });
+
+    // Check goals every hour
+    setInterval(() => this.checkGoals(), 3600000);
+    
+    // Initial goals check
+    this.checkGoals();
   },
   methods: {
     getCardFromId(cardId: string) {
@@ -806,6 +916,155 @@ export default defineComponent({
         console.log(`Cleared ${oldTaskCount} tasks older than 45 days`);
       }
     },
+
+    getProjectWeeklyTime(project: string) {
+      const now = new Date();
+      const sunday = new Date(now);
+      sunday.setDate(now.getDate() - now.getDay()); // Go back to last Sunday
+      sunday.setHours(0, 0, 0, 0); // Start of the day
+
+      const weekStart = sunday.toISOString().split('T')[0];
+      return this.cards
+        .filter(card => card.createdAt >= weekStart && card.project === project)
+        .reduce((total, card) => total + card.time, 0);
+    },
+
+    formatTime(ms: number) {
+      const date = new Date(ms + this.timeOffset());
+      return date.toTimeString().match(/\d\d:\d\d:\d\d/)?.[0] || '00:00:00';
+    },
+
+    openGoalModal(goal = null) {
+      this.goalModal.editingGoal = goal ? { ...goal } : {
+        project: '',
+        weeklyTimeGoal: 0,
+        streak: 0,
+        lastWeekAchieved: this.currentWeek
+      };
+      this.goalModal.isVisible = true;
+    },
+
+    closeGoalModal() {
+      this.goalModal.isVisible = false;
+    },
+
+    saveGoal(goal: any) {
+      if (goal.id) {
+        // Update existing goal
+        const index = this.goals.findIndex(g => g.id === goal.id);
+        if (index !== -1) {
+          this.goals[index] = goal;
+        }
+      } else {
+        // Add new goal
+        goal.id = `goal-${Date.now()}`;
+        this.goals.push(goal);
+      }
+      this.saveStorage();
+      this.closeGoalModal();
+    },
+
+    checkGoals() {
+      const currentWeek = this.currentWeek;
+      
+      this.goals.forEach(goal => {
+        const weeklyTime = this.getProjectWeeklyTime(goal.project);
+        
+        // If we're in a new week
+        if (goal.lastWeekAchieved !== currentWeek) {
+          // Check if previous week's goal was met
+          if (weeklyTime >= goal.weeklyTimeGoal) {
+            goal.streak++;
+            goal.lastWeekAchieved = currentWeek;
+          } else {
+            goal.streak = 0;
+          }
+        }
+      });
+
+      this.saveStorage();
+    },
+
+    addGoal() {
+      const newGoal = {
+        id: `goal-${Date.now()}`,
+        project: 'Project name',
+        weeklyTimeGoal: 3600000, // 1 hour default
+        streak: 0,
+        lastWeekAchieved: this.currentWeek
+      };
+      this.goals.push(newGoal);
+      this.saveStorage();
+    },
+
+    removeGoal(goalId: string) {
+      this.goals = this.goals.filter(goal => goal.id !== goalId);
+      this.saveStorage();
+    },
+
+    editGoalField(event: MouseEvent, goalId: string) {
+      if (this.isEditing) return;
+
+      const field = event.target as HTMLElement;
+      const originalText = field.textContent?.trim() || '';
+      this.isEditing = true;
+      field.setAttribute('contenteditable', 'true');
+      field.focus();
+
+      // Select text in field
+      const range = document.createRange();
+      range.selectNodeContents(field);
+      const sel = window.getSelection();
+      sel?.removeAllRanges();
+      sel?.addRange(range);
+
+      const property = field.dataset.boundProperty as keyof typeof this.goals[0];
+      const goal = this.goals.find(g => g.id === goalId);
+      if (!goal) return;
+
+      const cleanup = () => {
+        this.isEditing = false;
+        field.setAttribute('contenteditable', 'false');
+      };
+
+      $(field).on('blur', () => {
+        let value: string | number = field.textContent?.trim() || originalText;
+        
+        if (property === 'weeklyTimeGoal') {
+          // Parse time format (HH:MM:SS) to milliseconds
+          const timeParts = value.split(':').map(Number);
+          if (timeParts.length === 3) {
+            value = (timeParts[0] * 3600000) + (timeParts[1] * 60000) + (timeParts[2] * 1000);
+          } else {
+            value = goal.weeklyTimeGoal;
+          }
+          field.textContent = this.formatTime(value);
+        }
+
+        if (property === 'project') {
+          value = value || 'Project name';
+          field.textContent = value;
+        }
+
+        goal[property] = value;
+        this.saveStorage();
+        cleanup();
+      });
+
+      $(field).on('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          field.blur();
+        }
+      });
+
+      // Prevent paste with formatting
+      $(field).on('paste', (e) => {
+        e.preventDefault();
+        const text = e.originalEvent?.clipboardData?.getData('text/plain') || '';
+        document.execCommand('insertText', false, text);
+      });
+    },
   },
 });
 </script>
@@ -931,6 +1190,87 @@ export default defineComponent({
   .section-title {
     border-bottom: none;
     margin-top: 1rem;
+  }
+}
+
+.goals {
+  .card {
+    border-radius: 8px;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  .badge {
+    font-size: 0.875rem;
+    padding: 0.4em 0.6em;
+  }
+
+  .progress {
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .progress-bar {
+    transition: width 0.3s ease;
+  }
+
+  .project-name {
+    cursor: pointer;
+    padding: 0.2em 0.4em;
+    margin: -0.2em -0.4em;
+    border-radius: 4px;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    &[contenteditable="true"] {
+      outline: 2px solid var(--primary);
+      background-color: white;
+    }
+  }
+
+  .times-wrapper {
+    gap: 0.4em;
+  }
+
+  .current-time {
+    font-size: 1.25rem;
+    color: #6c757d;
+    line-height: 1;
+    margin-inline-end: 0.4em;
+  }
+
+  .time-separator {
+    color: #6c757d;
+    opacity: 0.5;
+    font-size: 1.25rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+  }
+
+  .time-goal {
+    cursor: pointer;
+    display: inline-block;
+    font-size: 1.25rem;
+    font-weight: 500;
+    padding: 0.2em 0.4em;
+    margin: -0.2em 0;
+    border-radius: 4px;
+    line-height: 1;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    &[contenteditable="true"] {
+      outline: 2px solid var(--primary);
+      background-color: white;
+    }
   }
 }
 </style>
