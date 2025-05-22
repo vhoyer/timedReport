@@ -18,12 +18,6 @@
       tabindex="0"
       @contextmenu="$emit('contextmenu', $event)"
     >
-      <!-- Project color indicator -->
-      <div 
-        class="project-color-indicator" 
-        :style="{ backgroundColor: projectColor }"
-      ></div>
-
       <div class="close-wrapper">
         <button
           type="button"
@@ -356,6 +350,7 @@ export default defineComponent({
 }
 
 .card-subtitle {
+  position: relative;
   line-height: 1.2;
 }
 
@@ -363,29 +358,15 @@ export default defineComponent({
   transition: box-shadow .3s ease-out, border-color .3s ease-out;
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(0,0,0,.125);
+  border: 1px solid rgba(0, 0, 0, 0.125);
 
   &.selected {
-    border-color: var(--project-color);
     // Fallback for browsers that don't support color-mix
     box-shadow: 0 0 0 8px rgba(var(--project-color-rgb), 0.4),
                 0 0 0 3px rgba(var(--project-color-rgb), 0.5);
     // Modern browsers
     box-shadow: 0 0 0 8px color-mix(in srgb, var(--project-color) 40%, transparent),
                 0 0 0 3px color-mix(in srgb, var(--project-color) 50%, transparent);
-  }
-
-  .project-color-indicator {
-    position: absolute;
-    left: -1px;
-    top: -2px;
-    bottom: -2px;
-    width: 5px;
-    transition: width 0.2s ease;
-  }
-
-  &:hover .project-color-indicator {
-    width: 7px;
   }
 
   .card-header.eta,
@@ -449,7 +430,24 @@ export default defineComponent({
 
 .card-title.h4 {
   font-size: 1.125rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1.25rem;
   font-weight: 500;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -0.75rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 2px;
+    background-color: var(--project-color);
+    border-radius: 1px;
+  }
+}
+
+.card-subtitle {
+  line-height: 1.2;
 }
 </style>
