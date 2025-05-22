@@ -7,11 +7,18 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, onMounted } from 'vue';
+import { analyticsTrack } from '../services/analytics';
 
 export default defineComponent({
   name: 'ReportsPage',
-  // Add your component logic here
+  setup() {
+    onMounted(() => {
+      analyticsTrack('app', {
+        event: 'reports_loaded'
+      });
+    });
+  }
 });
 </script>
 

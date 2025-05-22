@@ -452,7 +452,7 @@ export default defineComponent({
     });
 
     analyticsTrack('app', {
-      event: 'start',
+      event: 'timers_loaded',
     });
 
     // Check goals every hour

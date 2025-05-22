@@ -7,8 +7,9 @@ import { createApp, h } from 'vue';
 import App from './app.vue';
 import router from './router';
 
-import { analyticsInit } from './services/analytics';
+import { analyticsInit, analyticsTrack } from './services/analytics';
 analyticsInit();
+analyticsTrack('app', { event: 'start' });
 
 // Check if browser have support for window.localStorage
 if (!storageAvailable('localStorage')) {
