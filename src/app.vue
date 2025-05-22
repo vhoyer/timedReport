@@ -60,6 +60,45 @@
       class="container"
       style="flex-grow:1"
     >
+      <div class="project-breakdown mb-4">
+        <h5 class="mb-2">Project Breakdown</h5>
+        <div class="progress" style="height: 30px;">
+          <div
+            v-for="project in projectBreakdown"
+            :key="project.project"
+            class="progress-bar"
+            :style="{
+              width: project.percentage + '%',
+              backgroundColor: project.color
+            }"
+            :title="`${project.project}: ${Math.round(project.percentage)}% (${new Date(project.time).toISOString().substr(11, 8)})`"
+          >
+            <span 
+              class="project-label" 
+              :style="{ 
+                display: project.percentage > 5 ? 'inline' : 'none'
+              }"
+            >
+              {{ project.project }}
+            </span>
+          </div>
+        </div>
+        <div class="project-legend mt-2 d-flex flex-wrap">
+          <div 
+            v-for="project in projectBreakdown" 
+            :key="project.project"
+            class="mr-3 mb-1"
+          >
+            <span 
+              class="color-dot"
+              :style="{ backgroundColor: project.color }"
+            ></span>
+            {{ project.project }}: {{ Math.round(project.percentage) }}%
+            ({{ new Date(project.time).toISOString().substr(11, 8) }})
+          </div>
+        </div>
+      </div>
+
       <div
         id="container"
         class="row"
@@ -325,6 +364,39 @@ export default defineComponent({
     },
     showCompletedButtonText() {
       return this.hideCompletedCards ? 'Show Completed' : 'Hide Completed';
+    },
+    projectBreakdown() {
+      const projects = new Map<string, { time: number; color: string }>();
+      let totalTime = 0;
+
+      // Generate random color for a project
+      const getProjectColor = (project: string) => {
+        const hash = project.split('').reduce((acc, char) => {
+          return char.charCodeAt(0) + ((acc << 5) - acc);
+        }, 0);
+        return `hsl(${hash % 360}, 70%, 50%)`;
+      };
+
+      // Calculate total time and assign colors
+      this.cards.forEach(card => {
+        if (!projects.has(card.project)) {
+          projects.set(card.project, { time: 0, color: getProjectColor(card.project) });
+        }
+        const projectData = projects.get(card.project)!;
+        projectData.time += card.time;
+        totalTime += card.time;
+      });
+
+      // Convert to array and calculate percentages
+      return Array.from(projects.entries())
+        .map(([project, data]) => ({
+          project,
+          percentage: totalTime > 0 ? (data.time / totalTime) * 100 : 0,
+          color: data.color,
+          time: data.time
+        }))
+        .filter(p => p.percentage > 0)
+        .sort((a, b) => b.percentage - a.percentage);
     },
     cardList() {
       type Filter = (card: Task) => boolean;
@@ -819,3 +891,46 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss">
+.project-breakdown {
+  .progress {
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    transition: width 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+
+  .project-label {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+  }
+
+  .color-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+
+  .project-legend {
+    font-size: 0.875rem;
+    color: #666;
+  }
+}
+</style>
