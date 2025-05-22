@@ -25,13 +25,6 @@
             <button
               type="button"
               class="btn my-2 mr-2 my-sm-0"
-              @click="showConfigModal()"
-            >
-              Load configs
-            </button>
-            <button
-              type="button"
-              class="btn my-2 mr-2 my-sm-0"
               @click="exportToExcel()"
             >
               To Excel
@@ -167,19 +160,6 @@
         {{ getCardFromId(context.cardId)?.percentage }}% - change it
       </div>
 
-      <template v-if="customActions.length > 0">
-        <div class="dropdown-divider"></div>
-
-        <div
-          v-for="(custom, index) in customActions"
-          :key="`${custom.name}${index}`"
-          class="dropdown-item"
-          @click="callCustomEventHandlers(custom.action)"
-        >
-          {{ custom.name }}
-        </div>
-      </template>
-
       <div class="dropdown-divider"></div>
 
       <div
@@ -297,10 +277,7 @@ export default defineComponent({
   },
   data: () => ({
     autoSaver: undefined as number|undefined,
-    beta: false,
-    configEntry: '',
     hideCompletedCards: false,
-
     isEditing: false,
 
     timer: {
@@ -329,34 +306,20 @@ export default defineComponent({
       y: 0,
     },
 
-    customActions: [
-      {
-        name: 'Now with custom actions',
-        action: "(function(){vm.showConfigModal();vm.configEntry=\"vm.customActions[0]=({\\n    name: 'Increment It!',\\n    action: '( function(){\\\\\\n    let card=vm.getCardFromId(vm.context.cardId);\\\\\\n    if( card.percentage == 0 ) { card.taskState = 1; }\\\\\\n    if( card.percentage == 100 ) { return; }\\\\\\n    let n = vm.incrementWithRandom(card);\\\\\\n    if( n == 100 ) { card.taskState = 3; }\\\\\\n    card.percentage=n;\\\\\\n})'});\";setTimeout(()=>{autosize.update(document.querySelector('#config-entry'))},0)})",
-      },
-    ],
-
     // event args
     eventArgs: {
       previousActiveCard: undefined as Task|undefined,
       senderCard: undefined as Task|undefined,
-    },
-    on: {
-      cardCliking: '()=>{}',
-      cardClicked: '()=>{}',
     },
   }),
   computed: {
     storage() {
       return [
         'taskStateCustom',
-        'customActions',
-        'configEntry',
         'taskStates',
         'idOrigin',
         'timer',
         'cards',
-        'beta',
       ].reduce((exports: any, key) => {
         exports[key] = (this as any)[key]
         return exports;
@@ -411,10 +374,7 @@ export default defineComponent({
   },
   mounted() {
     this.loadStorage();
-    // Run config when start
-    this.$nextTick(() => {
-      this.runConfig();
-    });
+    
     // Start auto save timer
     this.autoSaver = setInterval(
       () => this.saveStorage(),
@@ -488,8 +448,6 @@ export default defineComponent({
     cardClicked(card: Task): void {
       this.eventArgs.senderCard = card;
 
-      this.callCustomEventHandlers(this.on.cardCliking, this.eventArgs);
-
       if (this.isEditing) {
         return;
       }
@@ -498,8 +456,6 @@ export default defineComponent({
         this.stopTimerOn(card);
       } else {
         this.startTimerOn(card);
-
-        this.callCustomEventHandlers(this.on.cardClicked, this.eventArgs);
       }
     },
 
@@ -600,20 +556,6 @@ export default defineComponent({
       });
     },
 
-    getRandomPercentage() {
-      return Math.floor(
-        Math.random() * 100,
-      );
-    },
-    incrementWithRandom(card: Task) {
-      const increment = Math.floor(Math.random() * 10);
-      let newValue = increment + card.percentage;
-      if (newValue > 100) {
-        newValue = 100;
-      }
-      return newValue;
-    },
-
     addCard() {
       this.idOrigin += 1;
 
@@ -673,7 +615,6 @@ export default defineComponent({
       clearInterval(this.autoSaver);
 
       this.timer.current = undefined;
-      this.beta = false;
       this.clearCards();
 
       window.localStorage.clear();
@@ -703,9 +644,7 @@ export default defineComponent({
       });
       if (newState === undefined) { return; }
 
-      const callIt = typeof newState.percentage === 'string';
-      // eslint-disable-next-line no-eval
-      card.percentage = callIt ? eval(`${newState.percentage}`)(card) : newState.percentage;
+      card.percentage = newState.percentage;
 
       analyticsTrack('contextmenu', {
         event: 'select',
@@ -748,73 +687,6 @@ export default defineComponent({
         name: 'change percentage',
         type: 'builtin',
       });
-    },
-
-    onCustomActionHandler(action: { name: string; action: string; }) {
-      this.callCustomEventHandlers(action.action);
-      analyticsTrack('contextmenu', {
-        event: 'select',
-        name: 'name',
-        type: 'custom',
-      });
-    },
-
-    callCustomEventHandlers(code: string, args?: any) {
-      // eslint-disable-next-line no-eval
-      eval(`(${code})`)(args);
-    },
-
-    showConfigModal() {
-      const modal = $('#config-modal');
-      modal.on('shown.bs.modal', () => {
-        const textarea = $('#config-entry');
-        textarea.trigger('focus');
-
-        autosize(textarea);
-        textarea.on('autosize:resized', () => {
-          modal.modal('handleUpdate');
-        });
-      });
-      modal.modal('show');
-
-      analyticsTrack('navbar', {
-        name: 'Load configs',
-      });
-    },
-    saveConfigFile() {
-      if ('download' in HTMLAnchorElement) {
-        throw new DOMException('File saving not supported for this browser');
-      }
-
-      const sourceText = encodeURIComponent(this.configEntry);
-
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.href = `data:text/plaincharset=utf-8,${sourceText}`;
-      downloadAnchor.setAttribute('download', 'MyTimedReport.config.js');
-
-      downloadAnchor.click();
-
-      analyticsTrack('custom_config', {
-        event: 'download',
-      })
-    },
-    updateConfig() {
-      this.runConfig();
-
-      // close modal
-      const buttonSelector = '#config-modal button.btn.d-none.d-sm-block';
-      const closeButton = document.querySelector(buttonSelector) as HTMLButtonElement|null;
-      closeButton?.click();
-    },
-    runConfig() {
-      // eslint-disable-next-line no-eval
-      eval(this.configEntry);
-
-      if (this.configEntry !== '') {
-        analyticsTrack('custom_config', {
-          event: 'run',
-        });
-      }
     },
 
     excelBase(card: Task) {
