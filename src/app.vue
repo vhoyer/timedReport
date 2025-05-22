@@ -199,6 +199,7 @@
               :is-selected="card.isSelected"
               :is-editing="isEditing"
               :project-color="getProjectColor(card.project)"
+              :billable="card.billable"
               @card-closed="removeCard(card.id)"
               @card-clicked="cardClicked(card)"
               @edit-title="editField($event, card.id)"
@@ -209,6 +210,7 @@
               @contextmenu="contextmenu($event, card.id)"
               @change-state="openStateMenu(card)"
               @change-percentage="openPercentageDialog(card)"
+              @toggle-billable="toggleBillable(card)"
             />
 
             <!-- Add Task card at the end of today's group -->
@@ -686,7 +688,8 @@ export default defineComponent({
         percentage: 0,
         isSelected: false,
         isHidden: false,
-        createdAt: new Date().toISOString().split('T')[0]
+        createdAt: new Date().toISOString().split('T')[0],
+        billable: false,
       });
 
       this.saveStorage(); // Save when adding a new card
@@ -1072,6 +1075,15 @@ export default defineComponent({
           e.preventDefault();
           field.blur();
         }
+      });
+    },
+
+    toggleBillable(card: Task) {
+      card.billable = !card.billable;
+      this.saveStorage();
+      analyticsTrack('task_edit', {
+        name: 'billable',
+        value: card.billable,
       });
     },
   },

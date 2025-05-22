@@ -68,13 +68,24 @@
         </p>
 
         <div class="card-actions d-flex justify-content-between align-items-center mb-2" @click.self="$emit('card-clicked')">
-          <button
-            type="button"
-            class="btn btn-sm btn-link px-2 state-button"
-            @click.stop="$emit('change-state')"
-          >
-            {{ taskStateString }}
-          </button>
+          <div class="d-flex align-items-center">
+            <button
+              type="button"
+              class="btn btn-sm btn-link px-2 state-button"
+              @click.stop="$emit('change-state')"
+            >
+              {{ taskStateString }}
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm btn-link px-2 billable-button"
+              :class="{ 'text-success': billable }"
+              :title="billable ? 'Task is billable' : 'Task is not billable'"
+              @click.stop="$emit('toggle-billable')"
+            >
+              $
+            </button>
+          </div>
 
           <button
             type="button"
@@ -138,6 +149,10 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    billable: {
+      type: Boolean,
+      required: true,
+    },
 
     progressColor: {
       type: String,
@@ -180,6 +195,7 @@ export default defineComponent({
     'edit-project': (_: HTMLElement) => true,
     'edit-description': (_: HTMLElement) => true,
     'edit-time': (_: HTMLElement) => true,
+    'toggle-billable': () => true,
   },
   data() {
     return {
@@ -373,6 +389,14 @@ export default defineComponent({
 .card-actions {
   margin-left: -0.5rem;
   margin-right: -0.5rem;
+  margin-top: 0.5rem;
+}
+
+.card-text {
+  margin-bottom: 0;
+  padding-bottom: 0.75rem;
+  flex-grow: 1;
+  min-height: 3em;
 }
 
 .card-subtitle {
@@ -475,5 +499,32 @@ export default defineComponent({
 
 .card-subtitle {
   line-height: 1.2;
+}
+
+.billable-button {
+  font-weight: 600;
+  opacity: 0.5;
+  transition: opacity 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+  aspect-ratio: 1;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  margin-left: 4px;
+
+  &:hover {
+    opacity: 0.8;
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  &.text-success {
+    opacity: 1;
+    background-color: rgba(40, 167, 69, 0.1);
+
+    &:hover {
+      background-color: rgba(40, 167, 69, 0.15);
+    }
+  }
 }
 </style>

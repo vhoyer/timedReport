@@ -10,4 +10,5 @@ export interface Task {
   isSelected: boolean;
   isHidden: boolean;
   createdAt: string; // ISO date string YYYY-MM-DD
+  billable: boolean;
 } 
