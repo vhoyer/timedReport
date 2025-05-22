@@ -28,6 +28,7 @@
 
 .card{
 	transition: box-shadow .3s ease-out;
+	min-height: 315px;
 }
 .card.selected {
 	box-shadow: 0 0 0 8px rgba(80,220,100,0.4),
