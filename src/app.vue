@@ -21,23 +21,14 @@
             </li>
           </ul>
 
-          <form class="form-inline">
-            <button
-              type="button"
-              class="btn my-2 mr-2 my-sm-0"
-              @click="toggleCompleted()"
-            >
-              {{ showCompletedButtonText }}
-            </button>
-            <button
-              type="button"
-              :disabled="!(cards.length > 0)"
-              class="btn btn-outline-danger my-2 my-sm-0"
-              @click="clearCards()"
-            >
-              Clear Cards
-            </button>
-          </form>
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <router-link
+                class="nav-link"
+                to="/reports"
+              >Reports</router-link>
+            </li>
+          </ul>
         </div>
       </nav>
     </header>
@@ -171,7 +162,27 @@
       </section>
 
       <section class="task-history">
-        <h2 class="section-title mb-4">Task History</h2>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2 class="section-title mb-0">Task History</h2>
+          <div class="d-flex align-items-center">
+            <button
+              type="button"
+              class="btn btn-outline-secondary btn-sm mr-2"
+              @click="toggleCompleted()"
+            >
+              {{ showCompletedButtonText }}
+            </button>
+            <button
+              type="button"
+              :disabled="!(cards.length > 0)"
+              class="btn btn-outline-danger btn-sm"
+              @click="clearCards()"
+            >
+              Clear Cards
+            </button>
+          </div>
+        </div>
+
         <div class="row">
           <template v-for="group in groupedCards" :key="group.date">
             <div class="col-12 mb-3">
