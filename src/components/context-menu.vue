@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="isActive"
     ref="menu"
     class="context-menu dropdown-menu position-fixed"
     data-hj-whitelist
@@ -11,19 +12,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue';
+import { ref, onMounted, watch, computed, onBeforeUnmount } from 'vue';
+import { onClickOutside, useEventListener } from '@vueuse/core';
 
-interface Props {
+const props = withDefaults(defineProps<{
   isActive?: boolean;
   x: number;
   y: number;
-}
+}>(), {
+  isActive: false
+});
 
-const props = defineProps<Props>();
 const emit = defineEmits<{
+  'update:isActive': [value: boolean];
   'outside-x': [value: number];
   'outside-y': [value: number];
-  'close-context': [];
 }>();
 
 const menu = ref<HTMLDivElement>();
@@ -34,7 +37,29 @@ const isDark = computed(() => {
   return document.documentElement.classList.contains('dark');
 });
 
+// Close menu when clicking outside
+onClickOutside(menu, () => {
+  if (props.isActive) {
+    closeMenu();
+  }
+});
+
+// Close menu on scroll
+useEventListener('scroll', () => {
+  if (props.isActive) {
+    closeMenu();
+  }
+}, { capture: true });
+
+// Close menu on escape key
+useEventListener('keydown', (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && props.isActive) {
+    closeMenu();
+  }
+});
+
 watch(() => props.x, () => {
+  if (!menu.value) return;
   const outsideScreen = window.innerWidth - 18 - (props.x + width.value);
   if (outsideScreen < 0) {
     emit('outside-x', outsideScreen);
@@ -42,6 +67,7 @@ watch(() => props.x, () => {
 });
 
 watch(() => props.y, () => {
+  if (!menu.value) return;
   const outsideScreen = window.innerHeight - 18 - (props.y + height.value);
   if (outsideScreen < 0) {
     emit('outside-y', outsideScreen);
@@ -50,30 +76,36 @@ watch(() => props.y, () => {
 
 onMounted(() => {
   onSizeChange();
-  onScroll();
 });
 
 function onSizeChange() {
   if (!menu.value) return;
 
   const observer = new MutationObserver((_mutations) => {
-    if (menu.value && menu.value.offsetWidth > width.value) {
+    if (menu.value) {
       width.value = menu.value.offsetWidth;
-    }
-    if (menu.value && menu.value.offsetHeight > height.value) {
       height.value = menu.value.offsetHeight;
     }
   });
 
   observer.observe(menu.value, {
     attributes: true,
+    childList: true,
+    subtree: true
+  });
+
+  // Initial size
+  width.value = menu.value.offsetWidth;
+  height.value = menu.value.offsetHeight;
+
+  // Cleanup
+  onBeforeUnmount(() => {
+    observer.disconnect();
   });
 }
 
-function onScroll() {
-  window.addEventListener('scroll', () => {
-    emit('close-context');
-  });
+function closeMenu() {
+  emit('update:isActive', false);
 }
 </script>
 

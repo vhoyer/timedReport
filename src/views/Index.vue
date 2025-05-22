@@ -2,7 +2,6 @@
   <div
     class="d-flex flex-column"
     style="min-height:100vh"
-    @click="closeContextMenu()"
   >
     <header class="mb-3">
       <nav class="navbar navbar-light bg-light">
@@ -264,12 +263,11 @@
     </main>
 
     <context-menu
-      :is-active="context.isActive"
+      v-model:is-active="context.isActive"
       :x="context.x"
       :y="context.y"
       @outside-x="context.x += $event"
       @outside-y="context.y += $event"
-      @close-context="context.isActive = false"
     >
       <div
         v-for="(state,index) in taskStates"
@@ -802,9 +800,7 @@ export default defineComponent({
       this.context.isActive = true;
       this.context.cardId = cardId;
     },
-    closeContextMenu() {
-      this.context.isActive = false;
-    },
+
     switchCardState(statesIndex: number) {
       const card = this.getCardFromId(this.context.cardId) as Task;
       card.taskState = statesIndex;
