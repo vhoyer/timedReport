@@ -9,6 +9,10 @@
       :id="id"
       class="card task-card text-center h-100"
       :class="{ selected: isSelected }"
+      :style="{
+        borderLeft: `4px solid ${projectColor}`,
+        '--project-color': projectColor,
+      }"
       :aria-selected="isSelected"
       :aria-labelledby="`${id}-title`"
       role="button"
@@ -158,6 +162,11 @@ export default defineComponent({
       required: true,
     },
 
+    projectColor: {
+      type: String,
+      required: true,
+    },
+
     isSelected: Boolean,
     isEditing: Boolean,
   },
@@ -198,6 +207,49 @@ export default defineComponent({
 
       return `${this.progressColor}!important`;
     },
+    projectColorRGB() {
+      // Convert HSL to RGB for the fallback shadow
+      const color = this.projectColor.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+      if (!color) return '0, 0, 0';
+      
+      const h = parseInt(color[1]) / 360;
+      const s = parseInt(color[2]) / 100;
+      const l = parseInt(color[3]) / 100;
+
+      let r, g, b;
+
+      if (s === 0) {
+        r = g = b = l;
+      } else {
+        const hue2rgb = (p: number, q: number, t: number) => {
+          if (t < 0) t += 1;
+          if (t > 1) t -= 1;
+          if (t < 1/6) return p + (q - p) * 6 * t;
+          if (t < 1/2) return q;
+          if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+          return p;
+        };
+
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+      }
+
+      return `${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}`;
+    }
+  },
+  watch: {
+    projectColorRGB: {
+      immediate: true,
+      handler(rgb: string) {
+        if (this.$refs.card) {
+          (this.$refs.card as HTMLElement).style.setProperty('--project-color-rgb', rgb);
+        }
+      }
+    }
   },
   mounted() {
     const card = this.$refs.card as HTMLDivElement;
@@ -296,5 +348,22 @@ export default defineComponent({
 .card-actions {
   margin-left: -0.5rem;
   margin-right: -0.5rem;
+}
+
+.card-subtitle {
+  line-height: 1.2;
+}
+
+.task-card {
+  transition: box-shadow .3s ease-out;
+
+  &.selected {
+    // Fallback for browsers that don't support color-mix
+    box-shadow: 0 0 0 8px rgba(var(--project-color-rgb), 0.4),
+                0 0 0 3px rgba(var(--project-color-rgb), 0.5);
+    // Modern browsers
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--project-color) 40%, transparent),
+                0 0 0 3px color-mix(in srgb, var(--project-color) 50%, transparent);
+  }
 }
 </style>

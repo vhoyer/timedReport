@@ -123,6 +123,7 @@
           :eta="card.eta"
           :is-selected="card.isSelected"
           :is-editing="isEditing"
+          :project-color="getProjectColor(card.project)"
           @card-closed="removeCard(card.id)"
           @card-clicked="cardClicked(card)"
           @edit-title="editField($event, card.id)"
@@ -637,6 +638,13 @@ export default defineComponent({
       analyticsTrack('task_edit', {
         name: 'percentage',
       });
+    },
+
+    getProjectColor(project: string) {
+      const hash = project.split('').reduce((acc, char) => {
+        return char.charCodeAt(0) + ((acc << 5) - acc);
+      }, 0);
+      return `hsl(${hash % 360}, 70%, 50%)`;
     },
   },
 });
