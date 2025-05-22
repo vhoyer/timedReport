@@ -294,6 +294,7 @@ export default defineComponent({
       startCounting: 0,
       current: undefined as number|undefined,
       delay: 200,
+      titleUpdater: undefined as number|undefined,
     },
 
     idOrigin: 0,
@@ -500,7 +501,10 @@ export default defineComponent({
       card.isSelected = false;
 
       clearInterval(this.timer.current);
+      clearInterval(this.timer.titleUpdater);
       this.timer.current = undefined;
+      this.timer.titleUpdater = undefined;
+      document.title = 'Timed Report!';
       this.saveStorage(); // Save when timer stops
     },
     startTimerOn(card: Task, updateNowValue = true): void {
@@ -520,12 +524,20 @@ export default defineComponent({
         this.timer.startCounting = Date.now();
       }
 
+      // Update title immediately
+      document.title = `${this.formatTime(card.time)} - ${card.title} - ${card.project} - Timed Report!`;
+
       this.timer.current = setInterval(() => {
         const now = Date.now();
         card.time += (now - this.timer.startCounting);
 
         this.timer.startCounting = now;
       }, this.timer.delay);
+
+      // Update title every second
+      this.timer.titleUpdater = setInterval(() => {
+        document.title = `${this.formatTime(card.time)} - ${card.title} - ${card.project} - Timed Report!`;
+      }, 1000);
     },
 
     getProgressColor(card: Task): string {
