@@ -107,20 +107,8 @@
           <!-- Goal Cards -->
           <div v-for="goal in goals" :key="goal.id" class="col-12 col-sm-6 col-md-4 col-xl-5-cols mb-2">
             <div class="card">
-              <div class="card-body px-3 py-2">
-                <div class="close-wrapper">
-                  <button
-                    type="button"
-                    class="close"
-                    aria-label="Delete Goal"
-                    title="Delete Goal"
-                    @click="removeGoal(goal.id)"
-                  >
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-
-                <h4 class="card-title d-flex justify-content-between align-items-center">
+              <div class="card-header px-3 py-2">
+                <div class="d-flex justify-content-between align-items-center">
                   <div
                     class="project-name"
                     data-bound-property="project"
@@ -128,11 +116,23 @@
                   >
                     {{ goal.project }}
                   </div>
-                  <span class="badge badge-success" v-if="goal.streak > 0">
-                    🔥 {{ goal.streak }} weeks
-                  </span>
-                </h4>
-                
+                  <div class="d-flex align-items-center">
+                    <span class="badge badge-success mr-2" v-if="goal.streak > 0">
+                      🔥 {{ goal.streak }} weeks
+                    </span>
+                    <button
+                      type="button"
+                      class="close"
+                      aria-label="Delete Goal"
+                      title="Delete Goal"
+                      @click="removeGoal(goal.id)"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="card-body px-3 py-2">
                 <div class="d-flex align-items-center mb-2 times-wrapper">
                   <div class="current-time">
                     {{ formatTime(getProjectWeeklyTime(goal.project)) }}
@@ -1197,11 +1197,15 @@ export default defineComponent({
       transform: translateY(-2px);
     }
 
-    .card-title {
-      font-size: 1rem;
-      margin-bottom: 0.4rem;
+    .card-header {
+      background-color: rgba(0, 0, 0, 0.03);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      padding: 0.5rem 0.75rem;
 
       .project-name {
+        font-size: 1rem;
+        font-weight: 500;
+        margin: 0;
         cursor: pointer;
         padding: 0.2em 0.4em;
         margin: -0.2em -0.4em;
@@ -1216,68 +1220,82 @@ export default defineComponent({
           background-color: white;
         }
       }
+
+      .close {
+        padding: 0.25rem;
+        margin: -0.25rem -0.25rem -0.25rem 0.5rem;
+        opacity: 0.5;
+        
+        &:hover {
+          opacity: 1;
+        }
+      }
+
+      .badge {
+        font-size: 0.75rem;
+        padding: 0.3em 0.5em;
+      }
     }
-  }
 
-  .badge {
-    font-size: 0.75rem;
-    padding: 0.3em 0.5em;
-  }
+    .card-body {
+      padding: 0.75rem;
+    }
 
-  .progress {
-    border-radius: 4px;
-    background-color: rgba(0, 0, 0, 0.05);
-    height: 6px !important;
-    margin-bottom: 0.5rem;
-  }
-
-  .progress-bar {
-    transition: width 0.3s ease;
-  }
-
-  .times-wrapper {
-    gap: 0.4em;
-    margin-bottom: 0.5rem;
-  }
-
-  .current-time {
-    font-size: 1rem;
-    color: #6c757d;
-    line-height: 1;
-    margin-inline-end: 0.4em;
-  }
-
-  .time-separator {
-    color: #6c757d;
-    opacity: 0.5;
-    font-size: 1rem;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-  }
-
-  .time-goal {
-    cursor: pointer;
-    display: inline-block;
-    font-size: 1rem;
-    font-weight: 500;
-    padding: 0.2em 0.4em;
-    margin: -0.2em 0;
-    border-radius: 4px;
-    line-height: 1;
-
-    &:hover {
+    .progress {
+      border-radius: 4px;
       background-color: rgba(0, 0, 0, 0.05);
+      height: 6px !important;
+      margin-bottom: 0.5rem;
     }
 
-    &[contenteditable="true"] {
-      outline: 2px solid var(--primary);
-      background-color: white;
+    .progress-bar {
+      transition: width 0.3s ease;
     }
-  }
 
-  .text-muted.small {
-    font-size: 0.75rem;
+    .times-wrapper {
+      gap: 0.4em;
+      margin-bottom: 0.5rem;
+    }
+
+    .current-time {
+      font-size: 1rem;
+      color: #6c757d;
+      line-height: 1;
+      margin-inline-end: 0.4em;
+    }
+
+    .time-separator {
+      color: #6c757d;
+      opacity: 0.5;
+      font-size: 1rem;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .time-goal {
+      cursor: pointer;
+      display: inline-block;
+      font-size: 1rem;
+      font-weight: 500;
+      padding: 0.2em 0.4em;
+      margin: -0.2em 0;
+      border-radius: 4px;
+      line-height: 1;
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+
+      &[contenteditable="true"] {
+        outline: 2px solid var(--primary);
+        background-color: white;
+      }
+    }
+
+    .text-muted.small {
+      font-size: 0.75rem;
+    }
   }
 }
 </style>

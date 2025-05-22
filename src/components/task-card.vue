@@ -387,6 +387,64 @@ export default defineComponent({
   &:hover .project-color-indicator {
     width: 7px;
   }
+
+  .card-header.eta,
+  .card-footer.timer {
+    cursor: pointer;
+    padding: 0.2em 0.4em;
+    margin: -0.2em -0.4em;
+    border-radius: 4px;
+    font-size: 1rem;
+    line-height: 2;
+    font-weight: 500;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    &[contenteditable="true"] {
+      outline: 2px solid var(--primary);
+      background-color: white;
+    }
+  }
+
+  .card-header.eta {
+    margin-top: 0;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card-footer.timer {
+    margin-bottom: 0;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card-title,
+  .card-subtitle,
+  .card-text {
+    cursor: pointer;
+    padding: 0.2em 0.4em;
+    margin: -0.2em -0.4em;
+    border-radius: 4px;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    &[contenteditable="true"] {
+      outline: 2px solid var(--primary);
+      background-color: white;
+    }
+  }
 }
 
 .card-title.h4 {
