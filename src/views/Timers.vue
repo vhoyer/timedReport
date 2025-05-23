@@ -210,11 +210,13 @@
     </section>
 
     <context-menu
+      id="context-menu"
       v-model:is-active="context.isActive"
       :x="context.x"
       :y="context.y"
       @outside-x="context.x += $event"
       @outside-y="context.y += $event"
+      style="z-index: 1000; position: fixed;"
     >
       <div
         v-for="(state,index) in taskStates"
@@ -249,6 +251,7 @@ import PercentageModal from '../components/percentage-modal.vue';
 import { analyticsTrack } from '../services/analytics';
 
 export default defineComponent({
+  name: 'TimersPage',
   components: {
     TaskCard,
     ContextMenu,
@@ -477,17 +480,20 @@ export default defineComponent({
       this.saveStorage(); // Save when timer stops
     },
     startTimerOn(card: Task, updateNowValue = true): void {
-      const selection = document.querySelector('.selected');
-
-      if (selection != null) {
-        const previous = this.getCardFromId(selection.id) as Task;
-        // stop any running timer
-        this.stopTimerOn(previous);
-        // set the events properties
-        this.eventArgs.previousActiveCard = previous;
+      // First, stop any currently running timer
+      const selectedCard = this.cards.find(c => c.id !== card.id && c.isSelected);
+      if (selectedCard) {
+        this.stopTimerOn(selectedCard);
+        this.eventArgs.previousActiveCard = selectedCard;
       }
-
+      
+      // Then start the new timer
       card.isSelected = true;
+      
+      // Ensure time is initialized
+      if (typeof card.time !== 'number' || card.time < 0) {
+        card.time = 0;
+      }
 
       if (updateNowValue) {
         this.timer.startCounting = Date.now();
@@ -498,9 +504,11 @@ export default defineComponent({
 
       this.timer.current = setInterval(() => {
         const now = Date.now();
-        card.time += (now - this.timer.startCounting);
-
-        this.timer.startCounting = now;
+        const timeDiff = now - this.timer.startCounting;
+        if (timeDiff > 0) {  // Only update if time has actually progressed
+          card.time += timeDiff;
+          this.timer.startCounting = now;
+        }
       }, this.timer.delay);
 
       // Update title every second
@@ -534,7 +542,7 @@ export default defineComponent({
         return;
       }
 
-      if (this.eventArgs.senderCard.isSelected) {
+      if (card.isSelected) {
         this.stopTimerOn(card);
       } else {
         this.startTimerOn(card);

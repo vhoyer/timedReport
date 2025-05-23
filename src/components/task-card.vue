@@ -290,7 +290,7 @@ export default defineComponent({
       element.addEventListener('paste', this.pastePureText);
     });
   },
-  beforeDestroy() {
+  beforeUnmount() {
     // Clean up paste event listeners
     const card = this.$refs.card as HTMLDivElement;
     if (!card) return;

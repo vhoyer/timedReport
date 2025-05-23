@@ -7,14 +7,11 @@
     }"
   >
     <div class="container">
-      <div class="row">
-        <small
-          class="col text-muted"
-          data-hj-whitelist
-        >
+      <div class="d-flex justify-content-between align-items-center">
+        <small class="text-muted" data-hj-whitelist>
           TimedReport!™ — next
         </small>
-        <small class="col text-right text-muted">
+        <small class="text-muted">
           Vinícius Hoyer
         </small>
       </div>

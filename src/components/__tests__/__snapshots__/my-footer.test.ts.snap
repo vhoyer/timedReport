@@ -11,18 +11,18 @@ exports[`Components > Footer > renders correctly 1`] = `
       data-v-53855059=""
     >
       <div
-        class="row"
+        class="d-flex justify-content-between align-items-center"
         data-v-53855059=""
       >
         <small
-          class="col text-muted"
+          class="text-muted"
           data-hj-whitelist=""
           data-v-53855059=""
         >
            TimedReport!™ — next 
         </small>
         <small
-          class="col text-right text-muted"
+          class="text-muted"
           data-v-53855059=""
         >
            Vinícius Hoyer 

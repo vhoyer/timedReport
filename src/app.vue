@@ -59,14 +59,10 @@
 import { defineComponent } from 'vue';
 import { analyticsTrack } from './services/analytics';
 import MyFooter from './components/my-footer.vue';
-import ContextMenu from './components/context-menu.vue';
-import PercentageModal from './components/percentage-modal.vue';
 
 export default defineComponent({
   components: {
-    MyFooter,
-    ContextMenu,
-    PercentageModal,
+    MyFooter
   },
   data() {
     return {
@@ -97,15 +93,12 @@ export default defineComponent({
   mounted() {
     // Initialize theme from localStorage or system preference
     const savedTheme = localStorage.getItem('theme');
-    let themeSource: string;
     
     if (savedTheme) {
       this.isDark = savedTheme === 'dark';
-      themeSource = 'saved';
     } else {
       // Check system preference
       this.isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      themeSource = 'system';
     }
     this.applyTheme();
     

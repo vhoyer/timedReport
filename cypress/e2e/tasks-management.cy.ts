@@ -64,6 +64,7 @@ it('can create and edit another task while the other is running', () => {
 it('click task2 stops task1; click task2 again stops itself', () => {
   cy.visit('/', clearLocalStorage);
   cy.taskCreate({ time: '00:00:02' })
+    .wait(1000)
     .click();
   cy.taskCreate({ title: 'A new hope' });
 
@@ -211,10 +212,10 @@ it('can change manually progress of the task', () => {
   cy.taskCreate();
 
   cy.get('#card-1')
-    .rightclick()
-    .get('#context-menu')
-    .findByText('0% - change it')
+    .findByText('0%')
     .click() // opens prompt with custom stub
+    .get('#percentageInput')
+    .type('69{enter}')
     .get('#card-1')
     .findByRole('progressbar')
     .should('have.attr', 'aria-valuenow', '69') // nice
