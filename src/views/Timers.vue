@@ -326,40 +326,37 @@ export default defineComponent({
       return this.hideCompletedCards ? 'Show Completed' : 'Hide Completed';
     },
     projectBreakdown() {
-      const projects = new Map<string, { time: number; color: string }>();
+      const today = this.getTodayLocal();
+      const projects = new Map<string, { project: string; time: number; color: string }>();
       let totalTime = 0;
-      const today = new Date().toISOString().split('T')[0];
 
-      // Generate random color for a project
-      const getProjectColor = (project: string) => {
-        const hash = project.split('').reduce((acc, char) => {
-          return char.charCodeAt(0) + ((acc << 5) - acc);
-        }, 0);
-        return `hsl(${hash % 360}, 70%, 50%)`;
-      };
-
-      // Calculate total time and assign colors
-      this.cards
-        .filter(card => card.createdAt === today) // Only consider today's tasks
-        .forEach(card => {
-          if (!projects.has(card.project)) {
-            projects.set(card.project, { time: 0, color: getProjectColor(card.project) });
+      // Calculate total time and group by project
+      this.cardList.forEach(card => {
+        if (this.formatDateLocal(card.createdAt) === today) {
+          const project = card.project || 'Uncategorized';
+          const projectTime = card.time || 0;
+          
+          if (projects.has(project)) {
+            projects.get(project)!.time += projectTime;
+          } else {
+            projects.set(project, {
+              project,
+              time: projectTime,
+              color: this.getProjectColor(project)
+            });
           }
-          const projectData = projects.get(card.project)!;
-          projectData.time += card.time;
-          totalTime += card.time;
-        });
+          
+          totalTime += projectTime;
+        }
+      });
 
       // Convert to array and calculate percentages
-      return Array.from(projects.entries())
-        .map(([project, data]) => ({
-          project,
-          percentage: totalTime > 0 ? (data.time / totalTime) * 100 : 0,
-          color: data.color,
-          time: data.time
-        }))
-        .filter(p => p.percentage > 0)
-        .sort((a, b) => b.percentage - a.percentage);
+      return Array.from(projects.values())
+        .sort((a, b) => b.time - a.time)
+        .map(project => ({
+          ...project,
+          percentage: totalTime > 0 ? (project.time / totalTime) * 100 : 0
+        }));
     },
     cardList() {
       type Filter = (card: Task) => boolean;
@@ -372,36 +369,52 @@ export default defineComponent({
       return filters.reduce((cardList, handler) => cardList.filter(handler), this.cards);
     },
     totalWorkTime() {
-      const today = new Date().toISOString().split('T')[0];
+      const today = this.getTodayLocal();
       const totalMs = this.cards
-        .filter(card => card.createdAt === today)
+        .filter(card => this.formatDateLocal(card.createdAt) === today)
         .reduce((total, card) => total + card.time, 0);
       const date = new Date(totalMs + this.timeOffset());
-      return date.toTimeString().match(/\d\d:\d\d:\d\d/)?.[0] || '00:00:00';
+      return date.toISOString().substr(11, 8);
     },
     weeklyWorkTime() {
       const now = new Date();
-      const sunday = new Date(now);
-      sunday.setDate(now.getDate() - now.getDay()); // Go back to last Sunday
-      sunday.setHours(0, 0, 0, 0); // Start of the day
-
-      const weekStart = sunday.toISOString().split('T')[0];
-      const totalMs = this.cards
-        .filter(card => card.createdAt >= weekStart)
-        .reduce((total, card) => total + card.time, 0);
-
+      const today = new Date(now);
+      today.setHours(0, 0, 0, 0);
+      
+      // Get the most recent Sunday
+      const sunday = new Date(today);
+      sunday.setDate(today.getDate() - today.getDay());
+      
+      // Get all dates from Sunday to today in local timezone
+      const weekDates = [];
+      const current = new Date(sunday);
+      const todayStr = this.getTodayLocal();
+      
+      while (true) {
+        const currentStr = this.formatDateLocal(current);
+        weekDates.push(currentStr);
+        if (currentStr === todayStr) break;
+        current.setDate(current.getDate() + 1);
+      }
+      
+      // Filter cards from this week
+      const weekCards = this.cardList.filter(card => 
+        weekDates.includes(this.formatDateLocal(card.createdAt))
+      );
+      
+      const totalMs = weekCards.reduce((sum, card) => sum + (card.time || 0), 0);
       const date = new Date(totalMs + this.timeOffset());
-      return date.toTimeString().match(/\d\d:\d\d:\d\d/)?.[0] || '00:00:00';
+      return date.toISOString().substr(11, 8);
     },
     groupedCards() {
       const groups = new Map<string, Task[]>();
-      const today = new Date().toISOString().split('T')[0];
+      const today = this.getTodayLocal();
 
       // Initialize today's group even if empty
       groups.set(today, []);
 
       this.cardList.forEach(card => {
-        const date = card.createdAt || today;
+        const date = this.formatDateLocal(card.createdAt);
         if (!groups.has(date)) {
           groups.set(date, []);
         }
@@ -537,7 +550,7 @@ export default defineComponent({
         return;
       }
 
-      if (card.createdAt !== new Date().toISOString().split('T')[0]) {
+      if (this.formatDateLocal(card.createdAt) !== this.getTodayLocal()) {
         this.duplicateCard(card);
         return;
       }
@@ -663,7 +676,7 @@ export default defineComponent({
         percentage: 0,
         isSelected: false,
         isHidden: false,
-        createdAt: new Date().toISOString().split('T')[0],
+        createdAt: this.getTodayLocal(),
         billable: false,
       });
 
@@ -845,46 +858,71 @@ export default defineComponent({
       return `hsl(${hash % 360}, 70%, 50%)`;
     },
 
+    // Format date to YYYY-MM-DD in local timezone
+    formatDateLocal(date: Date | string): string {
+      const d = typeof date === 'string' ? new Date(date + 'T00:00:00') : new Date(date);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    },
+
+    // Get today's date in local timezone as YYYY-MM-DD
+    getTodayLocal(): string {
+      return this.formatDateLocal(new Date());
+    },
+
+    // Format date for display with proper timezone handling
     formatDate(dateStr: string): string {
-      const date = new Date(dateStr);
       const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
       const yesterday = new Date(today);
       yesterday.setDate(yesterday.getDate() - 1);
+      
+      const inputDate = this.formatDateLocal(dateStr);
+      const todayStr = this.formatDateLocal(today);
+      const yesterdayStr = this.formatDateLocal(yesterday);
 
-      if (dateStr === today.toISOString().split('T')[0]) {
+      if (inputDate === todayStr) {
         return 'Today';
       }
-      if (dateStr === yesterday.toISOString().split('T')[0]) {
+      if (inputDate === yesterdayStr) {
         return 'Yesterday';
       }
 
+      const date = new Date(dateStr + 'T00:00:00');
       return date.toLocaleDateString(undefined, {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
       });
     },
 
     duplicateCard(card: Task) {
-      // Only duplicate if it's not from today
-      if (card.createdAt === new Date().toISOString().split('T')[0]) {
-        return;
+      // If the original card is from today, add a number to the title
+      let newTitle = card.title;
+      if (this.formatDateLocal(card.createdAt) === this.getTodayLocal()) {
+        const titleMatch = card.title.match(/^(.*?)(?:\s*\((\d+)\))?$/);
+        if (titleMatch) {
+          const baseTitle = titleMatch[1].trim();
+          const copyNumber = titleMatch[2] ? parseInt(titleMatch[2]) + 1 : 1;
+          newTitle = `${baseTitle} (${copyNumber})`;
+        }
       }
 
-      // Stop any currently running timer
-      const currentlyRunning = this.cards.find(c => c.isSelected);
-      if (currentlyRunning) {
-        this.stopTimerOn(currentlyRunning);
-      }
-
-      this.idOrigin += 1;
       const newCard: Task = {
         ...card,
-        id: `card-${this.idOrigin}`,
+        id: Date.now().toString(),
+        title: newTitle,
         time: 0,
-        isSelected: false,
-        createdAt: new Date().toISOString().split('T')[0]
+        progress: 0,
+        state: 0,
+        isCompleted: false,
+        lastUpdated: Date.now(),
+        createdAt: this.getTodayLocal()
       };
 
       this.cards.push(newCard);
