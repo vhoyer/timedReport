@@ -7,7 +7,7 @@ export const analyticsInit = () => {
 
 type AnalyticsTrack = {
   (name: 'app', properties: {
-    event: 'start';
+    event: 'start' | 'timers_loaded' | 'reports_loaded';
   }): void;
   (name: 'contextmenu', properties: {
     event: 'select';
@@ -26,6 +26,13 @@ type AnalyticsTrack = {
   }): void;
   (name: 'navbar', properties: {
     name: string;
+  }): void;
+  (name: 'goals', properties: {
+    event: 'loaded';
+    count: number;
+  }): void;
+  (name: 'theme_change', properties: {
+    theme: 'dark' | 'light';
   }): void;
 };
 

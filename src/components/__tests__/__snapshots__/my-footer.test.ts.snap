@@ -3,22 +3,27 @@
 exports[`Components > Footer > renders correctly 1`] = `
 <div>
   <footer
-    class="bg-light pt-4 pb-2"
+    class="pt-4 pb-4"
+    data-v-53855059=""
   >
     <div
       class="container"
+      data-v-53855059=""
     >
       <div
-        class="row text-muted"
+        class="d-flex justify-content-between align-items-center"
+        data-v-53855059=""
       >
         <small
-          class="col"
+          class="text-muted"
           data-hj-whitelist=""
+          data-v-53855059=""
         >
            TimedReport!™ — next 
         </small>
         <small
-          class="col text-right"
+          class="text-muted"
+          data-v-53855059=""
         >
            Vinícius Hoyer 
         </small>
