@@ -10,7 +10,7 @@ jobs:
     name: Linting
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v4
     - run: npm clean-install
     - run: npm run lint
 
@@ -18,7 +18,7 @@ jobs:
     name: Tests
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v4
     - run: npm clean-install
     - run: npm run test:unit:ci
 
@@ -27,25 +27,28 @@ jobs:
     name: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v4
     - run: npm clean-install
     - run: npm run build
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: dist
-        path: ./dist
+        path: dist/
+        retention-days: 5
 
   e2e:
     name: End to End Testing
     needs: [build]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v4
     - run: npm clean-install
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
         name: dist
-        path: ./dist
+        path: dist/
+        pattern: '**'
+        merge-multiple: true
     - run: npm run test:e2e:ci
 
   lighthouseci:
@@ -53,11 +56,13 @@ jobs:
     needs: [build]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v4
     - run: npm clean-install
     - run: npm install -g @lhci/cli
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
         name: dist
-        path: ./dist
+        path: dist/
+        pattern: '**'
+        merge-multiple: true
     - run: lhci autorun
