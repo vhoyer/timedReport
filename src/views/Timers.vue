@@ -389,12 +389,15 @@ export default defineComponent({
       const weekDates = [];
       const current = new Date(sunday);
       const todayStr = this.getTodayLocal();
+      const maxDays = 7; // Maximum days in a week
+      let daysProcessed = 0;
       
-      while (true) {
+      while (daysProcessed <= maxDays) {
         const currentStr = this.formatDateLocal(current);
         weekDates.push(currentStr);
         if (currentStr === todayStr) break;
         current.setDate(current.getDate() + 1);
+        daysProcessed++;
       }
       
       // Filter cards from this week
