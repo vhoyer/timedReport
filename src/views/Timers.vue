@@ -117,7 +117,12 @@
               </div>
               
               <!-- Create Task Button -->
-              <div class="d-flex justify-content-end mt-2">
+              <div class="d-flex justify-content-between mt-2">
+                <span class="badge d-flex align-items-center mr-2" style="color: #6c757d">
+                  <i class="fa-duotone fa-regular fa-fire-flame-curved mr-1" :style="(goal.streak > 0) ? { color: '#fd7e14' } : {}"></i>
+                  {{ goal.streak }} weeks
+                </span>
+
                 <button
                   type="button"
                   class="btn btn-link py-0 px-1 text-decoration-none start-task-btn"
@@ -127,13 +132,6 @@
                 >
                   <i class="fa-duotone fa-regular fa-plus"></i> Start Task
                 </button>
-              </div>
-              
-              <div class="d-flex mt-2">
-                <span class="badge d-flex align-items-center mr-2" style="color: #6c757d">
-                  <i class="fa-duotone fa-regular fa-fire-flame-curved mr-1" :style="(goal.streak > 0) ? { color: '#fd7e14' } : {}"></i>
-                  {{ goal.streak }} weeks
-                </span>
               </div>
             </div>
           </div>
