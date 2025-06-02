@@ -17,7 +17,7 @@
             width: project.percentage + '%',
             backgroundColor: project.color
           }"
-          :title="`${project.project}: ${Math.round(project.percentage)}% (${new Date(project.time).toISOString().substr(11, 8)})`"
+          :title="`${project.project}: ${Math.round(project.percentage)}% (${this.formatTime(project.time)})`"
         >
           <span
             class="project-label"
@@ -350,7 +350,7 @@ export default defineComponent({
 
       // Calculate total time and group by project
       this.cardList.forEach(card => {
-        if (this.formatDateLocal(card.createdAt) === today) {
+        if (this.isSameDay(card.createdAt, today)) {
           const project = card.project || 'Uncategorized';
           const projectTime = card.time || 0;
           
@@ -390,42 +390,28 @@ export default defineComponent({
       const today = this.getTodayLocal();
       const totalMs = this.cards
         .filter(card => this.formatDateLocal(card.createdAt) === today)
-        .reduce((total, card) => total + card.time, 0);
-      const date = new Date(totalMs + this.timeOffset());
-      return date.toISOString().substr(11, 8);
+        .reduce((total, card) => total + (card.time || 0), 0);
+      return new Date(totalMs).toISOString().substr(11, 8);
     },
     weeklyWorkTime() {
       const now = new Date();
       const today = new Date(now);
       today.setHours(0, 0, 0, 0);
       
-      // Get the most recent Sunday
-      const sunday = new Date(today);
-      sunday.setDate(today.getDate() - today.getDay());
+      // Get the most recent Sunday in local time
+      const todayDate = new Date(today);
+      const sunday = new Date(todayDate);
+      sunday.setDate(todayDate.getDate() - todayDate.getDay());
       
       // Get all dates from Sunday to today in local timezone
-      const weekDates = [];
-      const current = new Date(sunday);
-      const todayStr = this.getTodayLocal();
-      const maxDays = 7; // Maximum days in a week
-      let daysProcessed = 0;
-      
-      while (daysProcessed <= maxDays) {
-        const currentStr = this.formatDateLocal(current);
-        weekDates.push(currentStr);
-        if (currentStr === todayStr) break;
-        current.setDate(current.getDate() + 1);
-        daysProcessed++;
-      }
-      
-      // Filter cards from this week
-      const weekCards = this.cardList.filter(card => 
-        weekDates.includes(this.formatDateLocal(card.createdAt))
-      );
+      const weekCards = this.cardList.filter(card => {
+        const cardDate = new Date(card.createdAt);
+        // Check if the card is from this week (Sunday to today)
+        return cardDate >= sunday && cardDate <= todayDate;
+      });
       
       const totalMs = weekCards.reduce((sum, card) => sum + (card.time || 0), 0);
-      const date = new Date(totalMs + this.timeOffset());
-      return date.toISOString().substr(11, 8);
+      return new Date(totalMs).toISOString().substr(11, 8);
     },
     groupedCards() {
       const groups = new Map<string, Task[]>();
@@ -904,7 +890,23 @@ export default defineComponent({
 
     // Get today's date in local timezone as YYYY-MM-DD
     getTodayLocal(): string {
-      return this.formatDateLocal(new Date());
+      const now = new Date();
+      // Adjust for timezone offset to ensure we get the correct local date
+      const timezoneOffset = now.getTimezoneOffset() * 60000; // in milliseconds
+      const localDate = new Date(now.getTime() - timezoneOffset);
+      return localDate.toISOString().split('T')[0];
+    },
+    
+    // Check if two dates are the same day in local timezone
+    isSameDay(date1: Date | string, date2: Date | string): boolean {
+      const d1 = typeof date1 === 'string' ? new Date(date1) : new Date(date1);
+      const d2 = typeof date2 === 'string' ? new Date(date2) : new Date(date2);
+      
+      // Normalize both dates to midnight in local time
+      const date1Str = new Date(d1.getFullYear(), d1.getMonth(), d1.getDate()).toISOString().split('T')[0];
+      const date2Str = new Date(d2.getFullYear(), d2.getMonth(), d2.getDate()).toISOString().split('T')[0];
+      
+      return date1Str === date2Str;
     },
 
     // Format date for display with proper timezone handling
