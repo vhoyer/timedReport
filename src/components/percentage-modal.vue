@@ -17,7 +17,7 @@
             aria-label="Close"
             @click="$emit('close')"
           >
-            <span aria-hidden="true">&times;</span>
+            <i class="fa-duotone fa-regular fa-xmark fa-xs" aria-hidden="true"></i>
           </button>
         </div>
         <div class="modal-body">

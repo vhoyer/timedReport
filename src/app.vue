@@ -38,8 +38,8 @@
                 @click="toggleDarkMode"
                 :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
               >
-                <span v-if="isDark">☀️</span>
-                <span v-else>🌙</span>
+                <i v-if="isDark" class="fa-duotone fa-regular fa-sun"></i>
+                <i v-else class="fa-duotone fa-regular fa-moon"></i>
               </button>
             </li>
           </ul>

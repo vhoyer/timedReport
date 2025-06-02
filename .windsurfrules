@@ -1,1 +1,4 @@
-- when using icons, always use fontawesome's icons, use only dualtone icons or brand icons
+- when using icons, always use fontawesome's icons
+    - use only dualtone solid icons (<i class="fa-duotone fa-regular fa-*"></i>);
+    - classic regular icons (<i class="fa-regular fa-*"></i>); or
+    - brand icons (<i class="fa-brands fa-*"></i>).

@@ -71,8 +71,9 @@
                   {{ goal.project }}
                 </div>
                 <div class="d-flex align-items-center">
-                  <span class="badge badge-success mr-2" v-if="goal.streak > 0">
-                    🔥 {{ goal.streak }} weeks
+                  <span class="badge mr-2 d-flex align-items-center" v-if="goal.streak > 0">
+                    <i class="fa-duotone fa-solid fa-fire-flame-curved mr-1"></i>
+                    {{ goal.streak }} weeks
                   </span>
                   <button
                     type="button"
@@ -81,7 +82,7 @@
                     title="Delete Goal"
                     @click="removeGoal(goal.id)"
                   >
-                    <span aria-hidden="true">&times;</span>
+                    <i class="fa-duotone fa-regular fa-xmark fa-xs" aria-hidden="true"></i>
                   </button>
                 </div>
               </div>
