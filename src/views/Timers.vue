@@ -72,7 +72,7 @@
                 </div>
                 <div class="d-flex align-items-center">
                   <span class="badge mr-2 d-flex align-items-center" v-if="goal.streak > 0">
-                    <i class="fa-duotone fa-solid fa-fire-flame-curved mr-1"></i>
+                    <i class="fa-duotone fa-regular fa-fire-flame-curved mr-1" style="color: #fd7e14;"></i>
                     {{ goal.streak }} weeks
                   </span>
                   <button
