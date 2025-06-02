@@ -71,18 +71,14 @@
                   {{ goal.project }}
                 </div>
                 <div class="d-flex align-items-center">
-                  <span class="badge mr-2 d-flex align-items-center" v-if="goal.streak > 0">
-                    <i class="fa-duotone fa-regular fa-fire-flame-curved mr-1" style="color: #fd7e14;"></i>
-                    {{ goal.streak }} weeks
-                  </span>
                   <button
                     type="button"
-                    class="close"
+                    class="btn btn-link p-0"
                     aria-label="Delete Goal"
                     title="Delete Goal"
-                    @click="removeGoal(goal.id)"
+                    @click.stop="removeGoal(goal.id)"
                   >
-                    <i class="fa-duotone fa-regular fa-xmark fa-xs" aria-hidden="true"></i>
+                    <i class="fa-duotone fa-regular fa-xmark"></i>
                   </button>
                 </div>
               </div>
@@ -118,6 +114,26 @@
                   aria-valuemin="0"
                   aria-valuemax="100"
                 ></div>
+              </div>
+              
+              <!-- Create Task Button -->
+              <div class="d-flex justify-content-end mt-2">
+                <button
+                  type="button"
+                  class="btn btn-link py-0 px-1 text-decoration-none start-task-btn"
+                  aria-label="Create Task"
+                  title="Create Task"
+                  @click.stop="createTaskFromGoal(goal)"
+                >
+                  <i class="fa-duotone fa-regular fa-plus"></i> Start Task
+                </button>
+              </div>
+              
+              <div class="d-flex mt-2">
+                <span class="badge d-flex align-items-center mr-2" style="color: #6c757d">
+                  <i class="fa-duotone fa-regular fa-fire-flame-curved mr-1" :style="(goal.streak > 0) ? { color: '#fd7e14' } : {}"></i>
+                  {{ goal.streak }} weeks
+                </span>
               </div>
             </div>
           </div>
@@ -163,6 +179,7 @@
             :key="card.id"
             class="col-12 col-sm-6 col-md-4 col-lg-3"
             :id="card.id"
+            :data-card-id="card.id"
             :title="card.title"
             :project="card.project"
             :description="card.description"
@@ -482,6 +499,17 @@ export default defineComponent({
     this.checkGoals();
   },
   methods: {
+    createTaskFromGoal(goal) {
+      const newCard = this.addCard(goal.project);
+      this.$nextTick(() => {
+        this.startTimerOn(newCard);
+      });
+    },
+    
+    editGoal(goal) {
+      this.openGoalModal(goal);
+    },
+    
     getCardFromId(cardId: string) {
       return this.cards.find((card) => card.id === cardId);
     },
@@ -666,13 +694,13 @@ export default defineComponent({
       });
     },
 
-    addCard() {
+    addCard(project = 'Project name') {
       this.idOrigin += 1;
 
-      this.cards.push({
+      const newCard = {
         id: `card-${this.idOrigin}`,
         title: 'Task description',
-        project: 'Project name',
+        project: project,
         description: 'Full description',
         time: 0,
         eta: 0,
@@ -682,10 +710,13 @@ export default defineComponent({
         isHidden: false,
         createdAt: this.getTodayLocal(),
         billable: false,
-      });
+      };
 
-      this.saveStorage(); // Save when adding a new card
+      this.cards.push(newCard);
+      this.saveStorage();
       analyticsTrack('task_create', { count: this.idOrigin });
+      
+      return newCard;
     },
     removeCard(cardId: string) {
       this.cards = this.cards.filter((element) => element.id !== cardId);
@@ -1356,4 +1387,17 @@ export default defineComponent({
     }
   }
 }
+  .start-task-btn {
+    color: inherit;
+    color: #6c757d;
+    transition: color 0.2s ease-in-out;
+  }
+  
+  .start-task-btn:hover {
+    color: #28a745 !important;
+  }
+  
+  .start-task-btn:active {
+    color: #218838 !important;
+  }
 </style>

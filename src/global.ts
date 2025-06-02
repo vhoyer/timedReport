@@ -15,6 +15,9 @@ export type Task = {
   taskState: number;
   /** task percentage completion */
   percentage: number;
+  /** date of creation */
+  createdAt: string;
+  /** is the card selected */
   isSelected: boolean;
   isHidden: boolean;
 };

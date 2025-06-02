@@ -2,3 +2,7 @@
     - use only dualtone solid icons (<i class="fa-duotone fa-regular fa-*"></i>);
     - classic regular icons (<i class="fa-regular fa-*"></i>); or
     - brand icons (<i class="fa-brands fa-*"></i>).
+- you will prefer non colored icons.
+- always consider that you need to create colors for the light and dark themes
+    - use the css variables defined in the css.css file
+- always respect types in the "global.ts" file, keep them updated with changes to the models you make
