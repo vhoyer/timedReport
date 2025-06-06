@@ -1326,7 +1326,6 @@ export default defineComponent({
 
         &[contenteditable="true"] {
           outline: 2px solid var(--primary);
-          background-color: white;
         }
       }
 
@@ -1398,7 +1397,6 @@ export default defineComponent({
 
       &[contenteditable="true"] {
         outline: 2px solid var(--primary);
-        background-color: white;
       }
     }
 
