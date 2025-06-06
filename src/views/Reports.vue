@@ -24,6 +24,83 @@
           </ul>
         </div>
       </div>
+      
+      <!-- Project Settings Panel -->
+      <div v-if="currentProject" class="mb-4">
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="projectBillableRate" class="form-label">Billable Rate ($/h)</label>
+              <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input
+                  id="projectBillableRate"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="form-control"
+                  :value="currentProject.billableRate"
+                  @input="saveBillableRate(Number(($event.target as HTMLInputElement).value))"
+                >
+              </div>
+              <div class="form-text" v-if="defaultBillableRate !== undefined">
+                Current global rate: ${{ defaultBillableRate }}
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="projectInitialEstimate" class="form-label">Initial Estimate ($)</label>
+              <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input
+                  id="projectInitialEstimate"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="form-control"
+                  :value="currentProject.initialEstimate"
+                  @input="saveInitialEstimate(Number(($event.target as HTMLInputElement).value))"
+                >
+              </div>
+              <div class="form-text">
+                Initial project budget/estimate
+              </div>
+            </div>
+          </div>
+          
+          <!-- Will add more project metrics here -->
+          <div class="mt-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <span>Total Billed:</span>
+              <strong>${{ totalAmount.toFixed(2) }}</strong>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span>Remaining Budget:</span>
+              <strong :class="{ 'text-danger': calculateRemainingBudget() < 0 }">
+                ${{ calculateRemainingBudget().toFixed(2) }}
+              </strong>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span>Non-Billable Time:</span>
+              <strong>
+                {{ formatHours(calculateNonBillableTime()) }}
+              </strong>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span>Effective Hourly Rate:</span>
+              <strong>
+                ${{ calculateEffectiveHourlyRate().toFixed(2) }}/h
+              </strong>
+            </div>
+            <div v-if="calculateRemainingBudget() < 0" class="d-flex justify-content-between align-items-center text-danger">
+              <span>Time After Budget Depleted:</span>
+              <strong>
+                {{ formatHours(calculateOverBudgetTime()) }}
+              </strong>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div class="card-body p-0">
         <div v-if="!projects.length" class="text-muted text-center p-4">
@@ -49,14 +126,19 @@
                   </td>
                   <td class="text-end">{{ formatHours(task.time) }}</td>
                   <td class="text-end">
-                    <input
-                      type="number"
-                      class="form-control form-control-sm text-end"
-                      v-model.number="task.billable"
-                      min="0"
-                      step="0.01"
-                      @change="saveTask(task)"
-                    >
+                    <template v-if="task.billable">
+                      <input
+                        type="number"
+                        class="form-control form-control-sm text-end"
+                        v-model.number="task.billable"
+                        min="0"
+                        step="0.01"
+                        @change="saveTask(task)"
+                      >
+                    </template>
+                    <template v-else>
+                      -
+                    </template>
                   </td>
                   <td class="text-end">{{ calculateAmount(task) }}</td>
                 </tr>
@@ -64,7 +146,7 @@
               <tfoot>
                 <tr class="table-active">
                   <td colspan="3" class="text-end"><strong>Total:</strong></td>
-                  <td class="text-end"><strong>${{ formatNumber(totalAmount) }}</strong></td>
+                  <td class="text-end"><strong>${{ totalAmount.toFixed(2) }}</strong></td>
                 </tr>
               </tfoot>
             </table>
@@ -76,8 +158,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref, computed } from 'vue';
+import { defineComponent, onMounted, ref, computed, watch } from 'vue';
 import { analyticsTrack } from '../services/analytics';
+import { useSettings } from '@/store/settings';
+import { useProjects, type ProjectSettings } from '@/store/projects';
 
 interface Task {
   id: string;
@@ -93,10 +177,186 @@ export default defineComponent({
   setup() {
     const tasks = ref<Task[]>([]);
     const activeTab = ref('');
+    const settingsStore = useSettings();
+    const projectsStore = useProjects();
+    const currentProject = ref<ProjectSettings | null>(null);
+    const defaultBillableRate = ref(0);
+    
+    // Initialize default billable rate
+    onMounted(() => {
+      defaultBillableRate.value = settingsStore.defaultBillableRate();
+    });
+    
+    // Get the effective billable rate for a task
+    const getEffectiveRate = (task: Task): number => {
+      // If task is explicitly marked as non-billable, return 0
+      if (task.billable === 0 || task.billable.toString() === '0') {
+        return 0;
+      }
+      
+      // If task has an explicit rate, use that
+      if (task.billable) {
+        return Number(task.billable);
+      }
+      
+      // Otherwise use project rate if available
+      if (currentProject.value?.billableRate) {
+        return currentProject.value.billableRate;
+      }
+      
+      // Fall back to global default
+      return defaultBillableRate.value;
+    };
+    
+    // Calculate total billed amount for the current project (should match table total)
+    const calculateTotalBilled = (): number => {
+      if (!currentProject.value) return 0;
+      
+      return tasks.value
+        .filter(task => task.project === currentProject.value?.id)
+        .reduce((total, task) => {
+          const hours = task.time / (1000 * 60 * 60);
+          const rate = getEffectiveRate(task);
+          return total + (hours * rate);
+        }, 0);
+    };
+    
+    // Calculate total time spent on non-billable tasks for the current project
+    const calculateNonBillableTime = (): number => {
+      if (!currentProject.value) return 0;
+      
+      return tasks.value
+        .filter(task => task.project === currentProject.value?.id && !task.billable)
+        .reduce((total, task) => total + task.time, 0);
+    };
+    
+    // Calculate total time spent on all tasks (billable and non-billable) for the current project
+    const calculateTotalProjectTime = (): number => {
+      if (!currentProject.value) return 0;
+      
+      return tasks.value
+        .filter(task => task.project === currentProject.value?.id)
+        .reduce((total, task) => total + task.time, 0);
+    };
+    
+    // Calculate effective hourly rate based on initial estimate and total time spent
+    const calculateEffectiveHourlyRate = (): number => {
+      if (!currentProject.value) return 0;
+      
+      const totalTimeHours = calculateTotalProjectTime() / (1000 * 60 * 60);
+      if (totalTimeHours <= 0) return 0;
+      
+      return currentProject.value.initialEstimate / totalTimeHours;
+    };
+    
+    // Calculate time worked after the budget was exhausted
+    const calculateOverBudgetTime = (): number => {
+      if (!currentProject.value || calculateRemainingBudget() >= 0) return 0;
+      
+      // Sort tasks by creation date to process them in chronological order
+      const projectTasks = [...tasks.value]
+        .filter(task => task.project === currentProject.value?.id)
+        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      
+      let remainingBudget = currentProject.value.initialEstimate;
+      let overBudgetTime = 0;
+      
+      for (const task of projectTasks) {
+        const taskRate = getEffectiveRate(task);
+        const taskHours = task.time / (1000 * 60 * 60);
+        const taskCost = taskHours * taskRate;
+        
+        if (remainingBudget <= 0) {
+          // Entire task was done after budget was exhausted
+          overBudgetTime += task.time;
+        } else if (remainingBudget < taskCost) {
+          // Task was partially within budget, partially over
+          const budgetedHours = remainingBudget / taskRate;
+          const overBudgetHours = taskHours - budgetedHours;
+          overBudgetTime += overBudgetHours * (1000 * 60 * 60); // Convert back to ms
+          remainingBudget = 0;
+        } else {
+          // Task was fully within budget
+          remainingBudget -= taskCost;
+        }
+      }
+      
+      return overBudgetTime;
+    };
+    
+    // Calculate amount for a single task
+    const calculateTaskAmount = (task: Task): number => {
+      const rate = getEffectiveRate(task);
+      // If rate is 0 (non-billable), return 0
+      if (rate === 0) return 0;
+      
+      const hours = task.time / (1000 * 60 * 60);
+      return hours * rate;
+    };
+    
+    // Calculate remaining budget
+    const calculateRemainingBudget = (): number => {
+      if (!currentProject.value) return 0;
+      return currentProject.value.initialEstimate - calculateTotalBilled();
+    };
+    
+    // Watch for active tab changes to update project settings
+    watch(activeTab, (newProjectName) => {
+      if (newProjectName) {
+        currentProject.value = projectsStore.getProject(newProjectName);
+      } else {
+        currentProject.value = null;
+      }
+    });
+    
+    // Save project settings
+    const saveProjectSettings = () => {
+      if (currentProject.value) {
+        projectsStore.saveProject({
+          ...currentProject.value
+        });
+      }
+    };
+    
+    // Save billable rate
+    const saveBillableRate = (rate: number) => {
+      if (currentProject.value) {
+        projectsStore.updateProjectBillableRate(currentProject.value.id, rate);
+        // Update local ref to trigger UI update
+        currentProject.value = {
+          ...currentProject.value,
+          billableRate: rate
+        };
+      }
+    };
+    
+    // Save initial estimate
+    const saveInitialEstimate = (estimate: number) => {
+      if (currentProject.value) {
+        projectsStore.updateProjectEstimate(currentProject.value.id, estimate);
+        // Update local ref to trigger UI update
+        currentProject.value = {
+          ...currentProject.value,
+          initialEstimate: estimate
+        };
+      }
+    };
 
-    // Format time in milliseconds to hours with 2 decimal places
+    // Format time in milliseconds to human-readable format (e.g., 1h 35min)
     const formatHours = (ms: number): string => {
-      return (ms / (1000 * 60 * 60)).toFixed(2);
+      const totalSeconds = Math.floor(ms / 1000);
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      
+      if (hours > 0 && minutes > 0) {
+        return `${hours}h ${minutes}min`;
+      } else if (hours > 0) {
+        return `${hours}h`;
+      } else if (minutes > 0) {
+        return `${minutes}min`;
+      } else {
+        return '<1min';
+      }
     };
 
     // Format number to 2 decimal places
@@ -104,10 +364,9 @@ export default defineComponent({
       return num.toFixed(2);
     };
 
-    // Calculate amount for a task
+    // Calculate amount for display in the table
     const calculateAmount = (task: Task): string => {
-      const hours = task.time / (1000 * 60 * 60);
-      return (hours * (task.billable || 0)).toFixed(2);
+      return calculateTaskAmount(task).toFixed(2);
     };
 
     // Save task updates to localStorage
@@ -136,11 +395,15 @@ export default defineComponent({
       return tasks.value.filter(task => task.project === activeTab.value);
     });
 
-    // Calculate total amount for the active project
+    // Calculate total amount for all tasks in the current project
     const totalAmount = computed(() => {
-      return projectTasks.value.reduce((sum, task) => {
-        return sum + parseFloat(calculateAmount(task));
-      }, 0);
+      if (!currentProject.value) return 0;
+      
+      return tasks.value
+        .filter(task => task.project === currentProject.value?.id)
+        .reduce((total, task) => {
+          return total + calculateTaskAmount(task);
+        }, 0);
     });
 
     // Get current date in YYYY-MM-DD format
@@ -153,11 +416,19 @@ export default defineComponent({
         const data = JSON.parse(savedData);
         tasks.value = data.cards || [];
         
-        // Set default billable rate if not set
-        tasks.value = tasks.value.map(task => ({
-          ...task,
-          billable: task.billable || 0
-        }));
+        // Ensure billable is properly set with default rate
+        tasks.value = tasks.value.map(task => {
+          // If billable is explicitly false, set rate to 0
+          if (task.billable === false) {
+            return { ...task, billable: 0 };
+          }
+          // If billable is true or not set, use the existing rate or default
+          if (task.billable === true || task.billable === undefined) {
+            return { ...task, billable: settingsStore.defaultBillableRate() };
+          }
+          // If billable is already a number, keep it as is
+          return task;
+        });
 
         // Set first project as active if available
         if (projects.value.length > 0 && !activeTab.value) {
@@ -179,10 +450,19 @@ export default defineComponent({
       projectTasks,
       totalAmount,
       currentDate,
+      currentProject,
+      defaultBillableRate,
       formatHours,
       formatNumber,
       calculateAmount,
-      saveTask
+      saveTask,
+      saveBillableRate,
+      saveInitialEstimate,
+      calculateTotalBilled,
+      calculateRemainingBudget,
+      calculateNonBillableTime,
+      calculateEffectiveHourlyRate,
+      calculateOverBudgetTime
     };
   }
 });

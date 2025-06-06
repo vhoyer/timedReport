@@ -19,5 +19,8 @@ export type Task = {
   createdAt: string;
   /** is the card selected */
   isSelected: boolean;
+  /** is the card hidden */
   isHidden: boolean;
+  /** billable rate for the task (0 means not billable) */
+  billable: number;
 };

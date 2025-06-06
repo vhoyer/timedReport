@@ -150,7 +150,7 @@ export default defineComponent({
       required: true,
     },
     billable: {
-      type: Boolean,
+      type: Number,
       required: true,
     },
 

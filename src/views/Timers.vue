@@ -262,6 +262,7 @@
 import type { Task } from './global';
 import { defineComponent, computed } from 'vue';
 import { useSettings } from '@/store/settings';
+import { useProjects } from '@/store/projects';
 import $ from 'jquery';
 import TaskCard from '../components/task-card.vue';
 import ContextMenu from '../components/context-menu.vue';
@@ -327,8 +328,11 @@ export default defineComponent({
     }[],
   }),
   setup() {
-    const settings = useSettings();
-    const workWeekDays = computed(() => settings.workWeekDays());
+    const settingsStore = useSettings();
+    const projectsStore = useProjects();
+    
+    const workWeekDays = computed(() => settingsStore.workWeekDays());
+    const defaultBillableRate = computed(() => settingsStore.defaultBillableRate());
     
     const currentDayOfWeek = computed(() => {
       const today = new Date();
@@ -341,6 +345,9 @@ export default defineComponent({
     return {
       currentDayOfWeek,
       workWeekDays,
+      settingsStore,
+      projectsStore,
+      defaultBillableRate
     };
   },
   
@@ -713,7 +720,7 @@ export default defineComponent({
         isSelected: false,
         isHidden: false,
         createdAt: this.getTodayLocal(),
-        billable: false,
+        billable: 0, // 0 means not billable, any positive number is the billable rate
       };
 
       this.cards.push(newCard);
@@ -750,6 +757,18 @@ export default defineComponent({
       }
 
       const load = JSON.parse(raw);
+
+      // Migrate any boolean billable values to numbers
+      if (load.cards && Array.isArray(load.cards)) {
+        load.cards = load.cards.map((card: any) => {
+          if (card.hasOwnProperty('billable') && typeof card.billable === 'boolean') {
+            card.billable = card.billable ? 1 : 0;
+          } else if (!card.hasOwnProperty('billable')) {
+            card.billable = 0; // Default to not billable if property doesn't exist
+          }
+          return card;
+        });
+      }
 
       Object.keys(load).forEach((loadedProperty) => {
         const loaded = load[loadedProperty];
@@ -1152,7 +1171,14 @@ export default defineComponent({
     },
 
     toggleBillable(card: Task) {
-      card.billable = !card.billable;
+      if (card.billable) {
+        // If already billable, set to 0 (not billable)
+        card.billable = 0;
+      } else {
+        // Get project's billable rate if it's greater than 0, otherwise use global default
+        const projectRate = this.projectsStore.getProject(card.project)?.billableRate || 0;
+        card.billable = projectRate > 0 ? projectRate : this.settingsStore.defaultBillableRate();
+      }
       this.saveStorage();
       analyticsTrack('task_edit', {
         name: 'billable',
