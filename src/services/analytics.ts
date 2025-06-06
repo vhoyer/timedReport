@@ -34,6 +34,9 @@ type AnalyticsTrack = {
   (name: 'theme_change', properties: {
     theme: 'dark' | 'light';
   }): void;
+  (name: 'ko_fi_message_shown'): void;
+  (name: 'ko_fi_message_dismissed'): void;
+  (name: 'ko_fi_clicked'): void;
 };
 
 export const analyticsTrack: AnalyticsTrack = (name: string, properties?: any) => {

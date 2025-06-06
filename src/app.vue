@@ -7,16 +7,6 @@
             Timed Report!
           </h1>
 
-          <ul class="navbar-nav mr-auto">
-            <li class="nav-item">
-              <a
-                class="nav-link"
-                target="_blank"
-                href="https://github.com/vhoyer/timedReport/issues/new"
-              >Feature request?</a>
-            </li>
-          </ul>
-
           <ul class="navbar-nav d-flex align-items-center">
             <li class="nav-item d-flex align-items-center">
               <router-link
@@ -58,6 +48,7 @@
     </main>
     
     <my-footer />
+    <ko-fi-message />
   </div>
 </template>
 
@@ -65,10 +56,12 @@
 import { defineComponent } from 'vue';
 import { analyticsTrack } from './services/analytics';
 import MyFooter from './components/my-footer.vue';
+import KoFiMessage from './components/KoFiMessage.vue';
 
 export default defineComponent({
   components: {
-    MyFooter
+    MyFooter,
+    KoFiMessage
   },
   data() {
     return {

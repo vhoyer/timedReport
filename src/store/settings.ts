@@ -6,6 +6,8 @@ interface AppSettings {
   projectBillableRates: {
     [projectId: string]: number;
   };
+  firstSeen: number | null; // Timestamp of first use
+  koFiDismissed: boolean; // Whether the Ko-fi message has been dismissed
 }
 
 const STORAGE_KEY = 'app-settings';
@@ -13,6 +15,8 @@ const DEFAULT_SETTINGS: AppSettings = {
   workWeekDays: 5, // Default to 5-day work week
   defaultBillableRate: 0, // Default hourly rate (0 means no rate set)
   projectBillableRates: {}, // Project-specific rates
+  firstSeen: null, // Will be set on first load if not set
+  koFiDismissed: false, // Ko-fi message not dismissed by default
 };
 
 // Load settings from localStorage
