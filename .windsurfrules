@@ -6,3 +6,4 @@
 - always consider that you need to create colors for the light and dark themes
     - use the css variables defined in the css.css file
 - always respect types in the "global.ts" file, keep them updated with changes to the models you make
+- prefer using <script setup lang="ts"> instead of <script lang="ts">, expecially on new files

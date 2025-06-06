@@ -12,6 +12,11 @@ const routes: RouteRecordRaw[] = [
     name: 'Reports',
     component: () => import('../views/Reports.vue')
   },
+  {
+    path: '/settings',
+    name: 'Settings',
+    component: () => import('../views/Settings.vue')
+  },
   // Add a catch-all route that redirects to the home page
   {
     path: '/:pathMatch(.*)*',

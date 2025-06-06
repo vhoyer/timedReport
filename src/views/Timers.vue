@@ -5,7 +5,8 @@
         <h2 class="section-title mb-2">Project Breakdown</h2>
         <div class="total-times text-muted">
           <span class="mr-4">Today: {{ totalWorkTime }}</span>
-          <span>This Week: {{ weeklyWorkTime }}</span>
+          <span class="mr-4">This Week: {{ weeklyWorkTime }}</span>
+          <span>Week: {{ currentDayOfWeek }}/{{ workWeekDays }}</span>
         </div>
       </div>
       <div class="progress" style="height: 30px;">
@@ -259,7 +260,8 @@
 
 <script lang="ts">
 import type { Task } from './global';
-import { defineComponent } from 'vue';
+import { defineComponent, computed } from 'vue';
+import { useSettings } from '@/store/settings';
 import $ from 'jquery';
 import TaskCard from '../components/task-card.vue';
 import ContextMenu from '../components/context-menu.vue';
@@ -324,6 +326,24 @@ export default defineComponent({
       lastWeekAchieved: string; // YYYY-WW format
     }[],
   }),
+  setup() {
+    const settings = useSettings();
+    const workWeekDays = computed(() => settings.workWeekDays());
+    
+    const currentDayOfWeek = computed(() => {
+      const today = new Date();
+      const dayOfWeek = today.getDay(); // 0 (Sunday) to 6 (Saturday)
+      // Convert to work week (Monday = 1, etc.)
+      const workWeekDay = dayOfWeek === 0 ? 7 : dayOfWeek; // Convert Sunday from 0 to 7
+      return Math.min(workWeekDay, workWeekDays.value);
+    });
+
+    return {
+      currentDayOfWeek,
+      workWeekDays,
+    };
+  },
+  
   computed: {
     storage() {
       return [

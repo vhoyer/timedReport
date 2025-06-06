@@ -31,6 +31,12 @@
                 active-class="active"
                 exact-active-class="active"
               >Reports</router-link>
+              <router-link
+                class="nav-link mr-3"
+                to="/settings"
+                active-class="active"
+                exact-active-class="active"
+              >Settings</router-link>
               <button
                 type="button"
                 class="btn btn-link nav-link p-0 d-flex align-items-center justify-content-center"
