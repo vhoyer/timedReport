@@ -508,8 +508,34 @@ export default defineComponent({
 
     // Initial goals check
     this.checkGoals();
+
+    // Add storage event listener to sync with other tabs
+    window.addEventListener('storage', this.handleStorageChange);
+  },
+  beforeUnmount() {
+    // Clean up event listeners
+    window.removeEventListener('storage', this.handleStorageChange);
   },
   methods: {
+    handleStorageChange(event: StorageEvent) {
+      if (event.key === 'vm-data' && event.newValue) {
+        try {
+          const newData = JSON.parse(event.newValue);
+          if (newData.cards) {
+            // Only update if the data has actually changed
+            const currentCards = JSON.stringify(this.cards);
+            if (currentCards !== JSON.stringify(newData.cards)) {
+              this.cards = newData.cards;
+              // Force update the component
+              this.$forceUpdate();
+            }
+          }
+        } catch (e) {
+          console.error('Error processing storage event:', e);
+        }
+      }
+    },
+    
     createTaskFromGoal(goal) {
       const newCard = this.addCard(goal.project);
       this.$nextTick(() => {

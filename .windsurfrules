@@ -5,6 +5,7 @@
 - you will prefer non colored icons.
 - always consider that you need to create colors for the light and dark themes
     - use the css variables defined in the css.css file
+    - dark theme is detected by the "dark" class on the body element
 - always respect types in the "global.ts" file, keep them updated with changes to the models you make
 - prefer using <script setup lang="ts"> instead of <script lang="ts">, expecially on new files
 - whenever a configuration is added to the settings page, it should be saved in the settings store on the "src/store/settings.ts" file

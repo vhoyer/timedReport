@@ -26,77 +26,110 @@
       </div>
       
       <!-- Project Settings Panel -->
-      <div v-if="currentProject" class="mb-4">
-        <div class="card-body">
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label for="projectBillableRate" class="form-label">Billable Rate ($/h)</label>
-              <div class="input-group">
-                <span class="input-group-text">$</span>
-                <input
-                  id="projectBillableRate"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  class="form-control"
-                  :value="currentProject.billableRate"
-                  @input="saveBillableRate(Number(($event.target as HTMLInputElement).value))"
-                >
-              </div>
-              <div class="form-text" v-if="defaultBillableRate !== undefined">
-                Current global rate: ${{ defaultBillableRate }}
-              </div>
+      <div v-if="currentProject" class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="projectBillableRate" class="form-label">Billable Rate ($/h)</label>
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              <input
+                id="projectBillableRate"
+                type="number"
+                min="0"
+                step="0.01"
+                class="form-control"
+                :value="currentProject.billableRate"
+                @input="saveBillableRate(Number(($event.target as HTMLInputElement).value))"
+              >
             </div>
-            
-            <div class="col-md-6">
-              <label for="projectInitialEstimate" class="form-label">Initial Estimate ($)</label>
-              <div class="input-group">
-                <span class="input-group-text">$</span>
-                <input
-                  id="projectInitialEstimate"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  class="form-control"
-                  :value="currentProject.initialEstimate"
-                  @input="saveInitialEstimate(Number(($event.target as HTMLInputElement).value))"
-                >
-              </div>
-              <div class="form-text">
-                Initial project budget/estimate
-              </div>
+            <div class="form-text" v-if="defaultBillableRate !== undefined">
+              Current global rate: ${{ defaultBillableRate }}
             </div>
           </div>
           
-          <!-- Will add more project metrics here -->
-          <div class="mt-3">
-            <div class="d-flex justify-content-between align-items-center">
-              <span>Total Billed:</span>
-              <strong>${{ totalAmount.toFixed(2) }}</strong>
+          <div class="col-md-6">
+            <label for="projectInitialEstimate" class="form-label">Initial Estimate ($)</label>
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              <input
+                id="projectInitialEstimate"
+                type="number"
+                min="0"
+                step="0.01"
+                class="form-control"
+                :value="currentProject.initialEstimate"
+                @input="saveInitialEstimate(Number(($event.target as HTMLInputElement).value))"
+              >
             </div>
-            <div class="d-flex justify-content-between align-items-center">
-              <span>Remaining Budget:</span>
-              <strong :class="{ 'text-danger': calculateRemainingBudget() < 0 }">
-                ${{ calculateRemainingBudget().toFixed(2) }}
-              </strong>
+            <div class="form-text">
+              Initial project budget/estimate
             </div>
-            <div class="d-flex justify-content-between align-items-center">
-              <span>Non-Billable Time:</span>
-              <strong>
-                {{ formatHours(calculateNonBillableTime()) }}
-              </strong>
-            </div>
-            <div class="d-flex justify-content-between align-items-center">
-              <span>Effective Hourly Rate:</span>
-              <strong>
-                ${{ calculateEffectiveHourlyRate().toFixed(2) }}/h
-              </strong>
-            </div>
-            <div v-if="calculateRemainingBudget() < 0" class="d-flex justify-content-between align-items-center text-danger">
-              <span>Time After Budget Depleted:</span>
-              <strong>
-                {{ formatHours(calculateOverBudgetTime()) }}
-              </strong>
+          </div>
+        </div>
+        
+        <!-- Will add more project metrics here -->
+        <div class="mt-3">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span>Total Billed:</span>
+            <strong>${{ totalAmount.toFixed(2) }}</strong>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <span>Remaining Budget:</span>
+            <strong :class="{ 'text-danger': calculateRemainingBudget() < 0 }">
+              ${{ calculateRemainingBudget().toFixed(2) }}
+            </strong>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <span>Non-Billable Time:</span>
+            <strong>
+              {{ formatHours(calculateNonBillableTime()) }}
+            </strong>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <span>Effective Hourly Rate:</span>
+            <strong>
+              ${{ calculateEffectiveHourlyRate().toFixed(2) }}/h
+            </strong>
+          </div>
+          <div v-if="calculateRemainingBudget() < 0" class="d-flex justify-content-between align-items-center text-danger">
+            <span>Time After Budget Depleted:</span>
+            <strong>
+              {{ formatHours(calculateOverBudgetTime()) }}
+            </strong>
+          </div>
+          
+          <!-- Delete Confirmation Modal -->
+          <div class="modal" :class="{ 'd-block': showDeleteModal }" tabindex="-1" v-if="showDeleteModal">
+            <div class="modal-dialog">
+              <div class="modal-content" style="background-color: var(--card-bg); border-color: var(--border);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border); background-color: var(--card-header-bg);">
+                  <h5 class="modal-title" style="color: var(--text);">Confirm Deletion</h5>
+                  <button type="button" class="btn-close" @click="showDeleteModal = false" aria-label="Close" style="filter: invert(0.5);"></button>
+                </div>
+                <div class="modal-body" style="color: var(--text);">
+                  <p>Are you sure you want to delete the project "{{ activeTab }}" and all its tasks?</p>
+                  <p style="color: #dc3545;">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border); background-color: var(--card-header-bg);">
+                  <button 
+                    type="button" 
+                    class="btn btn-outline-secondary" 
+                    @click="showDeleteModal = false"
+                    style="color: var(--text); border-color: var(--border);"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="button" 
+                    class="btn btn-danger" 
+                    @click="deleteProject"
+                    style="background-color: #dc3545; border-color: #dc3545;"
+                  >
+                    <i class="fa-duotone fa-regular fa-trash me-2"></i>
+                    Delete Project
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -151,6 +184,18 @@
               </tfoot>
             </table>
           </div>
+          
+          <div class="modal-backdrop fade show bg-black/50 dark:bg-black/70" v-if="showDeleteModal" @click="showDeleteModal = false"></div>
+
+          <div class="d-grid justify-items-center gap-2 mx-4 my-4">
+            <button 
+              class="btn btn-outline-danger py-2"
+              @click="confirmDeleteProject"
+            >
+              <i class="fa-duotone fa-regular fa-trash me-2"></i>
+              Delete Project and All Tasks
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -159,6 +204,7 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, ref, computed, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { analyticsTrack } from '../services/analytics';
 import { useSettings } from '@/store/settings';
 import { useProjects, type ProjectSettings } from '@/store/projects';
@@ -181,6 +227,8 @@ export default defineComponent({
     const projectsStore = useProjects();
     const currentProject = ref<ProjectSettings | null>(null);
     const defaultBillableRate = ref(0);
+    const showDeleteModal = ref(false);
+    const router = useRouter();
     
     // Initialize default billable rate
     onMounted(() => {
@@ -444,6 +492,67 @@ export default defineComponent({
       });
     });
 
+    // Show confirmation modal for project deletion
+    const confirmDeleteProject = () => {
+      showDeleteModal.value = true;
+      analyticsTrack('project', {
+        event: 'delete_confirmation_shown',
+        project: activeTab.value
+      });
+    };
+
+    // Delete the current project and all its tasks
+    const deleteProject = () => {
+      if (!currentProject.value) return;
+      
+      const projectId = currentProject.value.id;
+      
+      // Filter out tasks from this project first
+      const tasksToKeep = tasks.value.filter(task => task.project !== projectId);
+      
+      // Update local state
+      tasks.value = tasksToKeep;
+      
+      // Save updated tasks to localStorage first
+      localStorage.setItem('vm-data', JSON.stringify({
+        cards: tasksToKeep
+      }));
+      
+      // Now remove the project from the projects store
+      const success = projectsStore.removeProject(projectId);
+      
+      if (success) {
+        // Close the modal
+        showDeleteModal.value = false;
+        
+        // If we have other projects, switch to the first one
+        const remainingProjects = projects.value.filter(p => p.id !== projectId);
+        if (remainingProjects.length > 0) {
+          activeTab.value = remainingProjects[0].id;
+        } else {
+          // If no projects left, go to the timers page
+          router.push('/');
+        }
+        
+        analyticsTrack('project', {
+          event: 'deleted',
+          project: projectId
+        });
+        
+        // Force a refresh of the tasks list
+        const event = new StorageEvent('storage', {
+          key: 'vm-data',
+          oldValue: null,
+          newValue: JSON.stringify({ cards: tasksToKeep }),
+          url: window.location.href,
+          storageArea: localStorage
+        });
+        window.dispatchEvent(event);
+      } else {
+        console.error('Failed to delete project:', projectId);
+      }
+    };
+
     return {
       activeTab,
       projects,
@@ -452,6 +561,7 @@ export default defineComponent({
       currentDate,
       currentProject,
       defaultBillableRate,
+      showDeleteModal,
       formatHours,
       formatNumber,
       calculateAmount,
@@ -462,7 +572,9 @@ export default defineComponent({
       calculateRemainingBudget,
       calculateNonBillableTime,
       calculateEffectiveHourlyRate,
-      calculateOverBudgetTime
+      calculateOverBudgetTime,
+      confirmDeleteProject,
+      deleteProject
     };
   }
 });

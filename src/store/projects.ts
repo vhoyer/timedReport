@@ -118,6 +118,57 @@ export function useProjects() {
     projects.value = projects.value.filter(p => p.id !== projectId);
   };
   
+  // Remove a project and clean up its data
+  const removeProject = (projectId: string): boolean => {
+    try {
+      // Remove from projects list
+      const initialLength = projects.value.length;
+      projects.value = projects.value.filter(p => p.id !== projectId);
+      
+      if (projects.value.length === initialLength) {
+        return false; // Project not found
+      }
+      
+      // Clean up vm-data
+      try {
+        // Get the current vm-data
+        let vmData = { cards: [] as any[] };
+        const vmDataStr = localStorage.getItem('vm-data');
+        if (vmDataStr) {
+          vmData = JSON.parse(vmDataStr);
+          if (!vmData.cards) {
+            vmData.cards = [];
+          }
+          
+          // Filter out tasks from the deleted project
+          const originalLength = vmData.cards.length;
+          vmData.cards = vmData.cards.filter((card: any) => card.project !== projectId);
+          
+          // Save back to localStorage
+          localStorage.setItem('vm-data', JSON.stringify(vmData));
+          
+          // Dispatch a storage event to notify other tabs/windows
+          const event = new StorageEvent('storage', {
+            key: 'vm-data',
+            oldValue: vmDataStr,
+            newValue: JSON.stringify(vmData),
+            url: window.location.href,
+            storageArea: localStorage
+          });
+          window.dispatchEvent(event);
+        }
+      } catch (e) {
+        console.error('Error cleaning up project data:', e);
+        // Continue even if cleanup fails
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error removing project:', error);
+      return false;
+    }
+  };
+  
   // Get all projects with their current rates and estimates
   const getAllProjects = () => {
     return projects.value.map(project => ({
@@ -147,5 +198,6 @@ export function useProjects() {
     updateProjectBillableRate,
     updateProjectEstimate,
     deleteProject,
+    removeProject
   };
 }
