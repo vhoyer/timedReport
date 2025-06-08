@@ -336,10 +336,18 @@ export default defineComponent({
     
     const currentDayOfWeek = computed(() => {
       const today = new Date();
-      const dayOfWeek = today.getDay(); // 0 (Sunday) to 6 (Saturday)
-      // Convert to work week (Monday = 1, etc.)
-      const workWeekDay = dayOfWeek === 0 ? 7 : dayOfWeek; // Convert Sunday from 0 to 7
-      return Math.min(workWeekDay, workWeekDays.value);
+      // Get day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+      let dayOfWeek = today.getDay();
+      
+      // Convert to 1-7 where Monday is 1 and Sunday is 7
+      // If it's Sunday (0), it becomes 7, otherwise we subtract 1 to make Monday=1
+      const normalizedDay = dayOfWeek === 0 ? 7 : dayOfWeek;
+      
+      // Get work week days setting (should be 5 for Mon-Fri)
+      const daysInWorkWeek = workWeekDays.value;
+      
+      // If it's a weekend day beyond the work week, cap at last work day
+      return Math.min(normalizedDay, daysInWorkWeek);
     });
 
     return {
@@ -416,27 +424,38 @@ export default defineComponent({
       const totalMs = this.cards
         .filter(card => this.formatDateLocal(card.createdAt) === today)
         .reduce((total, card) => total + (card.time || 0), 0);
-      return new Date(totalMs).toISOString().substr(11, 8);
+      return this.formatTime(totalMs);
     },
     weeklyWorkTime() {
-      const now = new Date();
-      const today = new Date(now);
-      today.setHours(0, 0, 0, 0);
-      
-      // Get the most recent Sunday in local time
-      const todayDate = new Date(today);
-      const sunday = new Date(todayDate);
-      sunday.setDate(todayDate.getDate() - todayDate.getDay());
-      
-      // Get all dates from Sunday to today in local timezone
-      const weekCards = this.cardList.filter(card => {
-        const cardDate = new Date(card.createdAt);
-        // Check if the card is from this week (Sunday to today)
-        return cardDate >= sunday && cardDate <= todayDate;
-      });
-      
-      const totalMs = weekCards.reduce((sum, card) => sum + (card.time || 0), 0);
-      return new Date(totalMs).toISOString().substr(11, 8);
+      try {
+        // Get today's date at 23:59:59.999 in local time
+        const today = new Date();
+        today.setHours(23, 59, 59, 999);
+        
+        // Get start of current week (Monday 00:00:00 in local time)
+        const startOfWeek = this.getStartOfWeek();
+        
+        // Get all cards from Monday 00:00:00 to today 23:59:59.999
+        const weekCards = this.cardList.filter(card => {
+          try {
+            // Parse the card's date in the local timezone
+            const [year, month, day] = card.createdAt.split('-').map(Number);
+            const cardDate = new Date(year, month - 1, day);
+            
+            // Check if the card is within the current week
+            return cardDate >= startOfWeek && cardDate <= today;
+          } catch (e) {
+            console.error('Error processing card:', card, e);
+            return false;
+          }
+        });
+        
+        const totalMs = weekCards.reduce((sum, card) => sum + (card.time || 0), 0);
+        return this.formatTime(totalMs);
+      } catch (e) {
+        console.error('Error in weeklyWorkTime:', e);
+        return '00:00:00';
+      }
     },
     groupedCards() {
       const groups = new Map<string, Task[]>();
@@ -517,6 +536,20 @@ export default defineComponent({
     window.removeEventListener('storage', this.handleStorageChange);
   },
   methods: {
+    getStartOfWeek(date = new Date()) {
+      // Create a new date to avoid modifying the original
+      const d = new Date(date);
+      
+      // Get the day of week (0 = Sunday, 1 = Monday, etc.) in local time
+      const day = d.getDay();
+      
+      // Calculate days to Monday (1 = Monday, 0 = Sunday)
+      const daysToSubtract = day === 0 ? 6 : day - 1;
+      
+      // Create a new date for Monday at 00:00:00 in local time
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate() - daysToSubtract, 0, 0, 0, 0);
+    },
+
     handleStorageChange(event: StorageEvent) {
       if (event.key === 'vm-data' && event.newValue) {
         try {
@@ -1047,15 +1080,36 @@ export default defineComponent({
     },
 
     getProjectWeeklyTime(project: string) {
-      const now = new Date();
-      const sunday = new Date(now);
-      sunday.setDate(now.getDate() - now.getDay()); // Go back to last Sunday
-      sunday.setHours(0, 0, 0, 0); // Start of the day
-
-      const weekStart = sunday.toISOString().split('T')[0];
-      return this.cards
-        .filter(card => card.createdAt >= weekStart && card.project === project)
-        .reduce((total, card) => total + card.time, 0);
+      try {
+        // Get today's date at 23:59:59.999 in local time
+        const today = new Date();
+        today.setHours(23, 59, 59, 999);
+        
+        // Get start of current week (Monday 00:00:00 in local time)
+        const startOfWeek = this.getStartOfWeek();
+        
+        const projectCards = this.cards.filter(card => {
+          try {
+            if (card.project !== project) return false;
+            
+            // Parse the card's date in the local timezone
+            const [year, month, day] = card.createdAt.split('-').map(Number);
+            const cardDate = new Date(year, month - 1, day);
+            
+            // Check if the card is within the current week
+            return cardDate >= startOfWeek && cardDate <= today;
+          } catch (e) {
+            console.error('Error processing card:', card, e);
+            return false;
+          }
+        });
+        
+        const totalMs = projectCards.reduce((total, card) => total + (card.time || 0), 0);
+        return totalMs;
+      } catch (e) {
+        console.error(`Error in getProjectWeeklyTime for ${project}:`, e);
+        return 0;
+      }
     },
 
     formatTime(ms: number) {
