@@ -6,9 +6,11 @@
 - always consider that you need to create colors for the light and dark themes
     - use the css variables defined in the css.css file
     - dark theme is detected by the "dark" class on the body element
+    - always look into the `:root` rule on @css.css to check what css variables are available for you to use before using any, create any variables deemed necessary
 - always respect types in the "global.ts" file, keep them updated with changes to the models you make
 - prefer using <script setup lang="ts"> instead of <script lang="ts">, expecially on new files
 - whenever a configuration is added to the settings page, it should be saved in the settings store on the "src/store/settings.ts" file
 - add analytics events to the "src/services/analytics.ts" file for every new feature added to the app
 - If the user has explicitly set something at the task level, it should be prioratized over the project level settings, if the user explicitly set a project level setting, it should be propratized over the global level setting
+- bear in mind the user needs to always see time in their current timezone
 
