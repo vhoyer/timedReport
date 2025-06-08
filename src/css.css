@@ -367,3 +367,10 @@ body {
 .goals .card:hover {
 	transform: translateY(-2px);
 }
+
+.gap-1 { gap: 2px; }
+.gap-2 { gap: 4px; }
+.gap-3 { gap: 8px; }
+.gap-4 { gap: 16px; }
+.gap-5 { gap: 32px; }
+

@@ -49,13 +49,20 @@
     <section class="goals mb-4">
       <div class="d-flex justify-content-between align-items-baseline mb-3">
         <h2 class="section-title">Weekly Goals</h2>
-        <button
-          type="button"
-          class="btn btn-sm btn-outline-primary"
-          @click="addGoal()"
-        >
-          Add Goal
-        </button>
+        <div class="d-flex align-items-center gap-3">
+          <span class="text-muted" v-if="goals && goals.length > 0">
+            <i class="fa-regular fa-bullseye ml-1"></i>
+            {{ formatTime(totalWeeklyGoals) }} total
+          </span>
+
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-primary"
+            @click="addGoal()"
+          >
+            <i class="fa-regular fa-plus ml-1"></i>Add Goal
+          </button>
+        </div>
       </div>
 
       <div class="row">
@@ -369,9 +376,12 @@ export default defineComponent({
         'cards',
         'goals',
       ].reduce((exports: any, key) => {
-        exports[key] = (this as any)[key]
+        exports[key] = (this as any)[key];
         return exports;
       }, {});
+    },
+    totalWeeklyGoals() {
+      return this.goals?.reduce((total, goal) => total + (goal.weeklyTimeGoal || 0), 0) || 0;
     },
     showCompletedButtonText() {
       return this.hideCompletedCards ? 'Show Completed' : 'Hide Completed';
